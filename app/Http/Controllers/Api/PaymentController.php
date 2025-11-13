@@ -652,6 +652,7 @@ class PaymentController extends Controller
 
     public function payWithCod(Request $request)
     {
+    	dd($request->all());
         $codSetting = CodSetting::first();
         if (!$codSetting || $codSetting->status == 0) {
             return response()->json([

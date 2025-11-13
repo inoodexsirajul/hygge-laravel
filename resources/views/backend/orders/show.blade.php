@@ -4,6 +4,7 @@
     $shipping = is_string($order->shipping_method) ? json_decode($order->shipping_method) : $order->shipping_method;
     $coupon = is_string($order->coupon) ? json_decode($order->coupon) : $order->coupon;
     $isPickup = isset($shipping->type) && $shipping->type === 'pickup';
+    $personalInfo = is_string($order->personal_info) ? json_decode($order->personal_info) : $order->personal_info;
 @endphp
 
 @extends('backend.layouts.master')
@@ -33,17 +34,19 @@
 
                         <div class="row">
                             {{-- Billing / Pickup Information --}}
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <address>
-                                    <strong>Billed To:</strong><br>
+                                    {{-- <strong>Billed To:</strong><br> --}}
                                     @if($isPickup)
-                                        <b>Pickup Store:</b> {{ $shipping->store_name ?? 'N/A' }}<br>
+                                    <strong>Pickup Form Store:</strong><br>
+                                        <b>Pickup Store Name:</b> {{ $shipping->store_name ?? 'N/A' }}<br>
                                         <b>Name:</b> {{ $shipping->name ?? 'N/A' }}<br>
                                         <b>Address:</b> {{ $shipping->address ?? 'N/A' }}<br>
                                         <b>Phone:</b> {{ $shipping->phone ?? 'N/A' }}<br>
                                         <b>Email:</b> {{ $shipping->email ?? 'N/A' }}<br>
                                         <b>Map:</b> <a href="{{ $shipping->map_location ?? '#' }}" target="_blank">View Map</a>
                                     @else
+                                        <strong>Billed To:</strong><br>
                                         <b>Name:</b> {{ $address->name ?? 'N/A' }}<br>
                                         <b>Email:</b> {{ $address->email ?? 'N/A' }}<br>
                                         <b>Phone:</b> {{ $address->phone ?? 'N/A' }}<br>
@@ -56,9 +59,26 @@
                                     @endif
                                 </address>
                             </div>
+                            <div class="col-md-4">
+                                <address>
+                                    
+                                    @if($personalInfo)
+                                    <strong>Personal Info:</strong><br>
+                                        <b>Name:</b> {{ $personalInfo->name ?? 'N/A' }}<br>
+                                        <b>Address:</b> {{ $personalInfo->address ?? 'N/A' }}<br>
+                                        <b>Phone:</b> {{ $personalInfo->phone ?? 'N/A' }}<br>
+                                        <b>Email:</b> {{ $personalInfo->email ?? 'N/A' }}<br>
+                                        <b>City:</b> {{$personalInfo->email ?? 'N/A'}}<br>
+                                         <b>State:</b> {{$personalInfo->state ?? 'N/A'}}<br>
+                                         <b>Zip:</b> {{$personalInfo->zip ?? 'N/A'}}<br>
+                                         <b>Country:</b> {{$personalInfo->country ?? 'N/A'}}<br>
+
+                                    @endif
+                                </address>
+                            </div>
 
                             {{-- Payment Info --}}
-                            <div class="col-md-6 text-md-right">
+                            <div class="col-md-4 text-md-right">
                                 <address>
                                     <strong>Payment Information:</strong><br>
                                     <b>Method:</b> {{ ucfirst($order->payment_method) }}<br>
