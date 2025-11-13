@@ -13,14 +13,10 @@ const CheckoutPage = () => {
         useCheckoutQuery();
     const { data: cartSummery, isLoading: summerLoading } =
         useGetCartSummeryQuery();
-    const [
-        codPayment,
-        { isLoading: codPaymentLoading, error: codPaymentError },
-    ] = useCodPaymentMutation();
-    const [
-        paypalPayment,
-        { isLoading: paypalPaymentLoading, error: paypalPaymentError },
-    ] = usePaypalPaymentMutation();
+    const [codPayment, { isLoading: codPaymentLoading }] =
+        useCodPaymentMutation();
+    const [paypalPayment, { isLoading: paypalPaymentLoading }] =
+        usePaypalPaymentMutation();
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -33,19 +29,23 @@ const CheckoutPage = () => {
         zipCode: "",
         country: "",
         paymentMethod: "cashOnDelivery",
-        cardNumber: "",
-        cardHolder: "",
-        expiryDate: "",
-        cvv: "",
         paypalEmail: "",
-        payoneerEmail: "",
-        mobilePayNumber: "",
         shippingMethod: "",
-        giftMessage: "",
+        pickupLocationId: "",
+        deliveryType: "shipping",
         termsAgreed: false,
+        bill_firstName: "",
+        bill_lastName: "",
+        bill_email: "",
+        bill_phone: "",
+        bill_address: "",
+        bill_city: "",
+        bill_state: "",
+        bill_zipCode: "",
+        bill_country: "",
+        shipToDifferentAddress: false,
     });
 
-    // Set default shipping method
     useEffect(() => {
         if (
             checkoutData?.shipping_methods?.length > 0 &&
@@ -60,6 +60,24 @@ const CheckoutPage = () => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        if (name === "shipToDifferentAddress") {
+            if (checked) {
+                setFormData((prev) => ({
+                    ...prev,
+                    shipToDifferentAddress: true,
+                    deliveryType: "shipping",
+                    pickupLocationId: "",
+                }));
+            } else {
+                setFormData((prev) => ({
+                    ...prev,
+                    shipToDifferentAddress: false,
+                }));
+            }
+            return;
+        }
+
         setFormData((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value,
@@ -69,10 +87,7 @@ const CheckoutPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const orderData = {
-            shipping_method: checkoutData?.shipping_methods?.find(
-                (method) => method.id.toString() === formData.shippingMethod
-            ) || { id: 0, name: "", type: "", cost: 0 },
+        let orderData = {
             shipping_address: {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
@@ -85,30 +100,44 @@ const CheckoutPage = () => {
             },
         };
 
+        if (formData.shipToDifferentAddress) {
+            orderData.billing_address = {
+                name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
+                email: formData.bill_email,
+                phone: formData.bill_phone,
+                address: formData.bill_address,
+                city: formData.bill_city,
+                state: formData.bill_state,
+                zip: formData.bill_zipCode,
+                country: formData.bill_country,
+            };
+        }
+
+        if (formData.deliveryType === "shipping") {
+            const selected = checkoutData?.shipping_methods?.find(
+                (m) => m.id.toString() === formData.shippingMethod
+            );
+            orderData.shipping_method = selected || { id: 0, cost: 0 };
+        } else if (formData.deliveryType === "pickup") {
+            const selectedPickup = checkoutData?.pickup_methods?.find(
+                (p) => p.id.toString() === formData.pickupLocationId
+            );
+            orderData.pickup_location = selectedPickup || null;
+            orderData.shipping_method = { id: 3, name: "Pick Up", cost: 0 };
+        }
+
         try {
             if (formData.paymentMethod === "cashOnDelivery") {
-                const response = await codPayment(orderData).unwrap();
-                console.log("COD Payment Response:", response);
+                await codPayment(orderData).unwrap();
                 navigate("/success");
             } else if (formData.paymentMethod === "paypal") {
-                if (!formData.paypalEmail) {
-                    alert("Please provide a PayPal email address.");
-                    return;
-                }
-                const paypalData = { ...orderData };
-                const response = await paypalPayment(paypalData).unwrap();
-                console.log("PayPal Payment Response:", response);
-                if (response.status === "success" && response.redirect_url) {
-                    window.location.href = response.redirect_url;
-                } else {
-                    throw new Error("No redirect URL provided by PayPal.");
-                }
+                if (!formData.paypalEmail)
+                    return alert("PayPal email required");
+                const res = await paypalPayment(orderData).unwrap();
+                if (res.redirect_url) window.location.href = res.redirect_url;
             }
-        } catch (error) {
-            console.error("Payment Error:", error);
-            alert(
-                `Payment failed: ${error?.data?.message || "Please try again."}`
-            );
+        } catch (err) {
+            alert(`Payment failed: ${err?.data?.message || "Try again"}`);
         }
     };
 
@@ -120,7 +149,20 @@ const CheckoutPage = () => {
         );
     }
 
-    // Process cart items with front/back images
+    const currencyIcon = cartSummery?.data?.currency_icon || "$";
+    const subtotal = parseFloat(cartSummery?.data?.sub_total || 0);
+    const discount = parseFloat(cartSummery?.data?.discount || 0);
+
+    let shippingCost = 0;
+    if (formData.deliveryType === "shipping") {
+        const selected = checkoutData?.shipping_methods?.find(
+            (m) => m.id.toString() === formData.shippingMethod
+        );
+        shippingCost = selected ? selected.cost : 0;
+    }
+
+    const total = subtotal - discount + shippingCost;
+
     const cartItems =
         cartSummery?.data?.cart_items?.map((item) => {
             const options = JSON.parse(item.options || "{}");
@@ -129,42 +171,26 @@ const CheckoutPage = () => {
                 name: item.product.name,
                 price: parseFloat(item.price),
                 quantity: item.quantity,
-                image: options.image || item.product.thumb_image,
-                thumb_image: item.product.thumb_image,
-                front_image: item.front_image,
-                back_image: item.back_image,
-                currency_icon: cartSummery?.data?.currency_icon || "$",
+                image: options.image || item.product.thumb_image || "",
+                thumb_image: item.product.thumb_image || "",
+                front_image: item.front_image || "",
+                back_image: item.back_image || "",
+                currency_icon: currencyIcon,
             };
         }) || [];
 
-    // Calculate totals
-    const subtotal = parseFloat(cartSummery?.data?.sub_total || 0);
-    const discount = parseFloat(cartSummery?.data?.discount || 0);
-    const currencyIcon = cartSummery?.data?.currency_icon || "$";
-    const selectedShippingMethod = checkoutData?.shipping_methods?.find(
-        (method) => method.id.toString() === formData.shippingMethod
-    );
-    const shipping = selectedShippingMethod ? selectedShippingMethod.cost : 0;
-    const total = subtotal - discount + shipping;
+    const hasImage = (path) =>
+        path && path.trim() !== "" && path !== "null" && !path.includes("null");
 
-    // Helper: Check if image exists
-    const hasImage = (path) => path && path.trim() !== "" && path !== "null";
+    const isPickupDisabled = formData.shipToDifferentAddress;
 
     return (
         <div className="min-h-screen bg-dark1 2xl:px-20 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="text-3xl font-bold text-cream mb-8">Checkout</h1>
 
-                {(codPaymentError || paypalPaymentError) && (
-                    <div className="mb-4 p-4 bg-red-900/20 border border-red-500 text-red-400 rounded">
-                        Error processing payment:{" "}
-                        {(codPaymentError || paypalPaymentError)?.data
-                            ?.message || "Please try again."}
-                    </div>
-                )}
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Left Column - Checkout Form */}
+                    {/* Left: Form */}
                     <div className="bg-dark2 rounded-lg shadow-md p-6">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Personal Information */}
@@ -172,6 +198,7 @@ const CheckoutPage = () => {
                                 <h2 className="text-xl font-semibold text-cream mb-4">
                                     Personal Information
                                 </h2>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray mb-2">
@@ -201,6 +228,7 @@ const CheckoutPage = () => {
                                         />
                                     </div>
                                 </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray mb-2">
@@ -230,14 +258,8 @@ const CheckoutPage = () => {
                                         />
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Shipping Address */}
-                            <div>
-                                <h2 className="text-xl font-semibold text-cream mb-4">
-                                    Shipping Address
-                                </h2>
-                                <div className="space-y-4">
+                                <div className="space-y-4 mt-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray mb-2">
                                             Street Address *
@@ -252,6 +274,7 @@ const CheckoutPage = () => {
                                             placeholder="Enter your address"
                                         />
                                     </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray mb-2">
@@ -282,6 +305,7 @@ const CheckoutPage = () => {
                                             />
                                         </div>
                                     </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray mb-2">
@@ -307,20 +331,16 @@ const CheckoutPage = () => {
                                                 onChange={handleInputChange}
                                                 className="w-full px-3 py-2 border border-gray/30 focus:border-gray rounded-md focus:outline-none bg-dark1 text-cream"
                                             >
-                                                <option
-                                                    value=""
-                                                    className="text-dark1"
-                                                >
+                                                <option value="">
                                                     Select Country
                                                 </option>
                                                 {checkoutData?.countries?.map(
-                                                    (country) => (
+                                                    (c) => (
                                                         <option
-                                                            key={country}
-                                                            value={country}
-                                                            className="text-dark1"
+                                                            key={c}
+                                                            value={c}
                                                         >
-                                                            {country}
+                                                            {c}
                                                         </option>
                                                     )
                                                 )}
@@ -328,7 +348,174 @@ const CheckoutPage = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                <div className="mt-6 pt-6 border-t border-gray/30">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="shipToDifferentAddress"
+                                            checked={
+                                                formData.shipToDifferentAddress
+                                            }
+                                            onChange={handleInputChange}
+                                            className="w-5 h-5 text-red focus:ring-red rounded"
+                                        />
+                                        <span className="text-red font-bold text-lg">
+                                            Do you want to ship to a different
+                                            address?
+                                        </span>
+                                    </label>
+                                </div>
                             </div>
+
+                            {/* Billing Address Form */}
+                            {formData.shipToDifferentAddress && (
+                                <div className="mt-8 p-6 bg-dark1/50 rounded-lg border border-red/40">
+                                    <h3 className="text-xl font-bold text-cream mb-4">
+                                        Billing Address (Different)
+                                    </h3>
+                                    {/* ... বিলিং ফর্ম ... (আগের মতোই) */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                First Name *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_firstName"
+                                                required
+                                                value={formData.bill_firstName}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing first name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Last Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_lastName"
+                                                value={formData.bill_lastName}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing last name"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Email *
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="bill_email"
+                                                required
+                                                value={formData.bill_email}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing email"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Phone
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                name="bill_phone"
+                                                value={formData.bill_phone}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing phone"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mt-4">
+                                        <label className="block text-sm font-medium text-gray mb-2">
+                                            Street Address *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="bill_address"
+                                            required
+                                            value={formData.bill_address}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                            placeholder="Billing address"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                City *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_city"
+                                                required
+                                                value={formData.bill_city}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                State *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_state"
+                                                required
+                                                value={formData.bill_state}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                ZIP *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_zipCode"
+                                                required
+                                                value={formData.bill_zipCode}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Country *
+                                            </label>
+                                            <select
+                                                name="bill_country"
+                                                required
+                                                value={formData.bill_country}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            >
+                                                <option value="">
+                                                    Select Country
+                                                </option>
+                                                {checkoutData?.countries?.map(
+                                                    (c) => (
+                                                        <option
+                                                            key={c}
+                                                            value={c}
+                                                        >
+                                                            {c}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Payment Method */}
                             <div>
@@ -367,30 +554,13 @@ const CheckoutPage = () => {
                                 </div>
                             </div>
 
-                            {/* Conditional Payment Fields */}
-                            {formData.paymentMethod === "paypal" && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray mb-2">
-                                        PayPal Email *
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="paypalEmail"
-                                        required
-                                        value={formData.paypalEmail}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray/30 rounded-md bg-dark1 text-cream"
-                                        placeholder="Enter your PayPal email"
-                                    />
-                                </div>
-                            )}
-
-                            {/* Shipping Method */}
+                            {/* Delivery Method */}
                             <div>
                                 <h2 className="text-xl font-semibold text-cream mb-4">
-                                    Shipping Method
+                                    Delivery Method
                                 </h2>
-                                <div className="space-y-2">
+
+                                <div className="space-y-2 mb-4">
                                     {checkoutData?.shipping_methods?.map(
                                         (method) => (
                                             <label
@@ -399,11 +569,11 @@ const CheckoutPage = () => {
                                             >
                                                 <input
                                                     type="radio"
-                                                    name="shippingMethod"
-                                                    value={method.id.toString()}
+                                                    name="deliveryType"
+                                                    value="shipping"
                                                     checked={
-                                                        formData.shippingMethod ===
-                                                        method.id.toString()
+                                                        formData.deliveryType ===
+                                                        "shipping"
                                                     }
                                                     onChange={handleInputChange}
                                                     className="text-red focus:ring-red"
@@ -417,9 +587,96 @@ const CheckoutPage = () => {
                                         )
                                     )}
                                 </div>
+
+                                {!isPickupDisabled && (
+                                    <div className="space-y-2">
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="deliveryType"
+                                                value="pickup"
+                                                checked={
+                                                    formData.deliveryType ===
+                                                    "pickup"
+                                                }
+                                                onChange={handleInputChange}
+                                                className="text-red focus:ring-red"
+                                            />
+                                            <span className="text-red font-bold">
+                                                Pickup from Store (Free)
+                                            </span>
+                                        </label>
+                                    </div>
+                                )}
+
+                                {isPickupDisabled && (
+                                    <p className="text-sm text-gray italic mt-2">
+                                        Pickup from store is not available when
+                                        shipping to a different address.
+                                    </p>
+                                )}
+
+                                {formData.deliveryType === "pickup" &&
+                                    checkoutData?.pickup_methods?.length >
+                                        0 && (
+                                        <div className="mt-4 p-4 bg-dark1/50 rounded-lg border border-red/40">
+                                            <h4 className="text-lg font-semibold text-cream mb-3">
+                                                Select Pickup Location
+                                            </h4>
+                                            <div className="space-y-3">
+                                                {checkoutData.pickup_methods.map(
+                                                    (location) => (
+                                                        <label
+                                                            key={location.id}
+                                                            className="flex items-start space-x-3 cursor-pointer"
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="pickupLocationId"
+                                                                value={location.id.toString()}
+                                                                checked={
+                                                                    formData.pickupLocationId ===
+                                                                    location.id.toString()
+                                                                }
+                                                                onChange={
+                                                                    handleInputChange
+                                                                }
+                                                                className="mt-1 text-red focus:ring-red"
+                                                                required
+                                                            />
+                                                            <div>
+                                                                <p className="text-cream font-medium">
+                                                                    {
+                                                                        location.store_name
+                                                                    }
+                                                                </p>
+                                                                <p className="text-sm text-gray">
+                                                                    Address:{" "}
+                                                                    {
+                                                                        location.address
+                                                                    }
+                                                                </p>
+                                                                <p className="text-sm text-gray">
+                                                                    Phone:{" "}
+                                                                    {
+                                                                        location.phone
+                                                                    }
+                                                                </p>
+                                                                <p className="text-sm text-gray">
+                                                                    Email:{" "}
+                                                                    {
+                                                                        location.email
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        </label>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                             </div>
 
-                            {/* Terms */}
                             <label className="flex items-center space-x-3">
                                 <input
                                     type="checkbox"
@@ -452,16 +709,18 @@ const CheckoutPage = () => {
                         </form>
                     </div>
 
-                    {/* Right Column - Order Summary */}
-                    <div className="bg-dark2 rounded-lg shadow-md p-6 h-fit">
-                        <h2 className="text-xl font-semibold text-cream mb-6">
+                    {/* Right: Order Summary — পুরোপুরি ফিক্সড ও সুন্দর */}
+                    <div className="bg-dark2 rounded-lg shadow-md p-6 sticky top-6">
+                        <h2 className="text-2xl font-bold text-cream mb-6 border-b border-gray/30 pb-3">
                             Order Summary
                         </h2>
 
-                        {/* Cart Items */}
-                        <div className="space-y-6 mb-6">
+                        <div className="space-y-5">
                             {cartItems.length > 0 ? (
                                 cartItems.map((item) => {
+                                    const mainImage = hasImage(item.image)
+                                        ? `/${item.image}`
+                                        : null;
                                     const thumb = hasImage(item.thumb_image)
                                         ? `/${item.thumb_image}`
                                         : null;
@@ -471,120 +730,134 @@ const CheckoutPage = () => {
                                     const back = hasImage(item.back_image)
                                         ? `/${item.back_image}`
                                         : null;
-                                    const hasAnyImage = thumb || front || back;
+                                    const itemTotal = (
+                                        item.price * item.quantity
+                                    ).toFixed(2);
 
                                     return (
                                         <div
                                             key={item.id}
-                                            className="flex items-start gap-4 border-b border-gray/30 pb-4"
+                                            className="flex gap-4 pb-5 border-b border-gray/20 last:border-0"
                                         >
-                                            {/* Main Thumbnail */}
-                                            <img
-                                                src={`/${item.image}`}
-                                                alt={item.name}
-                                                className="w-16 h-16 object-cover rounded border border-gray/40"
-                                                onError={(e) =>
-                                                    (e.target.style.display =
-                                                        "none")
-                                                }
-                                            />
-
-                                            {/* Custom Images: Thumb, Front, Back */}
-                                            <div className="flex flex-wrap gap-2">
-                                                {thumb && (
+                                            <div className="flex-shrink-0">
+                                                {mainImage ? (
                                                     <img
-                                                        src={thumb}
-                                                        alt="Thumbnail"
-                                                        className="w-20 h-20 object-contain rounded border border-gray/40 bg-white p-1"
+                                                        src={mainImage}
+                                                        alt={item.name}
+                                                        className="w-20 h-20 object-cover rounded-lg border border-gray/40 shadow-sm"
                                                         onError={(e) =>
                                                             (e.target.style.display =
                                                                 "none")
                                                         }
                                                     />
-                                                )}
-                                                {front && (
-                                                    <img
-                                                        src={front}
-                                                        alt="Front"
-                                                        className="w-20 h-20 object-contain rounded border border-gray/40 bg-white p-1"
-                                                        onError={(e) =>
-                                                            (e.target.style.display =
-                                                                "none")
-                                                        }
-                                                    />
-                                                )}
-                                                {back && (
-                                                    <img
-                                                        src={back}
-                                                        alt="Back"
-                                                        className="w-20 h-20 object-contain rounded border border-gray/40 bg-white p-1"
-                                                        onError={(e) =>
-                                                            (e.target.style.display =
-                                                                "none")
-                                                        }
-                                                    />
-                                                )}
-                                                {!hasAnyImage && (
-                                                    <div className="w-20 h-20 bg-gray-100 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-xs text-gray-500">
-                                                        No Image
+                                                ) : (
+                                                    <div className="w-20 h-20 bg-gray-200 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center">
+                                                        <span className="text-xs text-gray-500">
+                                                            No Image
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
 
-                                            {/* Product Info */}
                                             <div className="flex-1">
-                                                <h3 className="text-sm font-medium text-cream">
+                                                <h3 className="font-semibold text-cream text-sm line-clamp-2">
                                                     {item.name}
                                                 </h3>
-                                                <p className="text-xs text-gray">
-                                                    Qty: {item.quantity}
-                                                </p>
-                                            </div>
 
-                                            {/* Price */}
-                                            <div className="text-sm font-medium text-cream">
-                                                {item.currency_icon}
-                                                {item.price * item.quantity}
+                                                {(thumb || front || back) && (
+                                                    <div className="flex gap-2 mt-2">
+                                                        {thumb && (
+                                                            <img
+                                                                src={thumb}
+                                                                alt="Thumb"
+                                                                className="w-12 h-12 object-contain rounded border border-gray/40 bg-white p-1"
+                                                            />
+                                                        )}
+                                                        {front && (
+                                                            <img
+                                                                src={front}
+                                                                alt="Front"
+                                                                className="w-12 h-12 object-contain rounded border border-gray/40 bg-white p-1"
+                                                            />
+                                                        )}
+                                                        {back && (
+                                                            <img
+                                                                src={back}
+                                                                alt="Back"
+                                                                className="w-12 h-12 object-contain rounded border border-gray/40 bg-white p-1"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                <div className="mt-2 flex items-center justify-between">
+                                                    <span className="text-xs text-gray">
+                                                        Qty: {item.quantity}
+                                                    </span>
+                                                    <span className="text-sm font-bold text-cream">
+                                                        {currencyIcon}
+                                                        {itemTotal}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     );
                                 })
                             ) : (
-                                <p className="text-cream">Your cart is empty</p>
+                                <p className="text-center text-gray py-8">
+                                    Your cart is empty
+                                </p>
                             )}
                         </div>
 
-                        {/* Totals */}
-                        <div className="space-y-3 border-t border-gray/60 pt-4">
+                        <div className="mt-8 pt-6 border-t border-gray/40 space-y-3">
                             <div className="flex justify-between text-cream">
                                 <span>Subtotal</span>
-                                <span>
+                                <span className="font-medium">
                                     {currencyIcon}
-                                    {subtotal}
+                                    {subtotal.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-cream">
                                 <span>Discount</span>
-                                <span>
-                                    {currencyIcon}
-                                    {discount}
+                                <span className="text-green-400">
+                                    -{currencyIcon}
+                                    {discount.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-cream">
                                 <span>Shipping</span>
-                                <span>
-                                    {currencyIcon}
-                                    {shipping}
+                                <span
+                                    className={
+                                        shippingCost === 0
+                                            ? "text-green-400"
+                                            : ""
+                                    }
+                                >
+                                    {shippingCost === 0
+                                        ? "Free"
+                                        : `${currencyIcon}${shippingCost.toFixed(
+                                              2
+                                          )}`}
                                 </span>
                             </div>
-                            <div className="flex justify-between text-lg font-semibold border-t border-gray/60 pt-3 text-cream">
+
+                            <div className="pt-4 border-t border-gray/40 flex justify-between text-lg font-bold text-cream">
                                 <span>Total</span>
-                                <span>
+                                <span className="text-red">
                                     {currencyIcon}
-                                    {total}
+                                    {total.toFixed(2)}
                                 </span>
                             </div>
                         </div>
+
+                        {formData.deliveryType === "pickup" && (
+                            <div className="mt-4 p-3 bg-green-900/30 border border-green-500/50 rounded-lg">
+                                <p className="text-sm text-green-300 font-medium text-center">
+                                    Pickup from Store Selected (Free Shipping)
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

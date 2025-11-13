@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { IoSearchSharp } from "react-icons/io5";
 import { FaChevronDown, FaBars } from "react-icons/fa6";
 import { MdOutlineShoppingBag } from "react-icons/md";
+import { GrBasket } from "react-icons/gr";
 import {
     useGetCartDetailsQuery,
     useGetUserProfileQuery,
@@ -336,7 +337,8 @@ const Navbar = () => {
 
                     <li className="text-cream relative">
                         <Link to="/cart">
-                            <MdOutlineShoppingBag size={26} />
+                            <GrBasket size={40} />
+                            {/* <MdOutlineShoppingBag size={40} /> */}
                             {totalQuantity > 0 && (
                                 <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red text-cream flex justify-center items-center text-xs">
                                     {totalQuantity}

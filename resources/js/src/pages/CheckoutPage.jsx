@@ -46,6 +46,7 @@ const CheckoutPage = () => {
         shipToDifferentAddress: false,
     });
 
+    // Default shipping method set
     useEffect(() => {
         if (
             checkoutData?.shipping_methods?.length > 0 &&
@@ -87,6 +88,11 @@ const CheckoutPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validation: Pickup location required
+        if (formData.deliveryType === "pickup" && !formData.pickupLocationId) {
+            return alert("Please select a pickup location");
+        }
+
         let orderData = {
             shipping_address: {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -100,8 +106,9 @@ const CheckoutPage = () => {
             },
         };
 
+        // Billing Address (if different)
         if (formData.shipToDifferentAddress) {
-            orderData.billing_address = {
+            orderData.shipping_method = {
                 name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
                 email: formData.bill_email,
                 phone: formData.bill_phone,
@@ -113,17 +120,27 @@ const CheckoutPage = () => {
             };
         }
 
+        // Shipping Method Logic
         if (formData.deliveryType === "shipping") {
             const selected = checkoutData?.shipping_methods?.find(
                 (m) => m.id.toString() === formData.shippingMethod
             );
             orderData.shipping_method = selected || { id: 0, cost: 0 };
         } else if (formData.deliveryType === "pickup") {
-            const selectedPickup = checkoutData?.pickup_methods?.find(
+            const selectedStore = checkoutData?.pickup_methods?.find(
                 (p) => p.id.toString() === formData.pickupLocationId
             );
-            orderData.pickup_location = selectedPickup || null;
-            orderData.shipping_method = { id: 3, name: "Pick Up", cost: 0 };
+
+            // এখানে store_id পাঠানো হচ্ছে shipping_method এর ভিতরে
+            orderData.shipping_method = {
+                id: 3,
+                name: "Pick Up",
+                cost: 0,
+                store_id: selectedStore?.id || null,
+                store_name: selectedStore?.store_name || "Unknown Store",
+            };
+
+            orderData.pickup_location = selectedStore || null;
         }
 
         try {
@@ -137,6 +154,7 @@ const CheckoutPage = () => {
                 if (res.redirect_url) window.location.href = res.redirect_url;
             }
         } catch (err) {
+            console.log("Order Error:", err);
             alert(`Payment failed: ${err?.data?.message || "Try again"}`);
         }
     };
@@ -181,7 +199,6 @@ const CheckoutPage = () => {
 
     const hasImage = (path) =>
         path && path.trim() !== "" && path !== "null" && !path.includes("null");
-
     const isPickupDisabled = formData.shipToDifferentAddress;
 
     return (
@@ -349,6 +366,7 @@ const CheckoutPage = () => {
                                     </div>
                                 </div>
 
+                                {/* Different Billing Address */}
                                 <div className="mt-6 pt-6 border-t border-gray/30">
                                     <label className="flex items-center space-x-3 cursor-pointer">
                                         <input
@@ -374,7 +392,7 @@ const CheckoutPage = () => {
                                     <h3 className="text-xl font-bold text-cream mb-4">
                                         Billing Address (Different)
                                     </h3>
-                                    {/* ... বিলিং ফর্ম ... (আগের মতোই) */}
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray mb-2">
@@ -404,6 +422,7 @@ const CheckoutPage = () => {
                                             />
                                         </div>
                                     </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray mb-2">
@@ -433,6 +452,7 @@ const CheckoutPage = () => {
                                             />
                                         </div>
                                     </div>
+
                                     <div className="mt-4">
                                         <label className="block text-sm font-medium text-gray mb-2">
                                             Street Address *
@@ -447,6 +467,7 @@ const CheckoutPage = () => {
                                             placeholder="Billing address"
                                         />
                                     </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray mb-2">
@@ -633,6 +654,7 @@ const CheckoutPage = () => {
                                     </p>
                                 )}
 
+                                {/* Pickup Locations */}
                                 {formData.deliveryType === "pickup" &&
                                     checkoutData?.pickup_methods?.length >
                                         0 && (
@@ -694,6 +716,7 @@ const CheckoutPage = () => {
                                     )}
                             </div>
 
+                            {/* Terms & Conditions */}
                             <label className="flex items-center space-x-3">
                                 <input
                                     type="checkbox"
@@ -708,6 +731,7 @@ const CheckoutPage = () => {
                                 </span>
                             </label>
 
+                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 disabled={
@@ -726,7 +750,7 @@ const CheckoutPage = () => {
                         </form>
                     </div>
 
-                    {/* Right: Order Summary — পুরোপুরি ফিক্সড ও সুন্দর */}
+                    {/* Right: Order Summary */}
                     <div className="bg-dark2 rounded-lg shadow-md p-6 sticky top-6">
                         <h2 className="text-2xl font-bold text-cream mb-6 border-b border-gray/30 pb-3">
                             Order Summary
