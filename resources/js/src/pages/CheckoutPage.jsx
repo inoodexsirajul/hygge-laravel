@@ -105,6 +105,19 @@ const CheckoutPage = () => {
                 country: formData.country,
             },
         };
+        // Billing Address (if different)
+        if (!formData.shipToDifferentAddress) {
+            orderData.shipping_address = {
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zip: formData.zipCode,
+                country: formData.country,
+            };
+        }
 
         // Billing Address (if different)
         if (formData.shipToDifferentAddress) {
@@ -125,23 +138,13 @@ const CheckoutPage = () => {
             const selected = checkoutData?.shipping_methods?.find(
                 (m) => m.id.toString() === formData.shippingMethod
             );
+
             orderData.shipping_method = selected || { id: 0, cost: 0 };
         } else if (formData.deliveryType === "pickup") {
             const selectedStore = checkoutData?.pickup_methods?.find(
                 (p) => p.id.toString() === formData.pickupLocationId
             );
 
-            // (orderData.shipping_address = {
-            //     name: `${formData.firstName} ${formData.lastName}`.trim(),
-            //     email: formData.email,
-            //     phone: formData.phone,
-            //     address: formData.address,
-            //     city: formData.city,
-            //     state: formData.state,
-            //     zip: formData.zipCode,
-            //     country: formData.country,
-            // }),
-            // এখানে store_id পাঠানো হচ্ছে shipping_method এর ভিতরে
             orderData.shipping_method = {
                 ...selectedStore,
             };
