@@ -33,19 +33,25 @@ const CheckoutPage = () => {
         zipCode: "",
         country: "",
         paymentMethod: "cashOnDelivery",
-        cardNumber: "",
-        cardHolder: "",
-        expiryDate: "",
-        cvv: "",
         paypalEmail: "",
-        payoneerEmail: "",
-        mobilePayNumber: "",
         shippingMethod: "",
-        giftMessage: "",
         termsAgreed: false,
+
+        // Billing Address (Different)
+        bill_firstName: "",
+        bill_lastName: "",
+        bill_email: "",
+        bill_phone: "",
+        bill_address: "",
+        bill_city: "",
+        bill_state: "",
+        bill_zipCode: "",
+        bill_country: "",
+
+        shipToDifferentAddress: false,
     });
 
-    // Set default shipping method
+    // Default shipping method
     useEffect(() => {
         if (
             checkoutData?.shipping_methods?.length > 0 &&
@@ -69,10 +75,12 @@ const CheckoutPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const selectedShippingMethod = checkoutData?.shipping_methods?.find(
+            (method) => method.id.toString() === formData.shippingMethod
+        );
+
         const orderData = {
-            shipping_method: checkoutData?.shipping_methods?.find(
-                (method) => method.id.toString() === formData.shippingMethod
-            ) || { id: 0, name: "", type: "", cost: 0 },
+            shipping_method: selectedShippingMethod || { id: 0, cost: 0 },
             shipping_address: {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
@@ -83,29 +91,35 @@ const CheckoutPage = () => {
                 zip: formData.zipCode,
                 country: formData.country,
             },
+            ...(formData.shipToDifferentAddress && {
+                billing_address: {
+                    name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
+                    email: formData.bill_email,
+                    phone: formData.bill_phone,
+                    address: formData.bill_address,
+                    city: formData.bill_city,
+                    state: formData.bill_state,
+                    zip: formData.bill_zipCode,
+                    country: formData.bill_country,
+                },
+            }),
         };
 
         try {
             if (formData.paymentMethod === "cashOnDelivery") {
-                const response = await codPayment(orderData).unwrap();
-                console.log("COD Payment Response:", response);
+                await codPayment(orderData).unwrap();
                 navigate("/success");
             } else if (formData.paymentMethod === "paypal") {
                 if (!formData.paypalEmail) {
                     alert("Please provide a PayPal email address.");
                     return;
                 }
-                const paypalData = { ...orderData };
-                const response = await paypalPayment(paypalData).unwrap();
-                console.log("PayPal Payment Response:", response);
+                const response = await paypalPayment(orderData).unwrap();
                 if (response.status === "success" && response.redirect_url) {
                     window.location.href = response.redirect_url;
-                } else {
-                    throw new Error("No redirect URL provided by PayPal.");
                 }
             }
         } catch (error) {
-            console.error("Payment Error:", error);
             alert(
                 `Payment failed: ${error?.data?.message || "Please try again."}`
             );
@@ -120,7 +134,6 @@ const CheckoutPage = () => {
         );
     }
 
-    // Process cart items with front/back images
     const cartItems =
         cartSummery?.data?.cart_items?.map((item) => {
             const options = JSON.parse(item.options || "{}");
@@ -137,7 +150,6 @@ const CheckoutPage = () => {
             };
         }) || [];
 
-    // Calculate totals
     const subtotal = parseFloat(cartSummery?.data?.sub_total || 0);
     const discount = parseFloat(cartSummery?.data?.discount || 0);
     const currencyIcon = cartSummery?.data?.currency_icon || "$";
@@ -147,7 +159,6 @@ const CheckoutPage = () => {
     const shipping = selectedShippingMethod ? selectedShippingMethod.cost : 0;
     const total = subtotal - discount + shipping;
 
-    // Helper: Check if image exists
     const hasImage = (path) => path && path.trim() !== "" && path !== "null";
 
     return (
@@ -172,6 +183,8 @@ const CheckoutPage = () => {
                                 <h2 className="text-xl font-semibold text-cream mb-4">
                                     Personal Information
                                 </h2>
+
+                                {/* Shipping Address */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray mb-2">
@@ -321,20 +334,178 @@ const CheckoutPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-2">
-                                    <input
-                                        type="checkbox"
-                                        name=""
-                                        id="ship_another"
-                                    />
-                                    <label
-                                        htmlFor="ship_another"
-                                        className="text-red font-bold text-sm ml-2"
-                                    >
-                                        Do you want to ship another address?
+
+                                {/* Checkbox */}
+                                <div className="mt-6 pt-6 border-t border-gray/30">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="shipToDifferentAddress"
+                                            checked={
+                                                formData.shipToDifferentAddress
+                                            }
+                                            onChange={handleInputChange}
+                                            className="w-5 h-5 text-red focus:ring-red rounded"
+                                        />
+                                        <span className="text-red font-bold text-lg">
+                                            Do you want to ship to a different
+                                            address?
+                                        </span>
                                     </label>
                                 </div>
                             </div>
+
+                            {/* Different Billing Address Form */}
+                            {formData.shipToDifferentAddress && (
+                                <div className="mt-8 p-6 bg-dark1/50 rounded-lg border border-red/40">
+                                    <h3 className="text-xl font-bold text-cream mb-4">
+                                        Billing Address (Different)
+                                    </h3>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                First Name *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_firstName"
+                                                required
+                                                value={formData.bill_firstName}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing first name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Last Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_lastName"
+                                                value={formData.bill_lastName}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing last name"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Email *
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="bill_email"
+                                                required
+                                                value={formData.bill_email}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing email"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Phone
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                name="bill_phone"
+                                                value={formData.bill_phone}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                                placeholder="Billing phone"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4">
+                                        <label className="block text-sm font-medium text-gray mb-2">
+                                            Street Address *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="bill_address"
+                                            required
+                                            value={formData.bill_address}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-red/50 focus:border-red rounded-md focus:outline-none bg-dark1 text-cream"
+                                            placeholder="Billing address"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                City *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_city"
+                                                required
+                                                value={formData.bill_city}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                State *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_state"
+                                                required
+                                                value={formData.bill_state}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                ZIP *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="bill_zipCode"
+                                                required
+                                                value={formData.bill_zipCode}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray mb-2">
+                                                Country *
+                                            </label>
+                                            <select
+                                                name="bill_country"
+                                                required
+                                                value={formData.bill_country}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                            >
+                                                <option value="">
+                                                    Select Country
+                                                </option>
+                                                {checkoutData?.countries?.map(
+                                                    (c) => (
+                                                        <option
+                                                            key={c}
+                                                            value={c}
+                                                        >
+                                                            {c}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Payment Method */}
                             <div>
@@ -373,7 +544,6 @@ const CheckoutPage = () => {
                                 </div>
                             </div>
 
-                            {/* Conditional Payment Fields */}
                             {formData.paymentMethod === "paypal" && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray mb-2">
@@ -458,13 +628,12 @@ const CheckoutPage = () => {
                         </form>
                     </div>
 
-                    {/* Right Column - Order Summary */}
+                    {/* Right Column - Order Summary (ডান দিকের অংশ — একদম আগের মতো) */}
                     <div className="bg-dark2 rounded-lg shadow-md p-6 h-fit">
                         <h2 className="text-xl font-semibold text-cream mb-6">
                             Order Summary
                         </h2>
 
-                        {/* Cart Items */}
                         <div className="space-y-6 mb-6">
                             {cartItems.length > 0 ? (
                                 cartItems.map((item) => {
@@ -484,7 +653,6 @@ const CheckoutPage = () => {
                                             key={item.id}
                                             className="flex items-start gap-4 border-b border-gray/30 pb-4"
                                         >
-                                            {/* Main Thumbnail */}
                                             <img
                                                 src={`/${item.image}`}
                                                 alt={item.name}
@@ -495,7 +663,6 @@ const CheckoutPage = () => {
                                                 }
                                             />
 
-                                            {/* Custom Images: Thumb, Front, Back */}
                                             <div className="flex flex-wrap gap-2">
                                                 {thumb && (
                                                     <img
@@ -537,7 +704,6 @@ const CheckoutPage = () => {
                                                 )}
                                             </div>
 
-                                            {/* Product Info */}
                                             <div className="flex-1">
                                                 <h3 className="text-sm font-medium text-cream">
                                                     {item.name}
@@ -547,10 +713,11 @@ const CheckoutPage = () => {
                                                 </p>
                                             </div>
 
-                                            {/* Price */}
                                             <div className="text-sm font-medium text-cream">
                                                 {item.currency_icon}
-                                                {item.price * item.quantity}
+                                                {(
+                                                    item.price * item.quantity
+                                                ).toFixed(2)}
                                             </div>
                                         </div>
                                     );
@@ -560,34 +727,33 @@ const CheckoutPage = () => {
                             )}
                         </div>
 
-                        {/* Totals */}
                         <div className="space-y-3 border-t border-gray/60 pt-4">
                             <div className="flex justify-between text-cream">
                                 <span>Subtotal</span>
                                 <span>
                                     {currencyIcon}
-                                    {subtotal}
+                                    {subtotal.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-cream">
                                 <span>Discount</span>
                                 <span>
-                                    {currencyIcon}
-                                    {discount}
+                                    -{currencyIcon}
+                                    {discount.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-cream">
                                 <span>Shipping</span>
                                 <span>
                                     {currencyIcon}
-                                    {shipping}
+                                    {shipping.toFixed(2)}
                                 </span>
                             </div>
                             <div className="flex justify-between text-lg font-semibold border-t border-gray/60 pt-3 text-cream">
                                 <span>Total</span>
                                 <span>
                                     {currencyIcon}
-                                    {total}
+                                    {total.toFixed(2)}
                                 </span>
                             </div>
                         </div>
