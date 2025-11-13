@@ -131,22 +131,20 @@ const CheckoutPage = () => {
                 (p) => p.id.toString() === formData.pickupLocationId
             );
 
-            (orderData.shipping_address = {
-                name: `${formData.firstName} ${formData.lastName}`.trim(),
-                email: formData.email,
-                phone: formData.phone,
-                address: formData.address,
-                city: formData.city,
-                state: formData.state,
-                zip: formData.zipCode,
-                country: formData.country,
-            }),
-                // এখানে store_id পাঠানো হচ্ছে shipping_method এর ভিতরে
-                (orderData.shipping_method = {
-                    store_id: selectedStore?.id || null,
-                    store_name: selectedStore?.store_name || "Unknown Store",
-                    pickup_location: selectedStore || null,
-                });
+            // (orderData.shipping_address = {
+            //     name: `${formData.firstName} ${formData.lastName}`.trim(),
+            //     email: formData.email,
+            //     phone: formData.phone,
+            //     address: formData.address,
+            //     city: formData.city,
+            //     state: formData.state,
+            //     zip: formData.zipCode,
+            //     country: formData.country,
+            // }),
+            // এখানে store_id পাঠানো হচ্ছে shipping_method এর ভিতরে
+            orderData.shipping_method = {
+                ...selectedStore,
+            };
         }
 
         try {
