@@ -94,7 +94,7 @@ const CheckoutPage = () => {
         }
 
         let orderData = {
-            shipping_address: {
+            personal_info: {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
                 phone: formData.phone,
@@ -108,7 +108,7 @@ const CheckoutPage = () => {
 
         // Billing Address (if different)
         if (formData.shipToDifferentAddress) {
-            orderData.shipping_method = {
+            orderData.shipping_address = {
                 name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
                 email: formData.bill_email,
                 phone: formData.bill_phone,
