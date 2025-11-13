@@ -20,7 +20,8 @@ class Order extends Model
         'shipping_method',
         'coupon',
         // 'order_status',
-        'order_status_id'
+        'order_status_id',
+        'personal_info',
     ];
 
     public function orderStatus()

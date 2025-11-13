@@ -741,7 +741,8 @@ class PaymentController extends Controller
 
         $request->validate([
             'shipping_method' => 'required|array',
-            'shipping_address' => 'required|array',
+            'shipping_address' => 'nullable|array',
+            'personal_info' => 'nullable|array',
             'coupon' => 'nullable|array'
         ]);
 
@@ -793,6 +794,7 @@ class PaymentController extends Controller
         $config = $this->paypalConfig($paypalSetting);
         $provider = new PayPalClient($config);
         $provider->getAccessToken();
+        $personalInfo = $request->personal_info ?? [];
 
         $response = $provider->capturePaymentOrder($request->token);
 
@@ -801,7 +803,7 @@ class PaymentController extends Controller
             $request->merge(['cart_items' => $cartItems]);
 
             $total = $this->calculateCartTotal($cartItems, $request->shipping_method, $request->coupon ?? null);
-            $order = $this->storeOrder('Paypal', 1, $response['id'], $total, $request);
+            $order = $this->storeOrder('Paypal', 1, $response['id'], $total, $request,$personalInfo);
 
             return response()->json(['status' => 'success', 'order_id' => $order->id]);
         }
@@ -835,7 +837,8 @@ class PaymentController extends Controller
 
         $request->validate([
             'shipping_method' => 'required|array',
-            'shipping_address' => 'required|array',
+            'shipping_address' => 'nullable|array',
+            'personal_info' => 'nullable|array',
             'coupon' => 'nullable|array'
         ]);
 
@@ -896,11 +899,12 @@ class PaymentController extends Controller
         if ($status !== 'SUCCESS') {
             return response()->json(['status' => 'error', 'message' => 'Payoneer payment not completed!'], 400);
         }
+        $personalInfo = $request->personal_info ?? [];
 
         $cartItems = $this->getCartItems();
         $request->merge(['cart_items' => $cartItems]);
         $total = $this->calculateCartTotal($cartItems, $request->shipping_method, $request->coupon ?? null);
-        $order = $this->storeOrder('Payoneer', 1, $transactionId, $total, $request);
+        $order = $this->storeOrder('Payoneer', 1, $transactionId, $total, $request,null, $personalInfo);
 
         return response()->json(['status' => 'success', 'message' => 'Payment completed successfully!', 'order_id' => $order->id]);
     }
@@ -926,7 +930,8 @@ class PaymentController extends Controller
 
         $request->validate([
             'shipping_method' => 'required|array',
-            'shipping_address' => 'required|array',
+            'shipping_address' => 'nullable|array',
+            'personal_info' => 'nullable|array',
             'coupon' => 'nullable|array'
         ]);
 
@@ -981,9 +986,23 @@ class PaymentController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Failed to verify payment'], 400);
         }
 
+
         $transaction = MobilePayTransaction::where('order_id', $orderId)->first();
         if ($transaction) {
             $transaction->update(['status' => $statusResponse->json()['status'] ?? 'completed', 'response' => $statusResponse->json()]);
+        }
+               if (($statusResponse->json()['status'] ?? '') === 'SUCCESS') {
+            $cartItems = $this->getCartItems();
+            $personalInfo = $request->personal_info ?? [];
+            $total = $this->calculateCartTotal($cartItems, $request->shipping_method ?? [], $request->coupon ?? null);
+            $order = $this->storeOrder('MobilePay', 1, $orderId, $total, $request, $request->shipping_method ?? [], false, $personalInfo);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment verified and order created',
+                'order_id' => $order->id,
+                'data' => $statusResponse->json()
+            ]);
         }
 
         return response()->json(['status' => 'success', 'message' => 'Payment verified', 'data' => $statusResponse->json()]);
