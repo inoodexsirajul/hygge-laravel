@@ -114,58 +114,119 @@ class EmployeeController extends Controller
     }
     public function summary(Employee $employee, Request $request)
     {
-        $summary = $this->getEmployeeSummary($employee->user_id, $request->only('date'));
-        return response()->json($summary);
-    }
+        $type = $request->get('type', 'date');
+        $userId = $employee->user_id;
 
-    private function getEmployeeSummary($employeeId, $filter = [])
-    {
-        $today = Carbon::today();
-        $thisMonth = Carbon::now()->month;
-        $thisYear = Carbon::now()->year;
-
+        // Calculate hours
         $calculateHours = function ($query) {
-            $totalMinutes = 0;
-            foreach ($query->get() as $attendance) {
-                if ($attendance->start_time && $attendance->end_time) {
-                    $start = Carbon::parse($attendance->start_time);
-                    $end = Carbon::parse($attendance->end_time);
-                    $totalMinutes += $start->diffInMinutes($end);
-                }
-            }
-            $hours = intdiv($totalMinutes, 60);
-            $minutes = $totalMinutes % 60;
-            return "{$hours}h {$minutes}m";
+            $totalMinutes = $query->get()->sum(function ($att) {
+                if ($att->start_time && $att->end_time)
+                    return Carbon::parse($att->start_time)->diffInMinutes(Carbon::parse($att->end_time));
+                return 0;
+            });
+            return intdiv($totalMinutes, 60) . "h " . ($totalMinutes % 60) . "m";
         };
 
-        $totalToday = $calculateHours(
-            Attendance::where('user_id', $employeeId)->whereDate('date', $today)
-        );
+        // Default Summary (Today, Week, Month, Year)
+        $todayQuery = Attendance::where('user_id', $userId)->whereDate('date', Carbon::today());
+        $weekQuery = Attendance::where('user_id', $userId)
+            ->whereBetween('date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+        $monthQuery = Attendance::where('user_id', $userId)
+            ->whereMonth('date', Carbon::now()->month)
+            ->whereYear('date', Carbon::now()->year);
+        $yearQuery = Attendance::where('user_id', $userId)
+            ->whereYear('date', Carbon::now()->year);
 
-        $totalMonth = $calculateHours(
-            Attendance::where('user_id', $employeeId)
-                ->whereMonth('date', $thisMonth)
-                ->whereYear('date', $thisYear)
-        );
 
-        $totalYear = $calculateHours(
-            Attendance::where('user_id', $employeeId)
-                ->whereYear('date', $thisYear)
-        );
+        // Filtered Summary
+        $filteredQuery = Attendance::where('user_id', $userId);
 
-        $totalFiltered = null;
-        if (isset($filter['date']) && $filter['date'] != '') {
-            $totalFiltered = $calculateHours(
-                Attendance::where('user_id', $employeeId)
-                    ->whereDate('date', $filter['date'])
-            );
+        // DAY FILTER
+        if ($type === 'date' && $request->filled('date')) {
+            $filteredQuery->whereDate('date', $request->date);
         }
 
-        return [
-            'today' => $totalToday,
-            'month' => $totalMonth,
-            'year' => $totalYear,
-            'filtered' => $totalFiltered
-        ];
+        // WEEK FILTER 
+        if ($type === 'week' && $request->filled('week')) {
+            list($year, $week) = explode('-W', $request->week);
+
+            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
+            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
+
+            $filteredQuery->whereBetween('date', [$start->format('Y-m-d'), $end->format('Y-m-d')]);
+        }
+
+        // MONTH FILTER
+        if ($type === 'month' && $request->filled('month')) {
+            $monthObj = Carbon::parse($request->month);
+            $filteredQuery->whereMonth('date', $monthObj->month)
+                ->whereYear('date', $monthObj->year);
+        }
+
+        // YEAR FILTER
+        if ($type === 'year' && $request->filled('year')) {
+            $filteredQuery->whereYear('date', $request->year);
+        }
+
+
+        return response()->json([
+            'today'    => $calculateHours($todayQuery),
+            'week'     => $calculateHours($weekQuery),
+            'month'    => $calculateHours($monthQuery),
+            'year'     => $calculateHours($yearQuery),
+            'filtered' => $calculateHours($filteredQuery),
+        ]);
     }
+
+
+    // private function getEmployeeSummary($employeeId, $filter = [])
+    // {
+    //     $today = Carbon::today();
+    //     $thisMonth = Carbon::now()->month;
+    //     $thisYear = Carbon::now()->year;
+
+    //     $calculateHours = function ($query) {
+    //         $totalMinutes = 0;
+    //         foreach ($query->get() as $attendance) {
+    //             if ($attendance->start_time && $attendance->end_time) {
+    //                 $start = Carbon::parse($attendance->start_time);
+    //                 $end = Carbon::parse($attendance->end_time);
+    //                 $totalMinutes += $start->diffInMinutes($end);
+    //             }
+    //         }
+    //         $hours = intdiv($totalMinutes, 60);
+    //         $minutes = $totalMinutes % 60;
+    //         return "{$hours}h {$minutes}m";
+    //     };
+
+    //     $totalToday = $calculateHours(
+    //         Attendance::where('user_id', $employeeId)->whereDate('date', $today)
+    //     );
+
+    //     $totalMonth = $calculateHours(
+    //         Attendance::where('user_id', $employeeId)
+    //             ->whereMonth('date', $thisMonth)
+    //             ->whereYear('date', $thisYear)
+    //     );
+
+    //     $totalYear = $calculateHours(
+    //         Attendance::where('user_id', $employeeId)
+    //             ->whereYear('date', $thisYear)
+    //     );
+
+    //     $totalFiltered = null;
+    //     if (isset($filter['date']) && $filter['date'] != '') {
+    //         $totalFiltered = $calculateHours(
+    //             Attendance::where('user_id', $employeeId)
+    //                 ->whereDate('date', $filter['date'])
+    //         );
+    //     }
+
+    //     return [
+    //         'today' => $totalToday,
+    //         'month' => $totalMonth,
+    //         'year' => $totalYear,
+    //         'filtered' => $totalFiltered
+    //     ];
+    // }
 }

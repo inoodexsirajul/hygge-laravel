@@ -354,6 +354,8 @@ Route::prefix('employee')->name('employee.')->middleware(['auth', 'employee.acce
     Route::post('/attendance/start', [AttendanceController::class, 'startAttendance'])->name('attendance.start');
     Route::post('/attendance/end', [AttendanceController::class, 'endAttendance'])->name('attendance.end');
     Route::get('/attendance/status', [AttendanceController::class, 'attendanceStatus'])->name('attendance.status');
+    Route::get('{employee}/summary', [AttendanceController::class, 'summary'])
+        ->name('summary');
 });
 
 

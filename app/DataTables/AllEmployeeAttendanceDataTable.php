@@ -69,16 +69,75 @@ class AllEmployeeAttendanceDataTable extends DataTable
      */
     public function query(Attendance $model): QueryBuilder
     {
+        // $query = $model->newQuery()->with('user');
+
+        // if ($this->user_id) {
+        //     $query->where('user_id', $this->user_id);
+        // }
+
+        // // Get filter params
+        // $type = request('type', 'date');
+        // $date = request('date');
+        // $month = request('month');
+        // $year = request('year');
+
+        // if ($type === 'date' && $date) {
+        //     $query->whereDate('date', $date);
+        // }
+
+        // if ($type === 'week' && $date) {
+        //     $start = Carbon::parse($date)->startOfWeek();
+        //     $end = Carbon::parse($date)->endOfWeek();
+        //     $query->whereBetween('date', [$start, $end]);
+        // }
+
+        // if ($type === 'month' && $month) {
+        //     $query->whereMonth('date', Carbon::parse($month)->month)
+        //         ->whereYear('date', Carbon::parse($month)->year);
+        // }
+
+        // if ($type === 'year' && $year) {
+        //     $query->whereYear('date', $year);
+        // }
+
+        // return $query;
         $query = $model->newQuery()->with('user');
 
-
+        // Filter by user_id if set
         if ($this->user_id) {
             $query->where('user_id', $this->user_id);
         }
 
+        // Get filter parameters
+        $type  = request('type', 'date'); // default 'date'
+        $date  = request('date');
+        $week  = request('week'); // new week input
+        $month = request('month');
+        $year  = request('year');
 
-        if (request()->filled('date')) {
-            $query->whereDate('date', request('date'));
+        // Filter by single date
+        if ($type === 'date' && $date) {
+            $query->whereDate('date', $date);
+        }
+
+        // Filter by week (format: 2025-W05)
+        if ($type === 'week' && $week) {
+            // Convert "2025-W05" to start and end date
+            $start = Carbon::parse($week)->startOfWeek();
+            $end   = Carbon::parse($week)->endOfWeek();
+            $query->whereBetween('date', [$start, $end]);
+        }
+
+        // Filter by month
+        if ($type === 'month' && $month) {
+            $carbonMonth = Carbon::parse($month);
+            $query->whereMonth('date', $carbonMonth->month)
+                ->whereYear('date', $carbonMonth->year);
+        }
+
+        // Filter by year
+        if ($type === 'year' && $year) {
+            $query->whereYear('date', $year);
         }
 
         return $query;
