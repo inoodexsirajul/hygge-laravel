@@ -61,7 +61,7 @@ const CustomizeProduct = () => {
 
     const [designs, setDesigns] = useState({
         front: {
-            title: "Your Title",
+            title: "",
             titlePosition: "custom",
             titleColor: "black",
             textSize: 18,
@@ -77,7 +77,7 @@ const CustomizeProduct = () => {
             containerYAxis: 50,
         },
         back: {
-            title: "Back Title",
+            title: "",
             titlePosition: "custom",
             titleColor: "black",
             textSize: 18,

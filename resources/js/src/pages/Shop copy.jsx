@@ -11,6 +11,8 @@ import {
     useGetProductsQuery,
     useGetHomeCategoriesQuery,
     useGetBrandsQuery,
+    useGetColorsQuery,
+    useGetSizesQuery, // ← নতুন
 } from "../redux/services/eCommerceApi";
 
 const Shop = () => {
@@ -19,9 +21,11 @@ const Shop = () => {
     // States
     const [activePage, setActivePage] = useState(1);
     const [rangeValues, setRangeValues] = useState([0, 5000]);
-    const [filter, setFilter] = useState(false); // মোবাইল ফিল্টার
+    const [filter, setFilter] = useState(false);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedBrands, setSelectedBrands] = useState([]);
+    const [selectedColors, setSelectedColors] = useState([]);
+    const [selectedSizes, setSelectedSizes] = useState([]); // ← নতুন
 
     // URL Params
     const searchQuery = searchParams.get("q") || "";
@@ -30,6 +34,8 @@ const Shop = () => {
     const maxPrice = searchParams.get("max_price") || "";
     const urlCategories = searchParams.getAll("category_ids[]");
     const urlBrands = searchParams.getAll("brand_ids[]");
+    const urlColors = searchParams.getAll("color_ids[]");
+    const urlSizes = searchParams.getAll("size_ids[]"); // ← নতুন
 
     // Sync URL → State
     useEffect(() => {
@@ -41,6 +47,12 @@ const Shop = () => {
         setSelectedBrands(
             urlBrands.length > 0 ? urlBrands.map((id) => parseInt(id)) : []
         );
+        setSelectedColors(
+            urlColors.length > 0 ? urlColors.map((id) => parseInt(id)) : []
+        );
+        setSelectedSizes(
+            urlSizes.length > 0 ? urlSizes.map((id) => parseInt(id)) : []
+        ); // ← নতুন
     }, [searchParams]);
 
     useEffect(() => {
@@ -51,9 +63,14 @@ const Shop = () => {
     // Data Fetch
     const { data: homeCats } = useGetHomeCategoriesQuery();
     const { data: brands = [] } = useGetBrandsQuery();
+    const { data: colorData } = useGetColorsQuery();
+    const { data: sizeData } = useGetSizesQuery(); // ← নতুন
+    const colors = colorData || [];
+    const sizes = sizeData || []; // ← নতুন
+
     const categories = homeCats?.categories || [];
 
-    // Products Query
+    // Products Query — Size + Color সহ
     const { data: allData, isLoading: allLoading } = useGetProductsQuery({
         page: activePage,
         min_price: minPrice ? Number(minPrice) : undefined,
@@ -63,13 +80,15 @@ const Shop = () => {
         category_ids:
             selectedCategories.length > 0 ? selectedCategories : undefined,
         brand_ids: selectedBrands.length > 0 ? selectedBrands : undefined,
+        color_ids: selectedColors.length > 0 ? selectedColors : undefined,
+        size_ids: selectedSizes.length > 0 ? selectedSizes : undefined, // ← নতুন
     });
 
     const products = allData?.products?.data || [];
     const totalPages = allData?.products?.last_page || 1;
     const totalProducts = allData?.products?.total || 0;
 
-    // URL Update
+    // URL Update — Size সহ
     const updateURL = useCallback(
         (overrides) => {
             const newParams = new URLSearchParams(searchParams);
@@ -87,6 +106,21 @@ const Shop = () => {
                     newParams.append("brand_ids[]", id)
                 );
                 delete overrides.brands;
+            }
+            if ("colors" in overrides) {
+                newParams.delete("color_ids[]");
+                overrides.colors.forEach((id) =>
+                    newParams.append("color_ids[]", id)
+                );
+                delete overrides.colors;
+            }
+            if ("sizes" in overrides) {
+                // ← নতুন
+                newParams.delete("size_ids[]");
+                overrides.sizes.forEach((id) =>
+                    newParams.append("size_ids[]", id)
+                );
+                delete overrides.sizes;
             }
 
             Object.entries(overrides).forEach(([key, value]) => {
@@ -110,7 +144,7 @@ const Shop = () => {
         [searchParams, setSearchParams]
     );
 
-    // Toggle
+    // Toggle Functions
     const toggleCategory = (id) => {
         const newSelected = selectedCategories.includes(id)
             ? selectedCategories.filter((x) => x !== id)
@@ -127,10 +161,29 @@ const Shop = () => {
         updateURL({ brands: newSelected, page: 1 });
     };
 
-    const isChecked = (id, type = "cat") =>
-        type === "brand"
-            ? selectedBrands.includes(id)
-            : selectedCategories.includes(id);
+    const toggleColor = (id) => {
+        const newSelected = selectedColors.includes(id)
+            ? selectedColors.filter((x) => x !== id)
+            : [...selectedColors, id];
+        setSelectedColors(newSelected);
+        updateURL({ colors: newSelected, page: 1 });
+    };
+
+    const toggleSize = (id) => {
+        // ← নতুন
+        const newSelected = selectedSizes.includes(id)
+            ? selectedSizes.filter((x) => x !== id)
+            : [...selectedSizes, id];
+        setSelectedSizes(newSelected);
+        updateURL({ sizes: newSelected, page: 1 });
+    };
+
+    const isChecked = (id, type = "cat") => {
+        if (type === "brand") return selectedBrands.includes(id);
+        if (type === "color") return selectedColors.includes(id);
+        if (type === "size") return selectedSizes.includes(id); // ← নতুন
+        return selectedCategories.includes(id);
+    };
 
     // Handlers
     const handleRangeChange = (values) => {
@@ -151,10 +204,14 @@ const Shop = () => {
     const clearAllFilters = () => {
         setSelectedCategories([]);
         setSelectedBrands([]);
+        setSelectedColors([]);
+        setSelectedSizes([]); // ← নতুন
         setRangeValues([0, 5000]);
         updateURL({
             categories: [],
             brands: [],
+            colors: [],
+            sizes: [],
             min_price: "",
             max_price: "",
             sort_by: "",
@@ -166,6 +223,8 @@ const Shop = () => {
     const hasActiveFilters =
         selectedCategories.length > 0 ||
         selectedBrands.length > 0 ||
+        selectedColors.length > 0 ||
+        selectedSizes.length > 0 ||
         minPrice ||
         maxPrice ||
         sortBy ||
@@ -205,7 +264,7 @@ const Shop = () => {
                 </div>
 
                 <div className="flex gap-4 relative">
-                    {/* Overlay - মোবাইলে */}
+                    {/* Overlay */}
                     {filter && (
                         <div
                             className="fixed inset-0 bg-dark1 bg-opacity-60 z-40 xl:hidden"
@@ -215,29 +274,32 @@ const Shop = () => {
 
                     {/* Sidebar */}
                     <div
-                        className={`fixed top-0 left-0 h-full w-full max-w-[350px] bg-dark2 z-50 transition-transform duration-300 ease-in-out xl:static xl:z-0 xl:translate-x-0 ${
+                        className={`fixed top-0 left-0 h-full w-full max-w-[350px] bg-dark1 z-50 transition-transform duration-300 ease-in-out xl:static xl:z-0 xl:translate-x-0 ${
                             filter ? "translate-x-0" : "-translate-x-full"
                         }`}
                     >
                         <div className="p-4 h-full overflow-y-auto">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="font-bold text-xl text-cream">
-                                    Filters
-                                </h3>
-                                <button
-                                    onClick={() => setFilter(false)}
-                                    className="xl:hidden"
-                                >
-                                    <IoMdClose className="text-cream text-2xl" />
-                                </button>
+                            <div className="flex justify-between">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="font-bold text-xl text-cream">
+                                        Filters
+                                    </h3>
+                                    <button
+                                        onClick={() => setFilter(false)}
+                                        className="xl:hidden"
+                                    >
+                                        <IoMdClose className="text-cream text-2xl" />
+                                    </button>
+                                </div>
+                                {hasActiveFilters && (
+                                    <button
+                                        onClick={clearAllFilters}
+                                        className="text-red-400 text-sm mb-6 block cursor-pointer"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                )}
                             </div>
-
-                            <button
-                                onClick={clearAllFilters}
-                                className="text-red-400 text-sm mb-6 block"
-                            >
-                                Clear All Filters
-                            </button>
 
                             {/* Categories */}
                             <div className="mb-8">
@@ -295,7 +357,7 @@ const Shop = () => {
                                     <button
                                         key={brand.id}
                                         onClick={() => toggleBrand(brand.id)}
-                                        className={`flex items-center gap-3 w-full text-left mt-2 cursor-pointer ${
+                                        className={`flex items-center gap-3 w-full text-left mt-2 ${
                                             isChecked(brand.id, "brand")
                                                 ? "text-cream font-medium"
                                                 : "text-gray"
@@ -310,14 +372,82 @@ const Shop = () => {
                                             readOnly
                                             className="accent-cream"
                                         />
-                                        {/* <img
-                                            src={`http://127.0.0.1:8000/${brand.logo}`}
-                                            alt={brand.name}
-                                            className="w-6 h-6 object-contain"
-                                        /> */}
                                         {brand.name}
                                     </button>
                                 ))}
+                            </div>
+
+                            {/* Colors — শুধু বক্স */}
+                            <div className="mb-8">
+                                <h4 className="font-semibold text-cream mb-4">
+                                    Colors
+                                </h4>
+                                <div className="flex flex-wrap gap-4">
+                                    {colors.map((color) => {
+                                        const isSelected =
+                                            selectedColors.includes(color.id);
+                                        return (
+                                            <button
+                                                key={color.id}
+                                                onClick={() =>
+                                                    toggleColor(color.id)
+                                                }
+                                                className={`w-10 h-10 rounded-full border-4 transition-all duration-200 shadow-lg hover:scale-110 ${
+                                                    isSelected
+                                                        ? "border-cream scale-110 ring-4 ring-cream/30"
+                                                        : "border-gray-600"
+                                                }`}
+                                                style={{
+                                                    backgroundColor:
+                                                        color.color_code,
+                                                }}
+                                                title={color.color_name}
+                                            >
+                                                {isSelected && (
+                                                    <svg
+                                                        className="w-5 h-5 text-white mx-auto"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Sizes — প্রফেশনাল বাটন */}
+                            <div className="mb-8">
+                                <h4 className="font-semibold text-cream mb-4">
+                                    Sizes
+                                </h4>
+                                <div className="flex flex-wrap gap-3">
+                                    {sizes.map((size) => {
+                                        const isSelected =
+                                            selectedSizes.includes(size.id);
+                                        return (
+                                            <button
+                                                key={size.id}
+                                                onClick={() =>
+                                                    toggleSize(size.id)
+                                                }
+                                                className={`px-5 py-2 rounded-md font-semibold text-sm transition-all shadow-md ${
+                                                    isSelected
+                                                        ? "bg-cream text-black"
+                                                        : "bg-dark3 text-cream border border-gray-600 hover:border-cream"
+                                                }`}
+                                            >
+                                                {size.size_name.toUpperCase()}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
                             {/* Price Range */}
@@ -342,7 +472,6 @@ const Shop = () => {
 
                     {/* Main Content */}
                     <div className="w-full xl:w-4/5">
-                        {/* Mobile Filter Button */}
                         <button
                             onClick={() => setFilter(true)}
                             className="xl:hidden fixed bottom-4 left-4 bg-dark2 text-cream px-5 py-3 rounded-full shadow-2xl z-30 flex items-center gap-2"
@@ -393,7 +522,6 @@ const Shop = () => {
                             )}
                         </div>
 
-                        {/* Pagination */}
                         {totalPages > 1 && (
                             <div className="flex justify-center mt-10 gap-2">
                                 <button

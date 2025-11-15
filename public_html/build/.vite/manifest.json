@@ -20,12 +20,12 @@
     "src": "node_modules/slick-carousel/slick/fonts/slick.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DZ2oanid.css",
+    "file": "assets/app-DDTmwVf8.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-CxONTVHJ.js",
+    "file": "assets/app-CvltnSju.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -33,22 +33,12 @@
       "assets/app-Cof2SKTN.css"
     ],
     "assets": [
-      "assets/logo-DFLTqdDI.svg",
-      "assets/people-CiHRTeP6.png",
       "assets/ajax-loader-BcnMEykj.gif",
       "assets/slick-Bi9J8BMx.eot",
       "assets/slick-BlUtDIuC.woff",
       "assets/slick-DWzRxEMf.ttf",
       "assets/slick-BlzDm7g2.svg"
     ]
-  },
-  "resources/js/src/assets/custom/custom_order_section.png": {
-    "file": "assets/custom_order_section-DK5ZSkkn.png",
-    "src": "resources/js/src/assets/custom/custom_order_section.png"
-  },
-  "resources/js/src/assets/logo/logo.svg": {
-    "file": "assets/logo-DFLTqdDI.svg",
-    "src": "resources/js/src/assets/logo/logo.svg"
   },
   "resources/js/src/assets/people.png": {
     "file": "assets/people-CiHRTeP6.png",

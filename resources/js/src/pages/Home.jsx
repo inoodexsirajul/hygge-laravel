@@ -10,6 +10,7 @@ import {
     useGetProductsByTypeQuery,
 } from "../redux/services/eCommerceApi";
 import CategorySection from "../components/CategorySection";
+import FeaturedCategory from "../components/FeaturedCategory";
 
 const Home = () => {
     const { data } = useGetProductsByTypeQuery();
@@ -19,8 +20,11 @@ const Home = () => {
     return (
         <>
             <Hero />
-            {data?.newArrival?.length > 0 && <ProductSection />}
+            <FeaturedCategory />
             {/* custom order banner */}
+            {/* {data?.newArrival?.length > 0 && <ProductSection />} */}
+            {/* featured categories  */}
+
             <CustomOrderBanner />
             {/* recomended section */}
             {data?.bestProduct?.length > 0 && <RecomendedSection />}
@@ -29,7 +33,7 @@ const Home = () => {
             {data?.featuredProduct?.length > 0 && <EssentialSection />}
 
             {/* hot products */}
-            {data?.topProduct?.length > 0 && <HotProducts />}
+            {/* {data?.topProduct?.length > 0 && <HotProducts />} */}
             {/* <CategorySection products={products} /> */}
             {categoryLoading ? (
                 <div className="text-center py-8">

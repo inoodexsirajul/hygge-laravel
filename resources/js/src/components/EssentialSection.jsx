@@ -11,6 +11,7 @@ const EssentialSection = () => {
         <div className="px-[18px] pt-[19px] lg:pt-[125px] pb-[33px] lg:pb-[100px] bg-dark2 lg:px-20">
             <div className="mb-5">
                 <SectionTitle
+                    smallTitle="Featured Products"
                     title="Your Everyday Essential"
                     subtitle={`Eco-friendly. Customizable. More than just a tote.`}
                     btnUrl="/shop"

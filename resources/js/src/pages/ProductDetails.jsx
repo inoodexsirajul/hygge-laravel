@@ -506,21 +506,22 @@ const ProductDetails = () => {
                                     <button
                                         type="button"
                                         className="cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center hover:bg-gray-700 transition-all"
-                                        onClick={handleIncrement}
-                                        aria-label="Increase quantity"
-                                    >
-                                        <HiOutlinePlusSm />
-                                    </button>
-                                    <div className="w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center">
-                                        {quantity}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center hover:bg-gray-700 transition-all"
                                         onClick={handleDecrement}
                                         aria-label="Decrease quantity"
                                     >
                                         <HiOutlineMinusSm />
+                                    </button>
+                                    <div className="w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center">
+                                        {quantity}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center hover:bg-gray-700 transition-all"
+                                        onClick={handleIncrement}
+                                        aria-label="Increase quantity"
+                                    >
+                                        <HiOutlinePlusSm />
                                     </button>
                                 </div>
                             </div>
