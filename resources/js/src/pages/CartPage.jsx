@@ -21,7 +21,6 @@ const CartPage = () => {
     } = useGetCartSummeryQuery(undefined, {
         refetchOnMountOrArgChange: true,
     });
-    console.log(cartSummery);
 
     // Mutations for removing, updating cart items, and applying coupon
     const [removeFromCartMutation] = useRemoveFromCartMutation();
@@ -37,7 +36,6 @@ const CartPage = () => {
                 toast.error(
                     summaryError?.data?.message || "Failed to fetch cart data"
                 );
-                // console.log(cartError);
             }
         }
     }, [summaryError, navigate]);
@@ -238,13 +236,13 @@ const CartPage = () => {
                                                                 </button>
                                                             </div>
 
-                                                            {/* <Link
+                                                            <Link
                                                                 to={`/product/${item?.product?.slug}/customize`}
                                                                 className="text-green-600 hover:text-green-400 text-sm md:text-base transition"
                                                             >
                                                                 Customize
                                                                 Product
-                                                            </Link> */}
+                                                            </Link>
 
                                                             <button
                                                                 onClick={() =>

@@ -1,3 +1,4 @@
+// src/pages/UserProfile.jsx
 import React, { useState } from "react";
 import {
     UserIcon,
@@ -40,7 +41,7 @@ const UserProfile = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-dark1 py-8 3xl:px-[80px]">
+        <div className="min-h-screen bg-dark1 py-8 3xl:px-20">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -59,9 +60,8 @@ const UserProfile = () => {
                             <img
                                 className="w-16 h-16 rounded-full object-cover"
                                 src={
-                                    userData?.data?.image
-                                        ? `/${userData.data.image}`
-                                        : "https://via.placeholder.com/64"
+                                    userData?.data?.image &&
+                                    `${userData.data.image}`
                                 }
                                 alt="Profile"
                             />
@@ -268,10 +268,7 @@ const ProfileTab = ({
                     <div className="flex items-center space-x-6">
                         <img
                             className="w-20 h-20 rounded-full object-cover"
-                            src={
-                                formData.image ||
-                                "https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png"
-                            }
+                            src={formData.image}
                             alt="Profile"
                         />
                         <div>
@@ -382,21 +379,13 @@ const ProfileTab = ({
                     <div className="flex items-center space-x-4">
                         <img
                             className="w-20 h-20 rounded-full object-cover"
-                            src={
-                                userData?.image
-                                    ? `/${userData.image}`
-                                    : "https://via.placeholder.com/80"
-                            }
+                            src={userData?.image && `${userData.image}`}
                             alt="Profile"
                         />
                         <div>
                             <h3 className="text-xl font-semibold text-cream">
                                 {userData?.name}
                             </h3>
-                            <p className="text-gray">
-                                Member since{" "}
-                                {userData?.createdAt?.slice(0, 4) || "2023"}
-                            </p>
                         </div>
                     </div>
 
@@ -449,8 +438,18 @@ const ProfileTab = ({
     );
 };
 
-// ==================== Orders Tab ====================
+// ==================== Orders Tab (Updated Logic) ====================
 const OrdersTab = ({ orders, isLoading, error }) => {
+    // Safe JSON Parse
+    const safeParse = (str, fallback = {}) => {
+        if (!str) return fallback;
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            return fallback;
+        }
+    };
+
     if (isLoading) {
         return <div className="text-cream">Loading orders...</div>;
     }
@@ -480,12 +479,17 @@ const OrdersTab = ({ orders, isLoading, error }) => {
             ) : (
                 <div className="space-y-4">
                     {orders.map((order) => {
-                        const orderAddress = JSON.parse(
+                        const orderAddress = safeParse(
                             order.order_address || "{}"
                         );
-                        const shippingMethod = JSON.parse(
+                        const shippingMethod = safeParse(
                             order.shipping_method || "{}"
                         );
+
+                        // If order_address is empty or missing → use pickup point
+                        const usePickup =
+                            !orderAddress.address ||
+                            Object.keys(orderAddress).length === 0;
 
                         return (
                             <div
@@ -507,20 +511,67 @@ const OrdersTab = ({ orders, isLoading, error }) => {
                                             {order.product_qty} item
                                             {order.product_qty > 1 ? "s" : ""}
                                         </p>
+
+                                        {/* Shipping Method */}
                                         <p className="text-sm text-cream">
                                             Shipping:{" "}
-                                            {shippingMethod.name || "N/A"} (
-                                            {shippingMethod.cost
-                                                ? `$${shippingMethod.cost}`
-                                                : "N/A"}
-                                            )
+                                            <strong>
+                                                {usePickup
+                                                    ? "Store Pickup (Free)"
+                                                    : shippingMethod.name ||
+                                                      "Standard Delivery"}
+                                            </strong>
                                         </p>
+
+                                        {/* Address or Pickup Point */}
                                         <p className="text-sm text-cream">
-                                            Address: {orderAddress.address},{" "}
-                                            {orderAddress.city},{" "}
-                                            {orderAddress.state},{" "}
-                                            {orderAddress.zip},{" "}
-                                            {orderAddress.country}
+                                            {usePickup
+                                                ? "Pickup Store:"
+                                                : "Deliver to:"}{" "}
+                                            {usePickup ? (
+                                                <span className="text-green-400 font-medium">
+                                                    {shippingMethod.store_name ||
+                                                        shippingMethod.name ||
+                                                        "Pickup Point"}
+                                                    <br />
+                                                    <span className="text-xs text-gray-200">
+                                                        <strong className="text-cream font-bold ml-1">
+                                                            Address:
+                                                        </strong>
+                                                        {shippingMethod.address}
+                                                    </span>
+                                                    <span className="text-xs text-gray-200">
+                                                        <strong className="text-cream font-bold ml-1">
+                                                            Location:
+                                                        </strong>
+                                                        {
+                                                            shippingMethod.map_location
+                                                        }
+                                                    </span>
+                                                    <span className="text-xs text-gray-200 ">
+                                                        <strong className="text-cream font-bold ml-1">
+                                                            Phone:
+                                                        </strong>
+                                                        {shippingMethod.phone}
+                                                    </span>
+                                                    <span className="text-xs text-gray-200 ">
+                                                        <strong className="text-cream font-bold ml-1">
+                                                            Email:
+                                                        </strong>
+                                                        {shippingMethod.email}
+                                                    </span>
+                                                </span>
+                                            ) : (
+                                                <span>
+                                                    {orderAddress.address}
+                                                    {orderAddress.city &&
+                                                        `, ${orderAddress.city}`}
+                                                    {orderAddress.state &&
+                                                        `, ${orderAddress.state}`}
+                                                    {orderAddress.zip &&
+                                                        ` - ${orderAddress.zip}`}
+                                                </span>
+                                            )}
                                         </p>
                                     </div>
                                 </div>
@@ -530,7 +581,7 @@ const OrdersTab = ({ orders, isLoading, error }) => {
                                         Products
                                     </h4>
                                     {order.order_products.map((product) => {
-                                        const variants = JSON.parse(
+                                        const variants = safeParse(
                                             product.variants || "{}"
                                         );
 
@@ -563,18 +614,6 @@ const OrdersTab = ({ orders, isLoading, error }) => {
                                                         Unit Price: $
                                                         {product.unit_price}
                                                     </p>
-                                                    {product.front_image && (
-                                                        <p className="text-sm text-gray">
-                                                            Front Image: Custom
-                                                            Design
-                                                        </p>
-                                                    )}
-                                                    {product.back_image && (
-                                                        <p className="text-sm text-gray">
-                                                            Back Image: Custom
-                                                            Design
-                                                        </p>
-                                                    )}
                                                 </div>
                                             </div>
                                         );

@@ -12,6 +12,7 @@ import {
     useLogoutMutation,
 } from "../../redux/services/eCommerceApi";
 import { toast } from "react-toastify";
+import { clearSessionId } from "../../utils/helper";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -66,7 +67,9 @@ const Navbar = () => {
     const handleLogout = async () => {
         try {
             await logout().unwrap();
+            clearSessionId();
             localStorage.removeItem("authToken");
+            dispatch(eCommerceApi.util.invalidateTags(["Cart"]));
             toast.success("Logged out!");
             navigate("/");
         } catch {
@@ -98,7 +101,7 @@ const Navbar = () => {
         setShowMobileMenu(false);
         setMobileShopOpen(false);
     };
-
+    console.log(cart?.data);
     if (isLoading) return null;
 
     return (
@@ -297,7 +300,7 @@ const Navbar = () => {
                                 onClick={toggleProfileDropdown}
                             >
                                 <img
-                                    src={`/${user.data.image}`}
+                                    src={`${user.data.image}`}
                                     alt="Profile"
                                     className="w-8 h-8 rounded-full object-cover border border-cream"
                                 />

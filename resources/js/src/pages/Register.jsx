@@ -47,11 +47,16 @@ const Register = () => {
 
         try {
             await signup(payload).unwrap();
-            toast.success("Registration successful! Redirecting to login...", {
-                position: "top-right",
-                autoClose: 2000,
-                onClose: () => navigate("/signin"),
-            });
+
+            toast.success(
+                "Registration successful! Please check your email to verify your account.",
+                {
+                    position: "top-right",
+                    autoClose: 4000,
+                    onClose: () => navigate("/resend-email"),
+                }
+            );
+            localStorage.setItem("pendingVerificationEmail", data.email.trim());
         } catch (error) {
             toast.error(
                 error?.data?.message ||

@@ -381,4 +381,4 @@ Gate::before(function ($user, $ability) {
 
 Route::get('/{any}', function () {
     return view('welcome');
-})->where('any', '^(?!api|admin|sanctum|admin/login|logout|password|register|_ignition|horizon).*');
+})->where('any', '^(?!api|admin|employee|sanctum|admin/login|logout|password|register|_ignition|horizon).*');

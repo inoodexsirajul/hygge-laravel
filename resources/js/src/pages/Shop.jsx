@@ -493,8 +493,10 @@ const Shop = () => {
                             >
                                 <option value="">Default</option>
                                 <option value="latest">Latest</option>
+                                <option value="featureproduct">Featured</option>
                                 <option value="lowtohigh">Low to High</option>
                                 <option value="hightolow">High to Low</option>
+                                <option value="recommended">Recommended</option>
                             </select>
                         </div>
 

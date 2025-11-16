@@ -12,7 +12,7 @@ const FeaturedCategory = () => {
     const navigate = useNavigate();
 
     const handleCategoryClick = (categoryId, categoryName) => {
-        navigate(`/shop?category_ids=${categoryId}`);
+        navigate(`/shop?category_ids[]=${categoryId}`);
     };
 
     if (isLoading) {

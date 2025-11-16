@@ -46,6 +46,7 @@ const Home = () => {
                     .map((cat, index) => (
                         <CategorySection
                             key={cat.id}
+                            categoryId={cat.id}
                             products={cat}
                             index={index}
                             categorySlug={cat.slug}

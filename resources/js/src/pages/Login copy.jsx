@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router";
 import { eCommerceApi, useLoginMutation } from "../redux/services/eCommerceApi";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+// import { clearSessionId } from "../utils/helper";
 
 const Login = () => {
-    // reset ফাঙ্কশন নেওয়া হয়েছে — এটাই মূল সমাধান
-    const [login, { isLoading, reset }] = useLoginMutation();
+    const [login, { isLoading }] = useLoginMutation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ const Login = () => {
         formState: { errors },
         setError,
         clearErrors,
-        reset: resetForm,
+        reset,
     } = useForm({
         defaultValues: {
             email: "",
@@ -28,6 +28,7 @@ const Login = () => {
         try {
             const response = await login(data).unwrap();
 
+            // টোকেন সঠিক পাথ থেকে নাও
             const token = response?.data?.access_token;
 
             if (!token) {
@@ -36,17 +37,13 @@ const Login = () => {
 
             localStorage.setItem("authToken", token);
 
-            // কার্ট ও প্রোফাইল রিফ্রেশ
+            // রিফ্রেশ কার্ট + প্রোফাইল
             dispatch(eCommerceApi.util.invalidateTags(["Cart", "UserProfile"]));
 
-            // সফল হলে সব ক্লিয়ার করে হোমে নিয়ে যাওয়া
             clearErrors();
-            resetForm();
+            reset();
             navigate("/");
         } catch (err) {
-            // এখানে reset() কল করা হয়েছে — এটাই মূল ফিক্স
-            reset();
-
             setError("general", {
                 type: "manual",
                 message:
@@ -56,16 +53,6 @@ const Login = () => {
             });
         }
     };
-
-    // অটোমেটিক এরর মেসেজ ৬ সেকেন্ড পর ক্লিয়ার (UX ভালো হয়)
-    useEffect(() => {
-        if (errors.general) {
-            const timer = setTimeout(() => {
-                clearErrors("general");
-            }, 6000);
-            return () => clearTimeout(timer);
-        }
-    }, [errors.general, clearErrors]);
 
     return (
         <div className="flex min-h-screen w-full bg-dark1">
@@ -82,7 +69,7 @@ const Login = () => {
 
                     {/* General Error Message */}
                     {errors.general && (
-                        <p className="text-red-500 text-sm mt-4 w-full text-center bg-red-50 p-3 rounded-md border border-red-200 animate-pulse">
+                        <p className="text-red-500 text-sm mt-4 w-full text-center bg-red-50 p-2 rounded-md">
                             {errors.general.message}
                         </p>
                     )}
@@ -173,7 +160,7 @@ const Login = () => {
                     <div className="w-full flex items-center justify-between mt-8 text-cream">
                         <div className="flex items-center gap-2">
                             <input
-                                className="h-5 w-5 accent-red rounded"
+                                className="h-5 w-5 accent-red"
                                 type="checkbox"
                                 id="remember"
                             />
@@ -196,37 +183,13 @@ const Login = () => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className={`mt-8 w-full h-11 rounded-full text-white font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                        className={`mt-8 w-full h-11 rounded-full text-white font-medium bg-red hover:bg-red/90 transition-all duration-200 ${
                             isLoading
-                                ? "bg-red/70 cursor-not-allowed"
-                                : "bg-red hover:bg-red/90 cursor-pointer"
+                                ? "opacity-50 cursor-not-allowed"
+                                : "cursor-pointer"
                         }`}
                     >
-                        {isLoading ? (
-                            <>
-                                <svg
-                                    className="animate-spin h-5 w-5"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                    />
-                                    <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8v8z"
-                                    />
-                                </svg>
-                                Logging in...
-                            </>
-                        ) : (
-                            "Login"
-                        )}
+                        {isLoading ? "Logging in..." : "Login"}
                     </button>
 
                     {/* Sign Up Link */}

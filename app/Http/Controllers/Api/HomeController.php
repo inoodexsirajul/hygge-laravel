@@ -144,7 +144,7 @@ class HomeController extends Controller
             ->with(['products' => function ($q) {
                 $q->active()
                     ->select('id', 'name', 'slug', 'category_id', 'price', 'offer_price', 'img_alt_text', 'qty', 'thumb_image')
-                    ->with(['productImageGalleries', 'colors:id,color_name,price,is_default', 'sizes:id,size_name,price,is_default'])
+                    ->with(['productImageGalleries', 'colors:id,color_name,color_code,price,is_default', 'sizes:id,size_name,price,is_default'])
                     ->withreview()
                     ->take(10); 
             }])

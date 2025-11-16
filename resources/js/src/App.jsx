@@ -26,6 +26,7 @@ import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Career from "./pages/Career";
+import ResendEmail from "./pages/ResendEmail";
 
 const App = () => {
     const Wrapper = ({ children }) => {
@@ -80,13 +81,14 @@ const App = () => {
                         path="shop/childcategory/:childSlug"
                         element={<Shop />}
                     />
+                    <Route path="/resend-email" element={<ResendEmail />} />
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="cart" element={<CartPage />} />
                     <Route path="signin" element={<Login />} />
                     <Route path="customer-register" element={<Register />} />
-                    <Route path="/verify-email-f" element={<VerifyEmail />} />
-                    <Route path="/career" element={<Career />} />
+                    <Route path="verify-email-f" element={<VerifyEmail />} />
+                    <Route path="career" element={<Career />} />
                     <Route
                         path="update-password"
                         element={<UpdatePassword />}

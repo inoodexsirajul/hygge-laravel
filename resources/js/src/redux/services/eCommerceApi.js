@@ -232,7 +232,7 @@ export const eCommerceApi = createApi({
         }),
         getCategoryProducts: builder.query({
             query: () => `/home/products`,
-            providesTags: ["CategoryProducts"], // ← Fixed
+            providesTags: ["CategoryProducts"],
         }),
 
         // eCommerceApi.js
@@ -397,6 +397,14 @@ export const eCommerceApi = createApi({
             providesTags: ["ProductsByType"],
             keepUnusedDataFor: 600,
         }),
+
+        resendVerificationEmail: builder.mutation({
+            query: ({ email }) => ({
+                url: "/customers/resend-verification",
+                method: "POST",
+                body: { email },
+            }),
+        }),
     }),
 });
 
@@ -404,6 +412,7 @@ export const eCommerceApi = createApi({
 export const {
     useAddReviewMutation,
     useAddToCartMutation,
+    useResendVerificationEmailMutation,
     useCheckoutQuery,
     useCodPaymentMutation,
     useGetColorsQuery,

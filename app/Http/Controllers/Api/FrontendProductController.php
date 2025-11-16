@@ -412,7 +412,10 @@ class FrontendProductController extends Controller
      */
     public function allProducts(Request $request)
     {
-        $query = Product::active()->orderBy('id', 'desc');
+        $query = Product::active();
+        if(!$request->has('sort_by')){
+            $query->orderBy('id', 'desc');
+        }
         $query = $this->applyFilters($query, $request);
 
         $products = $query->with(['category', 'colors', 'customization', 'sizes'])

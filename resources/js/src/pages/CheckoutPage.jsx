@@ -770,9 +770,9 @@ const CheckoutPage = () => {
                                     const mainImage = hasImage(item.image)
                                         ? `/${item.image}`
                                         : null;
-                                    const thumb = hasImage(item.thumb_image)
-                                        ? `/${item.thumb_image}`
-                                        : null;
+                                    // const thumb = hasImage(item.thumb_image)
+                                    //     ? `/${item.thumb_image}`
+                                    //     : null;
                                     const front = hasImage(item.front_image)
                                         ? `/${item.front_image}`
                                         : null;
@@ -788,7 +788,7 @@ const CheckoutPage = () => {
                                             key={item.id}
                                             className="flex gap-4 pb-5 border-b border-gray/20 last:border-0"
                                         >
-                                            <div className="flex-shrink-0">
+                                            <div className="shrink-0">
                                                 {mainImage ? (
                                                     <img
                                                         src={mainImage}
@@ -813,15 +813,8 @@ const CheckoutPage = () => {
                                                     {item.name}
                                                 </h3>
 
-                                                {(thumb || front || back) && (
+                                                {(front || back) && (
                                                     <div className="flex gap-2 mt-2">
-                                                        {thumb && (
-                                                            <img
-                                                                src={thumb}
-                                                                alt="Thumb"
-                                                                className="w-12 h-12 object-contain rounded border border-gray/40 bg-white p-1"
-                                                            />
-                                                        )}
                                                         {front && (
                                                             <img
                                                                 src={front}

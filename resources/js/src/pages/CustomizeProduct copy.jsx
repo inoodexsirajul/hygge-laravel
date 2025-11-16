@@ -57,7 +57,7 @@ const CustomizeProduct = () => {
 
     const { data: cartData } = useGetCartDetailsQuery();
 
-    const containerSizes = { width: "248px", height: "264px" };
+    const containerSizes = { width: "220px", height: "238px" };
 
     const [designs, setDesigns] = useState({
         front: {
@@ -983,7 +983,7 @@ const CustomizeProduct = () => {
                         ) : (
                             <figure
                                 ref={previewRef}
-                                className="relative w-[700px]  h-auto"
+                                className="relative w-[700px] h-[600px]"
                             >
                                 <div>
                                     <img
@@ -993,7 +993,7 @@ const CustomizeProduct = () => {
                                             ]
                                         }`}
                                         alt={`${currentSide} view`}
-                                        className=" w-full h-full object-contain"
+                                        className="w-[700px] h-[600px] object-contain"
                                         crossOrigin="anonymous"
                                     />
                                 </div>
@@ -1034,7 +1034,7 @@ const CustomizeProduct = () => {
                 contentLabel="Preview Modal"
                 ariaHideApp={false}
             >
-                <div className="flex flex-col items-center z-1002 overflow-hidden bg-white">
+                <div className="flex flex-col items-center z-[1002] overflow-hidden bg-white">
                     <div className="flex justify-between items-center w-full mb-4">
                         <h2 className="text-xl font-bold text-dark1">
                             {currentSide.charAt(0).toUpperCase() +
@@ -1057,7 +1057,7 @@ const CustomizeProduct = () => {
                             <p>No {currentSide} image available for preview.</p>
                         ) : (
                             <figure className="relative w-full max-w-md h-auto">
-                                <div className="relative w full aspect-7/6">
+                                <div className="relative w full aspect-[7/6]">
                                     <img
                                         src={`/${
                                             data.product.customization[

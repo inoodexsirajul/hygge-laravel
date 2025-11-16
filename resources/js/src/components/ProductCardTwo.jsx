@@ -9,29 +9,15 @@ import { toast } from "react-toastify";
 // import baseurl from "../utils/url";
 
 const ProductCardTwo = ({ product }) => {
-    const [selectedColor, setSelectedColor] = useState(
-        product.colors?.[0] || null
-    );
-    const [selectedSizeId, setSelectedSizeId] = useState(
-        product.sizes?.[0]?.id || 2
-    ); // ডিফল্ট সাইজ
     const [quantity, setQuantity] = useState(1); // ডিফল্ট কোয়ান্টিটি
     const [isHovered, setIsHovered] = useState(false);
     const [addToCart, { isLoading, error }] = useAddToCartMutation();
     const { refetch } = useGetCartDetailsQuery(); // কার্ট আপডেট করার জন্য
 
-    // কালার আইডি ম্যাপিং
-    const colorMap = {
-        "#FF0000": 1, // Red
-        "#0000FF": 2, // Blue
-        "#008000": 3, // Green
-        // API থেকে কালার আইডি ম্যাপ করার জন্য এটি আপডেট করো
-    };
     const token = localStorage.getItem("authToken");
 
     const handleAddToCart = async () => {
         try {
-         
             const cartItem = {
                 product_id: product.id,
                 qty: quantity,
@@ -40,8 +26,8 @@ const ProductCardTwo = ({ product }) => {
             refetch(); // কার্ট আপডেট
             toast.success("Product added to cart!");
         } catch (err) {
-            // toast.error(err?.data?.message || "  to add to cart");
-            console.log(err);
+            toast.error(err?.data?.message || "  to add to cart");
+            // console.log(err);
         }
     };
 
@@ -109,7 +95,7 @@ const ProductCardTwo = ({ product }) => {
             {/* Product Info */}
             <div className="px-2 mt-2">
                 {/* Product title */}
-                <h4 className="text-cream text-[12px] 2xl:text-[18px] font-normal md:font-semibold font-manrope mb-[10px]">
+                <h4 className="text-cream text-[12px] 2xl:text-[18px] font-normal md:font-semibold font-manrope mb-2.5">
                     <Link to={`/product-details/${product?.slug}`}>
                         {product?.name}
                     </Link>
@@ -143,14 +129,12 @@ const ProductCardTwo = ({ product }) => {
                         {product.colors.map((color, index) => (
                             <button
                                 key={index}
-                                className={`w-[12px] lg:w-[18px] h-[12px] lg:h-[18px] border rounded-[5px] cursor-pointer ${
-                                    selectedColor === color
-                                        ? "border-gray-300"
-                                        : "border-gray-800"
-                                }`}
-                                style={{ backgroundColor: color }}
-                                onClick={() => setSelectedColor(color)}
-                                aria-label={`Color: ${color}`}
+                                className={`w-3 lg:w-[18px] h-3 lg:h-[18px] border rounded-[5px]  `}
+                                style={{ backgroundColor: color?.color_code }}
+                                onClick={() =>
+                                    setSelectedColor(color?.color_code)
+                                }
+                                aria-label={`Color: ${color?.color_code}`}
                             />
                         ))}
                     </div>
