@@ -325,6 +325,7 @@ class AuthController extends Controller
     {
         // $customer = $request->user(); // or Auth::user()
         $customer = Auth::user();
+        $customer->image= asset('uploads/default.jpg');
         return response()->json([
             'status' => 'success',
             'data' => $customer

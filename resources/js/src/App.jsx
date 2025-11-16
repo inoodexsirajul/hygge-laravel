@@ -84,7 +84,7 @@ const App = () => {
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="cart" element={<CartPage />} />
                     <Route path="signin" element={<Login />} />
-                    <Route path="register" element={<Register />} />
+                    <Route path="customer-register" element={<Register />} />
                     <Route path="/verify-email-f" element={<VerifyEmail />} />
                     <Route path="/career" element={<Career />} />
                     <Route
