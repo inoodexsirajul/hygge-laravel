@@ -36,22 +36,6 @@ class CategoryController extends Controller
      */
     public function store(AdminCategoryRequest $request)
     {
-        // dd($request->all());
-        //method 1
-        //  $validated=$request->validate([
-        // 'icon' =>'required|not_in:empty',
-        // 'name' =>'required|max:200|unique:categories,name',
-        // 'status'=>'required',
-        // ]);
-        // $category= new Category();
-        // $category->icon=$request->icon;
-        // $category->name=$request->name;
-        // $category->slug=Str::slug($request->name);
-        // $category->status=$request->status;
-        // $category->save();
-
-        //method 2 : 
-        // dd($request->all());
         $imagePath = $this->upload_image($request, 'image', 'uploads/categories');
         $validated = $request->validated();
         $validated['icon'] = $request->icon;

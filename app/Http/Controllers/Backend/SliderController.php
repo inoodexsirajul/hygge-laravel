@@ -8,6 +8,7 @@ use App\Http\Requests\SliderCreateRequest;
 use App\Http\Requests\SliderUpdateRequest;
 use App\Models\Slider;
 use App\Traits\ImageUploadTrait;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -39,7 +40,8 @@ class SliderController extends Controller
         $validated = $request->validated();
         $validated['banner'] = $path;
         Slider::create($validated);
-        return redirect()->route('admin.slider.index')->with('success', 'Slider created successfully');
+        Toastr::success('Slider Added Successfully');
+        return redirect()->route('admin.slider.index');
     }
 
     /**
@@ -69,7 +71,8 @@ class SliderController extends Controller
         $validated = $request->validated();
         $validated['banner'] = $image_path ?: $slider->banner;
         $slider->update($validated);
-        return redirect()->route('admin.slider.index')->with('success', 'Slider updated successfully');
+        Toastr::success('Slider Updated Successfully');
+        return redirect()->route('admin.slider.index');
     }
 
     /**

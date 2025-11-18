@@ -12,6 +12,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\ChildCategory;
 use App\Models\Color;
+use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Models\productCustomization;
 use App\Models\ProductImageGallery;
@@ -88,48 +89,6 @@ class ProductController extends Controller
         }
 
         $product->save();
-        // Attach sizes and colors 
-        // if ($request->has('proSize')) {
-        //     $product->sizes()->attach($request->proSize);
-        // }
-        // if ($request->has('proColor')) {
-        //     $product->colors()->attach($request->proColor);
-        // }
-
-        // Attach sizes, colors, and price variants
-        // if ($request->has('variants')) {
-        //     foreach ($request->variants as $variant) {
-        //         $product->variants()->create([
-        //             'size_id' => $variant['size_id'] ?? null,
-        //             'color_id' => $variant['color_id'] ?? null,
-        //             'price' => $variant['price'] ?? null,
-        //         ]);
-        //     }
-        // }
-        // Save Size + Price Variants price
-        // if ($request->has('variants')) {
-        //     foreach ($request->variants as $variant) {
-        //         if (!empty($variant['size_id'])) {
-        //             DB::table('product_sizes')->insert([
-        //                 'product_id' => $product->id,
-        //                 'size_id' => $variant['size_id'],
-        //                 'size_price' => $variant['price'] ?? 0,
-        //                 'created_at' => now(),
-        //                 // 'updated_at' => now(),
-        //             ]);
-        //         }
-
-        //         if (!empty($variant['color_id'])) {
-        //             DB::table('product_colors')->insert([
-        //                 'product_id' => $product->id,
-        //                 'color_id' => $variant['color_id'],
-        //                 'color_price' => $variant['price'] ?? 0,
-        //                 'created_at' => now(),
-        //                 // 'updated_at' => now(),
-        //             ]);
-        //         }
-        //     }
-        // }
 
         // ===============================
         // Size + Price Sync
@@ -265,45 +224,24 @@ class ProductController extends Controller
         $product->meta_description = $request->meta_description;
         $product->save();
 
-        // Sync sizes and colors
-        // if ($request->has('proSize')) {
-        //     $product->sizes()->sync($request->proSize);
-        // } else {
-        //     $product->sizes()->sync([]);
-        // }
+        /** Handle Size + Color Variants */
+        $sizesToSync = [];
+        $colorsToSync = [];
 
-        // if ($request->has('proColor')) {
-        //     $product->colors()->sync($request->proColor);
-        // } else {
-        //     $product->colors()->sync([]);
-        // }
-
-        // Remove old pivot data
-        DB::table('product_sizes')->where('product_id', $product->id)->delete();
-        DB::table('product_colors')->where('product_id', $product->id)->delete();
-
-        // Save Size + Price Variants
         if ($request->has('variants')) {
             foreach ($request->variants as $variant) {
                 if (!empty($variant['size_id'])) {
-                    DB::table('product_sizes')->insert([
-                        'product_id' => $product->id,
-                        'size_id' => $variant['size_id'],
-                        'size_price' => $variant['price'] ?? 0,
-                        'updated_at' => now(),
-                    ]);
+                    $sizesToSync[$variant['size_id']] = ['size_price' => $variant['price'] ?? 0];
                 }
-
                 if (!empty($variant['color_id'])) {
-                    DB::table('product_colors')->insert([
-                        'product_id' => $product->id,
-                        'color_id' => $variant['color_id'],
-                        'color_price' => $variant['price'] ?? 0,
-                        'updated_at' => now(),
-                    ]);
+                    $colorsToSync[$variant['color_id']] = ['color_price' => $variant['price'] ?? 0];
                 }
             }
         }
+
+        // Sync: Merge old + new
+        $product->sizes()->sync($sizesToSync);
+        $product->colors()->sync($colorsToSync);
 
         /**============================
          * Handle Product Customization
@@ -338,9 +276,9 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $product = Product::findOrFail($id);
-        // if (OrderProduct::where('product_id', $product->id)->count() > 0) {
-        //     return response(['status' => 'error', 'message' => 'Product have orders! Can not be deleted']);
-        // }
+        if (OrderProduct::where('product_id', $product->id)->count() > 0) {
+            return response(['status' => 'error', 'message' => 'Product have orders! Can not be deleted']);
+        }
 
         // Detach sizes and colors from pivot tables
         $product->sizes()->detach();

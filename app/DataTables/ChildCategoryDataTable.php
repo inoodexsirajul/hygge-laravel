@@ -41,7 +41,7 @@ class ChildCategoryDataTable extends DataTable
                   </label>';
                 } else {
                     $activeButton = '<label class="custom-switch mt-2">
-                    <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input show_at_home" data-id="' . $query->id . '" >
+                    <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input change-status" data-id="' . $query->id . '" >
                     <span class="custom-switch-indicator"></span>
                   </label>';
                 }

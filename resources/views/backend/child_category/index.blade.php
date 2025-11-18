@@ -33,6 +33,7 @@
     <script>
         $(document).ready(function() {
             $('body').on('click', '.change-status', function() {
+                // alert('hello');
                 let isChecked = $(this).is(':checked');
                 let id = $(this).data('id');
                 $.ajax({

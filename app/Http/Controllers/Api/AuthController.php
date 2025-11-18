@@ -108,70 +108,14 @@ class AuthController extends Controller
     }
 
 
-
-    /**
-     * Customer login
-     */
-    // public function login(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|email',
-    //         'password' => 'required|string',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Validation failed',
-    //             'errors' => $validator->errors(),
-    //         ], 422);
-    //     }
-
-    //     $customer = Customer::where('email', $request->email)->first();
-
-    //     if (!$customer || !Hash::check($request->password, $customer->password)) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Invalid credentials'
-    //         ], 401);
-    //     }
-
-    //     // Delete old tokens to enforce single session
-    //     $customer->tokens()->delete();
-
-    //     // Create new token
-    //     $token = $customer->createToken('API Token')->plainTextToken;
-
-    //     $this->mergeGuestData($request, $customer->id);
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Login successful',
-    //         'data' => [
-    //             'user' => $customer,
-    //             'access_token' => $token,
-    //             'token_type' => 'Bearer',
-    //         ]
-    //     ]);
-    // }
-
-    // protected function mergeGuestData(Request $request, $userId)
-    // {
-    //     $sessionId = $request->header('X-Session-Id'); // guest এর sessionId পাঠানো উচিত
-    //     if (!$sessionId) return;
-
-    //     // Merge Cart
-    //     Cart::where('session_id', $sessionId)->update([
-    //         'user_id' => $userId,
-    //         'session_id' => null,
-    //     ]);
-
-    //     // Merge Customer Customizations
-    //     customerCustomization::where('session_id', $sessionId)->update([
-    //         'user_id' => $userId,
-    //         'session_id' => null,
-    //     ]);
-    // }
+/**
+ * Login API
+ * This endpoint is used to login a user.
+ * 
+ * @param Request $request
+ * @return \Illuminate\Http\Response
+ * 
+ */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -238,7 +182,7 @@ class AuthController extends Controller
         foreach ($guestCart as $item) {
             $existing = Cart::where('user_id', $userId)
                 ->where('product_id', $item->product_id)
-                ->where('options', $item->options) // optional: size/color/customization match
+                ->where('options', $item->options)
                 ->first();
 
             if ($existing) {
@@ -331,6 +275,14 @@ class AuthController extends Controller
             'data' => $customer
         ]);
     }
+/**
+ * Forgot password
+ *
+ * Sends a password reset link to the customer's email.
+ *
+ * @param \Illuminate\Http\Request $request
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email|exists:customers,email']);
@@ -352,6 +304,18 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Reset password
+     *
+     * Resets the customer's password.
+     *
+     * @bodyParam email required The customer's email address.
+     * @bodyParam token required The password reset token sent to the customer's email address.
+     * @bodyParam password required The new password for the customer.
+     * @bodyParam password_confirmation required The new password confirmation for the customer.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function resetPassword(Request $request)
     {
         $request->validate([

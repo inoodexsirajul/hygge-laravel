@@ -9,6 +9,7 @@ use App\Http\Requests\AdminSubCategoryUpdateRequest;
 use App\Models\Category;
 use App\Models\ChildCategory;
 use App\Models\SubCategory;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -39,7 +40,8 @@ class SubCategoryController extends Controller
         $validated = $request->validated();
         $validated['slug'] = Str::slug($request->name);
         SubCategory::create($validated);
-        return redirect()->route('admin.sub-category.index')->with('success', 'Sub Category added successfully!');
+        Toastr::success('Sub Category created successfully!');
+        return redirect()->route('admin.sub-category.index');
     }
 
     /**
@@ -65,13 +67,11 @@ class SubCategoryController extends Controller
      */
     public function update(AdminSubCategoryUpdateRequest $request, string $id)
     {
-        // dd($request->all());
-        // dd($id);
-
         $validated = $request->validated();
         $validated['slug'] = Str::slug($request->name);
         SubCategory::findOrFail($id)->update($validated);
-        return redirect()->route('admin.sub-category.index')->with('success', 'Sub Category updated successfully!');
+        Toastr::success('Sub Category updated successfully!');
+        return redirect()->route('admin.sub-category.index');
     }
 
     /**
@@ -79,7 +79,7 @@ class SubCategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $subCategory=SubCategory::findOrFail($id);
+        $subCategory = SubCategory::findOrFail($id);
         $childCategory = ChildCategory::where('sub_category_id', $subCategory->id)->count();
         if ($childCategory > 0) {
             return response(['status' => 'error', 'message' => "You can't delete this Sub Category because it has child category!"]);

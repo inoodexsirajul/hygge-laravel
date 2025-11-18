@@ -52,7 +52,7 @@ class BlogController extends Controller
         $blog = new Blog();
         $blog->image = $imagePath;
         $blog->title = $request->title;
-        $blog->slug = \Str::slug($request->title);
+        $blog->slug = Str::slug($request->title);
         $blog->category_id = $request->category;
         $blog->user_id = Auth::user()->id;
         $blog->description = $request->description;
@@ -101,7 +101,7 @@ class BlogController extends Controller
         $imagePath = $this->update_image($request, 'image', 'uploads/blogs', $blog->image);
         $blog->image = !empty($imagePath) ? $imagePath : $blog->image;
         $blog->title = $request->title;
-        $blog->slug = \Str::slug($request->title);
+        $blog->slug = Str::slug($request->title);
         $blog->category_id = $request->category;
         $blog->user_id = Auth::user()->id;
         $blog->description = $request->description;

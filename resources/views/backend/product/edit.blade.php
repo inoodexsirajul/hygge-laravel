@@ -264,55 +264,6 @@
 
 
                                 </div>
-                                {{-- <hr>
-                                <h5>🔧 Product Customization</h5>
-
-                                <div class="form-group">
-                                    <label>Is Customizable?</label>
-                                    <select name="is_customizable" id="is_customizable" class="form-control">
-                                        <option value="0"
-                                            {{ ($product->customization->is_customizable ?? 0) == 0 ? 'selected' : '' }}>No
-                                        </option>
-                                        <option value="1"
-                                            {{ ($product->customization->is_customizable ?? 0) == 1 ? 'selected' : '' }}>
-                                            Yes</option>
-                                    </select>
-                                </div>
-
-                                <div id="customize_section" style="display: none;">
-                                    <div class="row">
-                                        <div class="form-group col-md-6">
-                                            <label>Front Side Customize Image</label>
-                                            <input type="file" name="front_image" class="form-control">
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label>Back Side Customize Image</label>
-                                            <input type="file" name="back_image" class="form-control">
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label>Front Side Extra Cost</label>
-                                            <input type="number" name="front_price" step="0.01" class="form-control"
-                                                placeholder="0.00"
-                                                value="{{ $product->customization->front_price ?? '' }}">
-                                        </div>
-                                        <div class="form-group col-md-4">
-                                            <label>Back Side Extra Cost</label>
-                                            <input type="number" name="back_price" step="0.01" class="form-control"
-                                                placeholder="0.00"
-                                                value="{{ $product->customization->back_price ?? '' }}">
-                                        </div>
-                                        <div class="form-group col-md-4">
-                                            <label>Both Side Extra Cost</label>
-                                            <input type="number" name="both_price" step="0.01" class="form-control"
-                                                placeholder="0.00"
-                                                value="{{ $product->customization->both_price ?? '' }}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr> --}}
                                 <hr>
                                 <h5>🔧 Product Customization</h5>
 
@@ -460,12 +411,16 @@
                         id: id
                     },
                     success: function(data) {
+                        // sub category reset completely
                         $('.sub-category').html(
                             '<option value="">Select Sub Category</option>');
                         $.each(data, function(i, item) {
                             $('.sub-category').append(
                                 `<option value="${item.id}">${item.name}</option>`);
                         });
+                        // Child category reset completely
+                        $('.child-category').html(
+                            '<option value="">Select Child Category</option>');
                     },
                     error: function(xhr, status, error) {
                         console.error('Error status:', status);
@@ -500,9 +455,24 @@
                 });
             });
 
+
             // Variant handling
             let variants = [];
 
+            // add new variant 
+            $('#variantList .variant-item').each(function() {
+                let sizeId = $(this).find('input[name$="[size_id]"]').val();
+                let colorId = $(this).find('input[name$="[color_id]"]').val();
+                let price = $(this).find('input[name$="[price]"]').val();
+
+                variants.push({
+                    size_id: sizeId || '',
+                    color_id: colorId || '',
+                    price: price || ''
+                });
+            });
+
+            // Add new variant
             $('#addVariant').on('click', function() {
                 let sizeId = $('#variantSize').val();
                 let sizeText = $('#variantSize option:selected').text();
@@ -510,57 +480,79 @@
                 let colorText = $('#variantColor option:selected').text();
                 let price = $('#variantPrice').val();
 
-                // Check if at least one field is provided
                 if (!sizeId && !colorId && !price) {
-                    toastr.error('please provide at least one attribute');
+                    toastr.error('Please provide at least one attribute');
                     return;
                 }
 
-                // Add to variants array
+                // Duplicate check
+                let duplicate = false;
+                $('#variantList .variant-item').each(function() {
+                    let existingSize = $(this).find('input[name$="[size_id]"]').val();
+                    let existingColor = $(this).find('input[name$="[color_id]"]').val();
+                    if ((sizeId && sizeId == existingSize) || (colorId && colorId ==
+                        existingColor)) {
+                        duplicate = true;
+                        return false;
+                    }
+                });
+
+                if (duplicate) {
+                    toastr.error('This size or color is already added');
+                    return;
+                }
+
+                // array add 
                 variants.push({
                     size_id: sizeId || '',
-                    size_text: sizeId ? sizeText : 'N/A',
                     color_id: colorId || '',
-                    color_text: colorId ? colorText : 'N/A',
                     price: price || ''
                 });
 
-                // Add hidden inputs for form submission
-                let input = `<input type="hidden" name="variants[${variants.length-1}][size_id]" value="${sizeId || ''}">
-                            <input type="hidden" name="variants[${variants.length-1}][color_id]" value="${colorId || ''}">
-                            <input type="hidden" name="variants[${variants.length-1}][price]" value="${price || ''}">`;
+                let index = variants.length - 1;
 
-                // Display variant
+                // hidden input make
+                let inputHtml = `
+                <input type="hidden" name="variants[${index}][size_id]" value="${sizeId || ''}">
+                <input type="hidden" name="variants[${index}][color_id]" value="${colorId || ''}">
+                <input type="hidden" name="variants[${index}][price]" value="${price || ''}">
+            `;
+
+                // display
                 let displayText = [];
                 if (sizeId) displayText.push(`Size: ${sizeText}`);
                 if (colorId) displayText.push(`Color: ${colorText}`);
                 if (price) displayText.push(`Price: ${price}`);
-                let display = displayText.length > 0 ? displayText.join(', ') : 'No attributes selected';
+                let display = displayText.join(', ');
 
                 $('#variantList').append(`
-                    <div class="variant-item btn btn-primary" data-index="${variants.length-1}">
-                        <div class="variant-content">
-                            <span>${display}</span>
-                            <i class="fas fa-times remove-variant"></i>
-                        </div>
-                        ${input}
+                <div class="variant-item btn btn-primary" data-index="${index}">
+                    <div class="variant-content">
+                        <span>${display}</span>
+                        <i class="fas fa-times remove-variant"></i>
                     </div>
-                `);
+                    ${inputHtml}
+                </div>
+            `);
 
-                // Clear inputs
+                // clear input
                 $('#variantSize').val('');
                 $('#variantColor').val('');
                 $('#variantPrice').val('');
             });
 
-            // Remove variant
+            // Remove
             $(document).on('click', '.remove-variant', function() {
                 let item = $(this).closest('.variant-item');
                 let index = item.data('index');
+
+                // array remove
                 variants.splice(index, 1);
+
+                // HTML remove 
                 item.remove();
 
-                // Reindex remaining variants
+                // reindex
                 $('#variantList .variant-item').each(function(i) {
                     $(this).data('index', i);
                     $(this).find('input[name^="variants"]').each(function() {
@@ -570,6 +562,7 @@
                     });
                 });
             });
+
         });
     </script>
     {{-- <script>

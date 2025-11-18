@@ -8,7 +8,9 @@ use App\Http\Requests\ChildCategoryRequest;
 use App\Http\Requests\ChildCategoryUpdateRequest;
 use App\Models\Category;
 use App\Models\ChildCategory;
+use App\Models\Product;
 use App\Models\SubCategory;
+use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -39,7 +41,8 @@ class ChildCategoryController extends Controller
         $validated = $request->validated();
         $validated['slug'] = Str::slug($request->name);
         ChildCategory::create($validated);
-        return redirect()->route('admin.child-category.index')->with('success', 'Child Category created successfully!');
+        Toastr::success('Child Category created successfully!');
+        return redirect()->route('admin.child-category.index');
     }
 
     /**
@@ -69,7 +72,8 @@ class ChildCategoryController extends Controller
         $validated = $request->validated();
         $validated['slug'] = Str::slug($request->name);
         ChildCategory::findOrFail($id)->update($validated);
-        return redirect()->route('admin.child-category.index')->with('success', 'Child Category updated successfully!');
+        Toastr::success('Child Category updated successfully!');
+        return redirect()->route('admin.child-category.index');
     }
 
     /**
@@ -78,17 +82,10 @@ class ChildCategoryController extends Controller
     public function destroy(string $id)
     {
         $childCategory = ChildCategory::findOrFail($id);
-        // if (Product::where('child_category_id', $childCategory->id)->count() > 0) {
-        //     return response(['status' => 'error', 'message' => 'You can\'t delete this category because it has products!']);
-        // }
-        // $homeSetting = HomePageSetting::all();
-        // foreach ($homeSetting as $item) {
-        //     $array = json_decode($item->value, true);
-        //     $collaction = collect($array);
-        //     if ($collaction->contains('child_category', $childCategory->id)) {
-        //         return response(['status' => 'error', 'message' => 'You can\'t delete this category because it has products!']);
-        //     }
-        // }
+        if (Product::where('child_category_id', $childCategory->id)->count() > 0) {
+            return response(['status' => 'error', 'message' => 'You can\'t delete this category because it has products!']);
+        }
+
         $childCategory->delete();
         return response(['status' => 'success', 'message' => 'Deleted Successfully!']);
     }
@@ -105,6 +102,7 @@ class ChildCategoryController extends Controller
      */
     public function changeStatus(Request $request)
     {
+        // dd($request->all());
         $childCategory = ChildCategory::findOrFail($request->id);
         $childCategory->status = $request->status == 'true' ? 1 : 0;
         $childCategory->save();

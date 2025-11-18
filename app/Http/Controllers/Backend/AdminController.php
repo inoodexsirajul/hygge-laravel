@@ -34,43 +34,6 @@ class AdminController extends Controller
             ];
         }
         $totalProduct = Product::count();
-
-        // $employeeId = auth()->user()->id ?? null;
-
-        // if (!$employeeId) {
-        //     $todayHoursFormatted = $monthHoursFormatted = $yearHoursFormatted = '0h 0m';
-        // } else {
-
-        //     $todayMinutes = Attendance::where('user_id', $employeeId)
-        //         ->whereDate('start_time', Carbon::today())
-        //         ->whereNotNull('end_time')
-        //         ->get()
-        //         ->sum(function ($att) {
-        //             return Carbon::parse($att->start_time)->diffInMinutes(Carbon::parse($att->end_time));
-        //         });
-        //     $todayHoursFormatted = intdiv($todayMinutes, 60) . 'h ' . ($todayMinutes % 60) . 'm';
-
-
-        //     $monthMinutes = Attendance::where('user_id', $employeeId)
-        //         ->whereMonth('start_time', Carbon::now()->month)
-        //         ->whereYear('start_time', Carbon::now()->year)
-        //         ->whereNotNull('end_time')
-        //         ->get()
-        //         ->sum(function ($att) {
-        //             return Carbon::parse($att->start_time)->diffInMinutes(Carbon::parse($att->end_time));
-        //         });
-        //     $monthHoursFormatted = intdiv($monthMinutes, 60) . 'h ' . ($monthMinutes % 60) . 'm';
-
-
-        //     $yearMinutes = Attendance::where('user_id', $employeeId)
-        //         ->whereYear('start_time', Carbon::now()->year)
-        //         ->whereNotNull('end_time')
-        //         ->get()
-        //         ->sum(function ($att) {
-        //             return Carbon::parse($att->start_time)->diffInMinutes(Carbon::parse($att->end_time));
-        //         });
-        //     $yearHoursFormatted = intdiv($yearMinutes, 60) . 'h ' . ($yearMinutes % 60) . 'm';
-        // }
         $workingHours = $this->calculateWorkingHours();
         return view('backend.dashboard', compact('todaysOrders', 'ordersByStatus', 'totalOrders', 'totalCategories', 'totalUsers', 'totalProduct', 'workingHours'));
     }
@@ -101,7 +64,7 @@ class AdminController extends Controller
         return sprintf("%2dh:%2dm", intdiv($totalMinutes, 60), $totalMinutes % 60);
     }
 
-   
+
     private function calculateWorkingHours()
     {
         $userId = auth()->id();

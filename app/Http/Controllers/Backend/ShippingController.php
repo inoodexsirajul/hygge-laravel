@@ -23,43 +23,9 @@ class ShippingController extends Controller
     {
         return view('backend.shipping.create');
     }
-    //multiple way to do that method 
-    // public function store(Request $request)
-    // {
-    //     // dd($request->all());
-    //     // dd($request->all());
-    //     $request->validate([
-    //         'name' => 'required|max:256|unique:shipping_methods,name',
-    //         // 'type' => 'required',
-    //         'type_select' => 'nullable|string|max:100',
-    //         'is_active' => 'required|boolean',
-    //     ]);
-    //     $type = $request->type_select === 'other' ? $request->type : $request->type_select;
-
-    //     if (!$type) {
-    //         return back()->withErrors(['type' => 'Please enter the shipping type'])->withInput();
-    //     }
-
-    //     ShippingMethod::create([
-    //         'name' => $request->name,
-    //         'type' => $type,
-    //         'is_active' => $request->is_active,
-    //     ]);
-    //     Toastr::success('Shipping Method Created Successfully!');
-    //     return back();
-    // }
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        // $request->validate([
-        //     'name' => 'required|max:256|unique:shipping_methods,name',
-        //     'type' => 'required',
-        //     'is_active' => 'required|boolean',
-        // ]);
-        // ShippingMethod::create($request->only('name', 'type', 'is_active'));
-        // Toastr::success('Shipping Method Created Successfully!');
-        // return back();
         $request->validate([
             'name' => 'required',
             'type' => 'required|array',
@@ -85,17 +51,6 @@ class ShippingController extends Controller
 
     public function update(Request $request, string $id)
     {
-        // dd($request->all());
-        // $request->validate([
-        //     'name' => 'required|max:256|unique:shipping_methods,name,' . $id,
-        //     'type' => 'required',
-        //     'is_active' => 'required|boolean',
-
-        // ]);
-        // $shipping = ShippingMethod::findOrFail($id);
-        // $shipping->update($request->only('name', 'type', 'is_active'));
-        // Toastr::success('Shipping Method Updated Successfully!');
-        // return redirect()->route('admin.shipping-methods.index');
         $request->validate([
             'name' => 'required',
             'type' => 'required|array',
@@ -127,11 +82,7 @@ class ShippingController extends Controller
         $shipping_method->save();
         return response(['status' => 'success', 'message' => 'Status Change Successfully!']);
     }
-    // public function chargeForm(ShippingMethod $shipping)
-    // {
-    //     $countries = Country::with('states')->get();
-    //     return view('backend.shipping.charge', compact('shipping', 'countries'));
-    // }
+    
     public function chargeForm(ShippingMethod $shipping)
     {
         $countries = Country::with('states')->get();
