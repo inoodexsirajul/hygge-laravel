@@ -18,7 +18,6 @@ const Career = () => {
         clearErrors,
     } = useForm();
 
-    // Auto-dismiss messages after 5 seconds
     useEffect(() => {
         if (successMessage || errorMessage) {
             const timer = setTimeout(() => {
@@ -39,9 +38,7 @@ const Career = () => {
         formData.append("phone", data.phone);
         formData.append("position", data.position);
         formData.append("cover_letter", data.coverLetter);
-        if (uploadedFile) {
-            formData.append("resume", uploadedFile);
-        }
+        if (uploadedFile) formData.append("resume", uploadedFile);
 
         try {
             await jobApply(formData).unwrap();
@@ -51,7 +48,6 @@ const Career = () => {
             reset();
             setUploadedFile(null);
         } catch (err) {
-            console.error("Job apply error:", err);
             const msg =
                 err?.data?.message ||
                 err?.data?.errors?.[0] ||
@@ -62,29 +58,29 @@ const Career = () => {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            if (file.size > 10 * 1024 * 1024) {
-                setError("resume", { message: "File size must be under 10MB" });
-                setUploadedFile(null);
-                e.target.value = "";
-                return;
-            }
-            if (
-                ![
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                ].includes(file.type)
-            ) {
-                setError("resume", { message: "Only PDF, DOC, DOCX allowed" });
-                setUploadedFile(null);
-                e.target.value = "";
-                return;
-            }
-            clearErrors("resume");
-            setUploadedFile(file);
-            setValue("resume", file);
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {
+            setError("resume", { message: "File size must be under 10MB" });
+            setUploadedFile(null);
+            e.target.value = "";
+            return;
         }
+        if (
+            ![
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ].includes(file.type)
+        ) {
+            setError("resume", { message: "Only PDF, DOC, DOCX allowed" });
+            setUploadedFile(null);
+            e.target.value = "";
+            return;
+        }
+        clearErrors("resume");
+        setUploadedFile(file);
+        setValue("resume", file);
     };
 
     const removeFile = () => {
@@ -96,18 +92,44 @@ const Career = () => {
     return (
         <div className="flex min-h-screen w-full bg-dark2">
             <div className="w-full flex flex-col items-center justify-center px-4 py-12">
+                {/* নতুন কন্টেন্ট যোগ করা হয়েছে এখানে */}
+                <div className="w-full max-w-5xl text-center mb-16">
+                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-8">
+                        Careers at Hygge Cotton
+                    </h1>
+                    <p className="text-xl md:text-2xl text-red/80 leading-relaxed max-w-4xl mx-auto">
+                        We’re always looking for creative minds who share our
+                        love for design, sustainability, and craftsmanship.
+                    </p>
+                    <p className="text-lg md:text-xl text-gray-300 mt-6 max-w-3xl mx-auto">
+                        If you’d like to join our growing team in Copenhagen,
+                        send your CV and a short introduction to:
+                    </p>
+                    <div className="mt-8">
+                        <a
+                            href="mailto:inf@hyggecotton.dk"
+                            className="inline-flex items-center gap-3 text-2xl font-bold text-red hover:text-purple-300 transition"
+                        >
+                            inf@hyggecotton.dk
+                        </a>
+                    </div>
+                    <p className="text-gray-400 text-sm mt-10">
+                        Or apply directly using the form below
+                    </p>
+                </div>
+
+                {/* আগের ফর্ম কার্ড */}
                 <div className="w-full max-w-5xl bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 md:p-12">
                     <div className="text-center mb-10">
-                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
                             Join Our Team
-                        </h1>
+                        </h2>
                         <p className="text-lg text-gray-300">
                             We're excited to have you apply! Please fill out the
                             form below.
                         </p>
                     </div>
 
-                    {/* Auto-dismiss Messages */}
                     {successMessage && (
                         <div className="mb-6 p-4 bg-green-600/20 border border-green-500/50 rounded-xl text-green-300 text-center font-medium animate-pulse">
                             {successMessage}
@@ -120,9 +142,8 @@ const Career = () => {
                     )}
 
                     <form onSubmit={handleSubmit(onSubmit)}>
-                        {/* Two-Column Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            {/* Name */}
+                            {/* Name, Email, Phone, Position — same as before */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Full Name{" "}
@@ -134,7 +155,7 @@ const Career = () => {
                                         required: "Name is required",
                                     })}
                                     placeholder="John Doe"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.name && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -142,8 +163,6 @@ const Career = () => {
                                     </p>
                                 )}
                             </div>
-
-                            {/* Email */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Email Address{" "}
@@ -159,7 +178,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="john@example.com"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.email && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -167,8 +186,6 @@ const Career = () => {
                                     </p>
                                 )}
                             </div>
-
-                            {/* Phone */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Phone Number{" "}
@@ -184,7 +201,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="+880 17XX-XXXXXX"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.phone && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -192,8 +209,6 @@ const Career = () => {
                                     </p>
                                 )}
                             </div>
-
-                            {/* Position */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Position{" "}
@@ -204,8 +219,8 @@ const Career = () => {
                                     {...register("position", {
                                         required: "Position is required",
                                     })}
-                                    placeholder="e.g. Frontend Developer"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                                    placeholder="e.g. Graphic Designer"
+                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.position && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -215,21 +230,20 @@ const Career = () => {
                             </div>
                         </div>
 
-                        {/* Resume Upload - Interactive */}
+                        {/* Resume & Cover Letter — unchanged */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-200 mb-3">
                                 Resume / CV{" "}
                                 <span className="text-red-400">*</span>
                             </label>
-
                             {!uploadedFile ? (
                                 <label
                                     htmlFor="resume"
-                                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300 hover:border-purple-500 group"
+                                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300  group"
                                 >
                                     <div className="flex flex-col items-center pt-8 pb-6">
                                         <svg
-                                            className="w-14 h-14 mb-4 text-purple-400 group-hover:scale-110 transition-transform"
+                                            className="w-14 h-14 mb-4 text-red group-hover:scale-110 transition-transform"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -260,10 +274,10 @@ const Career = () => {
                                     />
                                 </label>
                             ) : (
-                                <div className="relative p-6 bg-white/10 border-2 border-purple-500/50 rounded-xl">
+                                <div className="relative p-6 bg-white/10 border-2 border-red rounded-xl">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-purple-600/30 rounded-lg">
+                                            <div className="p-3 bg-red rounded-lg">
                                                 <svg
                                                     className="w-8 h-8 text-purple-300"
                                                     fill="currentColor"
@@ -318,7 +332,6 @@ const Career = () => {
                             )}
                         </div>
 
-                        {/* Cover Letter - Full Width */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-200 mb-3">
                                 Cover Letter{" "}
@@ -329,8 +342,8 @@ const Career = () => {
                                     required: "Cover letter is required",
                                 })}
                                 rows="6"
-                                placeholder="Tell us why you're passionate about this role and how you can contribute..."
-                                className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none transition-all"
+                                placeholder="Tell us why you're passionate about this role..."
+                                className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red resize-none transition-all"
                             />
                             {errors.coverLetter && (
                                 <p className="mt-2 text-sm text-red-400">
@@ -339,23 +352,26 @@ const Career = () => {
                             )}
                         </div>
 
-                        {/* Submit */}
                         <button
                             type="submit"
                             disabled={isLoading || !uploadedFile}
                             className={`w-full py-5 rounded-xl font-bold text-lg text-white transition-all duration-300 ${
                                 isLoading || !uploadedFile
-                                    ? "bg-purple-700/50 cursor-not-allowed"
-                                    : "bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-2xl hover:shadow-purple-500/50 transform hover:-translate-y-1"
+                                    ? "bg-red cursor-not-allowed"
+                                    : "bg-red to-pink-600 hover:bg-red  shadow-2xl transform hover:-translate-y-1"
                             }`}
                         >
                             {isLoading ? "Submitting..." : "Submit Application"}
                         </button>
                     </form>
 
-                    <p className="text-center text-sm text-gray-400 mt-8">
-                        We typically respond within 3–5 business days.
-                    </p>
+                    <div className="text-center mt-12 pt-8 border-t border-white/10">
+                        <p className="text-gray-400 text-sm">
+                            We typically respond within{" "}
+                            <strong>3–5 business days</strong>.<br />
+                            Thank you for wanting to be part of Hygge Cotton
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

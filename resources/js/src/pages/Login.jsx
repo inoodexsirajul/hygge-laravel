@@ -36,10 +36,8 @@ const Login = () => {
 
             localStorage.setItem("authToken", token);
 
-            // কার্ট ও প্রোফাইল রিফ্রেশ
             dispatch(eCommerceApi.util.invalidateTags(["Cart", "UserProfile"]));
 
-            // সফল হলে সব ক্লিয়ার করে হোমে নিয়ে যাওয়া
             clearErrors();
             resetForm();
             navigate("/");

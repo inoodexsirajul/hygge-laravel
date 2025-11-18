@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearSessionId, getSessionId } from "../../utils/helper";
+import { toast } from "react-toastify";
 
 export const eCommerceApi = createApi({
     reducerPath: "eCommerceApi",
@@ -23,6 +24,7 @@ export const eCommerceApi = createApi({
         },
     }),
 
+    // keepUnusedDataFor: 5 * 60,
     tagTypes: [
         "Cart",
         "Products",
@@ -31,6 +33,7 @@ export const eCommerceApi = createApi({
         "CategoryProducts", // ← Added
         "ProductsByType",
         "Customization",
+        "CartSummary",
         "Checkout",
         "About",
         "Footer",
@@ -58,23 +61,40 @@ export const eCommerceApi = createApi({
                 body: userData,
             }),
         }),
-
         logout: builder.mutation({
             query: () => ({
                 url: "/logout",
                 method: "POST",
             }),
-            invalidatesTags: ["Cart", "UserProfile"],
-            async onQueryStarted(arg, { queryFulfilled }) {
+            invalidatesTags: ["Cart", "UserProfile", "CartSummary"], // যা যা দরকার
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
+
                     localStorage.removeItem("authToken");
-                    // Cart already invalidated via invalidatesTags
+                    localStorage.removeItem("pendingVerificationEmail");
+                    clearSessionId();
                 } catch (err) {
-                    console.error("Logout API failed:", err);
+                    toast.error("Logout failed. Please try again.");
                 }
             },
         }),
+        // logout: builder.mutation({
+        //     query: () => ({
+        //         url: "/logout",
+        //         method: "POST",
+        //     }),
+        //     invalidatesTags: ["Cart", "UserProfile"],
+        //     async onQueryStarted(arg, { queryFulfilled }) {
+        //         try {
+        //             await queryFulfilled;
+        //             localStorage.removeItem("authToken");
+        //             // Cart already invalidated via invalidatesTags
+        //         } catch (err) {
+        //             console.error("Logout API failed:", err);
+        //         }
+        //     },
+        // }),
 
         updateProfile: builder.mutation({
             query: (profileData) => ({
@@ -290,7 +310,7 @@ export const eCommerceApi = createApi({
 
         getCartDetails: builder.query({
             query: () => "/cart/details",
-            providesTags: ["Cart"],
+            providesTags: ["Cart", "CartSummary"],
         }),
 
         getCartSummery: builder.query({
@@ -304,7 +324,7 @@ export const eCommerceApi = createApi({
                 method: "POST",
                 body: { cart_id: id, quantity },
             }),
-            invalidatesTags: ["Cart"],
+            invalidatesTags: ["Cart", "CartSummary"],
         }),
 
         removeFromCart: builder.mutation({
@@ -312,7 +332,7 @@ export const eCommerceApi = createApi({
                 url: `/cart/remove/${itemId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["Cart"],
+            invalidatesTags: ["Cart", "CartSummary"],
         }),
 
         resetCart: builder.mutation({

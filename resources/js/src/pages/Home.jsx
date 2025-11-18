@@ -12,6 +12,39 @@ import {
 import CategorySection from "../components/CategorySection";
 import FeaturedCategory from "../components/FeaturedCategory";
 
+// Skeleton for Category Section
+const CategorySectionSkeleton = () => (
+    <div className="py-16 px-6 lg:px-20 bg-cream">
+        <div className="max-w-7xl mx-auto">
+            {/* Title Skeleton */}
+            <div className="mb-12 text-center">
+                <div className="h-10 bg-gray-300 rounded-full w-64 mx-auto animate-pulse"></div>
+                <div className="h-6 bg-gray-200 rounded-full w-96 mx-auto mt-4 animate-pulse"></div>
+            </div>
+
+            {/* Product Grid Skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+                {[...Array(8)].map((_, i) => (
+                    <div key={i} className="group">
+                        <div className="aspect-square bg-gray-300 rounded-2xl overflow-hidden shadow-lg animate-pulse">
+                            <div className="w-full h-full bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400"></div>
+                        </div>
+                        <div className="mt-4 space-y-3">
+                            <div className="h-5 bg-gray-300 rounded-full w-32 mx-auto animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded-full w-24 mx-auto animate-pulse"></div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* View More Button Skeleton */}
+            <div className="text-center mt-12">
+                <div className="inline-block h-12 w-48 bg-gray-300 rounded-full animate-pulse"></div>
+            </div>
+        </div>
+    </div>
+);
+
 const Home = () => {
     const { data } = useGetProductsByTypeQuery();
     const { data: categoryProducts, isLoading: categoryLoading } =
@@ -21,25 +54,19 @@ const Home = () => {
         <>
             <Hero />
             <FeaturedCategory />
-            {/* custom order banner */}
-            {/* {data?.newArrival?.length > 0 && <ProductSection />} */}
-            {/* featured categories  */}
-
             <CustomOrderBanner />
-            {/* recomended section */}
-            {data?.bestProduct?.length > 0 && <RecomendedSection />}
 
-            {/* your every day essential */}
+            {/* Recommended & Essential — আগেই লোড হয়ে যায় */}
+            {data?.bestProduct?.length > 0 && <RecomendedSection />}
             {data?.featuredProduct?.length > 0 && <EssentialSection />}
 
-            {/* hot products */}
-            {/* {data?.topProduct?.length > 0 && <HotProducts />} */}
-            {/* <CategorySection products={products} /> */}
+            {/* শুধু এই সেকশনের জন্য সুন্দর লোডিং */}
             {categoryLoading ? (
-                <div className="text-center py-8">
-                    <div className="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-                    <p className="mt-2 text-gray-600">Products Loading...</p>
-                </div>
+                <>
+                    <CategorySectionSkeleton />
+                    {/* অথবা চাইলে ২টা সেকশনের জন্য ২ বার দেখাতে পারিস */}
+                    {/* <CategorySectionSkeleton /> */}
+                </>
             ) : (
                 categoryProducts?.homeProducts
                     ?.filter((cat) => cat.products.length > 0)

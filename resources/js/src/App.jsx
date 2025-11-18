@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,33 +20,37 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 import TermsAndCondition from "./pages/TermsAndCondition";
 import FooterPage from "./pages/FooterPage";
 import UpdatePassword from "./pages/UpdatePassword";
-import { eCommerceApi } from "./redux/services/eCommerceApi";
+import {
+    eCommerceApi,
+    useGetCartDetailsQuery,
+    useGetUserProfileQuery,
+} from "./redux/services/eCommerceApi";
 import store from "./redux/store";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Career from "./pages/Career";
 import ResendEmail from "./pages/ResendEmail";
+import { useSyncToken } from "./utils/useSyncToken";
+import SupportPage from "./pages/SupportPage";
+import ShippingInfo from "./pages/ShippingInfo";
+import ReturnsPolicy from "./pages/ReturnsPolicy";
+import HowToOrder from "./pages/HowToOrder";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import LegalNotice from "./pages/LegalNotice";
 
 const App = () => {
-    const Wrapper = ({ children }) => {
-        const location = useLocation();
-        useLayoutEffect(() => {
-            document.documentElement.scrollTo(0, 0);
-        }, [location.pathname]);
-        return children;
-    };
+    const location = useLocation();
+    const token = useSyncToken();
 
+    // এই দুটো কুয়েরি শুধু টোকেন থাকলে চলবে
+    useGetUserProfileQuery(undefined, { skip: !token });
+    useGetCartDetailsQuery(undefined, { skip: !token });
     useEffect(() => {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-            store.dispatch(eCommerceApi.endpoints.getUserProfile.initiate());
-            store.dispatch(eCommerceApi.endpoints.getCartDetails.initiate());
-        }
-    }, []);
-
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
     return (
-        <Wrapper>
+        <>
             <ToastContainer
                 position="top-center"
                 autoClose={3000}
@@ -81,8 +85,14 @@ const App = () => {
                         path="shop/childcategory/:childSlug"
                         element={<Shop />}
                     />
-                    <Route path="/resend-email" element={<ResendEmail />} />
+                    <Route path="resend-email" element={<ResendEmail />} />
                     <Route path="about" element={<About />} />
+                    <Route path="support" element={<SupportPage />} />
+                    <Route path="shipping" element={<ShippingInfo />} />
+                    <Route path="return-policy" element={<ReturnsPolicy />} />
+                    <Route path="how-to-order" element={<HowToOrder />} />
+                    <Route path="privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="legal-notice" element={<LegalNotice />} />
                     <Route path="contact" element={<ContactPage />} />
                     <Route path="cart" element={<CartPage />} />
                     <Route path="signin" element={<Login />} />
@@ -126,7 +136,7 @@ const App = () => {
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>
-        </Wrapper>
+        </>
     );
 };
 

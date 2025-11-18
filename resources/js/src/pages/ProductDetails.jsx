@@ -38,6 +38,7 @@ const ProductDetails = () => {
     const { data, isLoading, error } = useGetProductDetailsQuery(slug);
     const [addReview, { isLoading: isReviewSubmitting, error: reviewError }] =
         useAddReviewMutation();
+    console.log(data?.product);
     const [addToCart, { isLoading: isCartLoading, error: cartError }] =
         useAddToCartMutation();
     const { refetch } = useGetCartDetailsQuery(undefined, {
@@ -124,12 +125,6 @@ const ProductDetails = () => {
             toast.error("Invalid product price");
             return;
         }
-
-        // const token = localStorage.getItem("authToken");
-        // if (!token) {
-        //     toast.error("Please log in to add items to the cart");
-        //     return;
-        // }
 
         try {
             await addToCart({

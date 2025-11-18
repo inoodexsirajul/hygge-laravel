@@ -8,14 +8,15 @@ import "react-loading-skeleton/dist/skeleton.css";
 import "./bootstrap";
 import ReactDOM from "react-dom/client";
 import App from "./src/App.jsx";
-import store from "./src/redux/store.js";
+import store, { persistor } from "./src/redux/store.js";
+import { PersistGate } from "redux-persist/integration/react";
 
 ReactDOM.createRoot(document.getElementById("app")).render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <Provider store={store}>
+    <BrowserRouter>
+        <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
                 <App />
-            </Provider>
-        </BrowserRouter>
-    </React.StrictMode>
+            </PersistGate>
+        </Provider>
+    </BrowserRouter>
 );

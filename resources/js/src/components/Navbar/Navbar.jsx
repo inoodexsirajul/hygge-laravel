@@ -10,11 +10,13 @@ import {
     useGetFooterQuery,
     useGetHomeCategoriesQuery,
     useLogoutMutation,
+    eCommerceApi,
 } from "../../redux/services/eCommerceApi";
-import { toast } from "react-toastify";
-import { clearSessionId } from "../../utils/helper";
+import { useSyncToken } from "../../utils/useSyncToken";
+import { useDispatch } from "react-redux";
 
 const Navbar = () => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isSticky, setSticky] = useState(false);
     const [showSearchbar, setShowSearchbar] = useState(false);
@@ -28,10 +30,16 @@ const Navbar = () => {
 
     const searchBarRef = useRef(null);
     const navRef = useRef(null);
-    const token = localStorage.getItem("authToken");
 
-    const { data: user } = useGetUserProfileQuery(undefined, { skip: !token });
-    const { data: cart } = useGetCartDetailsQuery();
+    const token = useSyncToken();
+
+    const { data: user } = useGetUserProfileQuery(undefined, {
+        skip: !token,
+        selectFromResult: ({ data }) => ({
+            data: token ? data : null,
+        }),
+    });
+    const { data: cart } = useGetCartDetailsQuery(undefined);
     const { data: categoryData, isLoading } = useGetHomeCategoriesQuery();
     const { data: logoData } = useGetFooterQuery();
     const [logout] = useLogoutMutation();
@@ -65,18 +73,11 @@ const Navbar = () => {
     const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
     const handleLogout = async () => {
-        try {
-            await logout().unwrap();
-            clearSessionId();
-            localStorage.removeItem("authToken");
-            dispatch(eCommerceApi.util.invalidateTags(["Cart"]));
-            toast.success("Logged out!");
-            navigate("/");
-        } catch {
-            toast.error("Logout failed");
-        }
-    };
+        await logout();
+        dispatch(eCommerceApi.util.resetApiState());
 
+        navigate("/");
+    };
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
@@ -101,7 +102,7 @@ const Navbar = () => {
         setShowMobileMenu(false);
         setMobileShopOpen(false);
     };
-    console.log(cart?.data);
+
     if (isLoading) return null;
 
     return (
