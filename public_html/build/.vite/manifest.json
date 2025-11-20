@@ -20,12 +20,12 @@
     "src": "node_modules/slick-carousel/slick/fonts/slick.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CGWBXuoR.css",
+    "file": "assets/app-gji-oL07.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-C4HQbdR0.js",
+    "file": "assets/app-BWEHhZc0.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
@@ -33,7 +33,6 @@
       "assets/app-Cof2SKTN.css"
     ],
     "assets": [
-      "assets/founder-C26sGljB.jpg",
       "assets/ajax-loader-BcnMEykj.gif",
       "assets/slick-Bi9J8BMx.eot",
       "assets/slick-BlUtDIuC.woff",

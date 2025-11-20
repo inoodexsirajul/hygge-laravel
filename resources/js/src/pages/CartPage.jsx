@@ -354,13 +354,22 @@ const CartPage = () => {
                                                                 </p>
                                                             )}
 
-                                                            {/* <Link
-                                                                to={`/product/${item?.product?.slug}/customize`}
-                                                                className="text-green-600 hover:text-green-400 text-sm md:text-base"
-                                                            >
-                                                                Customize
-                                                                Product
-                                                            </Link> */}
+                                                            {item.customization_id ? (
+                                                                <Link
+                                                                    to={{
+                                                                        pathname: `/product/${item.product.slug}/customize`,
+                                                                        state: {
+                                                                            redo: true, // এটাই ম্যাজিক
+                                                                            cartItemId:
+                                                                                item.id, // পুরানো আইটেম মুছার জন্য
+                                                                        },
+                                                                    }}
+                                                                    className="text-indigo-600 hover:underline font-medium"
+                                                                >
+                                                                    Redo
+                                                                    Customization
+                                                                </Link>
+                                                            ) : null}
                                                             <Link
                                                                 to={{
                                                                     pathname: `/product/${item?.product?.slug}/customize`,

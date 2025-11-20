@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
 import Modal from "react-modal";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify"; // <-- এটা যোগ করেছি
 import {
     useGetProductDetailsQuery,
     useProductCustomizeMutation,
@@ -56,33 +57,53 @@ const CustomizeProduct = () => {
         useProductCustomizeMutation();
 
     const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
-
     const { data: cartData } = useGetCartDetailsQuery();
+    const [removeFromCart] = useRemoveFromCartMutation();
 
-    const { cartItemId, removeFromCartFirst } = location.state || {};
+    const { redo, cartItemId } = location.state || {};
 
-    // এই মিউটেশনটা তোমার কোডে আগে থেকেই আছে (CartPage এ ব্যবহার করেছো)
-    const [removeFromCartMutation] = useRemoveFromCartMutation();
-
-    // পেজ লোড হওয়ার সাথে সাথে পুরানো আইটেম মুছে ফেলো
+    // নতুন useEffect: এই প্রোডাক্টের সব পুরানো আইটেম (নরমাল + কাস্টমাইজড) মুছে ফেলো
     useEffect(() => {
-        if (removeFromCartFirst && cartItemId) {
-            // কার্ট থেকে পুরানো আইটেমটা মুছে ফেলি
-            removeFromCartMutation(cartItemId)
+        if (!cartData?.data?.cart_items?.length || !data?.product?.id) return;
+
+        const itemsToRemove = cartData.data.cart_items.filter(
+            (item) => item.product_id === data.product.id
+        );
+
+        if (itemsToRemove.length > 0) {
+            itemsToRemove.forEach((item) => {
+                removeFromCart(item.id)
+                    .unwrap()
+                    .catch(() => {
+                        toast.error("Failed to remove old item from cart");
+                    });
+            });
+
+            toast.success(
+                "Previous item removed. Starting fresh customization!",
+                {
+                    position: "top-center",
+                    autoClose: 2000,
+                }
+            );
+        }
+    }, [cartData, data, removeFromCart]);
+
+    // Redo Customization থেকে এলে পুরানোটা মুছে দাও (যদি থাকে)
+    useEffect(() => {
+        if (redo && cartItemId) {
+            removeFromCart(cartItemId)
                 .unwrap()
                 .then(() => {
                     toast.success(
-                        "Previous item removed. Start fresh customization!",
-                        {
-                            position: "top-center",
-                        }
+                        "Previous customization removed. Start fresh!"
                     );
                 })
                 .catch(() => {
                     toast.error("Failed to remove old item");
                 });
         }
-    }, [removeFromCartFirst, cartItemId, removeFromCartMutation]);
+    }, [redo, cartItemId, removeFromCart]);
 
     const containerSizes = { width: "248px", height: "264px" };
 
@@ -276,17 +297,12 @@ const CustomizeProduct = () => {
         }
     };
 
-    const productInCart = cartData?.data?.cart_items?.some(
-        (item) => item.product_id === data?.product?.id
-    );
-
-    // ==================== MAIN ACTION: CUSTOMIZE + ADD TO CART IF NOT EXISTS ====================
+    // MAIN ACTION: সবসময় নতুন কাস্টমাইজড আইটেম এড করো (পুরানোটা আগেই মুছে গেছে)
     const handleUpdateProduct = async () => {
         if (isUpdating || isCustomizeLoading || isCartLoading) return;
         setIsUpdating(true);
 
         try {
-            // কাস্টমাইজেশন চেক
             const isFrontCustomized =
                 designs.front.title !== "" ||
                 designs.front.uploadedImage ||
@@ -316,7 +332,7 @@ const CustomizeProduct = () => {
                 designs.back.fontFamily !== "Story Script";
 
             if (!isFrontCustomized && !isBackCustomized) {
-                alert("Please customize at least one side before proceeding.");
+                toast.error("Please customize at least one side!");
                 return;
             }
 
@@ -346,19 +362,20 @@ const CustomizeProduct = () => {
             const frontDesign = designs.front;
             const backDesign = designs.back;
 
-            // ১. সবসময় productCustomize কল করো
             const customizePayload = {
                 product_id: data?.product?.id,
                 side,
                 front_price: isFrontCustomized
-                    ? data?.product?.customization?.front_price
+                    ? data?.product?.customization?.front_price || 4
                     : 0,
                 back_price: isBackCustomized
-                    ? data?.product?.customization?.front_price
+                    ? data?.product?.customization?.back_price ||
+                      data?.product?.customization?.front_price ||
+                      4
                     : 0,
                 both_price:
                     isFrontCustomized && isBackCustomized
-                        ? data?.product?.customization?.both_price
+                        ? data?.product?.customization?.both_price || 8
                         : 0,
                 front_image: frontImage,
                 back_image: backImage,
@@ -410,6 +427,8 @@ const CustomizeProduct = () => {
                           size: `${backDesign.imageSize}%`,
                       })
                     : "",
+                // এটা যোগ করে প্রতিবার নতুন রেকর্ড তৈরি হবে (যদি ব্যাকএন্ড ডুপ্লিকেট চেক করে)
+                _prevent_duplicate: Date.now(),
             };
 
             const customizeResponse = await productCustomize(
@@ -419,33 +438,29 @@ const CustomizeProduct = () => {
                 customizeResponse?.data?.customization_id ||
                 customizeResponse?.customization_id;
 
-            if (!customizationId) {
-                throw new Error("Customization ID not returned from server.");
-            }
+            if (!customizationId)
+                throw new Error("Customization ID not returned");
 
-            // ২. কার্টে আছে কিনা চেক করো
-            const cartItems = cartData?.data?.cart_items || [];
-            const productInCart = cartItems.some(
-                (item) => item.product_id === data?.product?.id
-            );
+            // সবসময় নতুন আইটেম এড করো
+            const price =
+                isFrontCustomized && isBackCustomized
+                    ? data?.product?.customization?.both_price || 8
+                    : 4;
 
-            if (!productInCart) {
-                const price = isFrontCustomized && isBackCustomized ? 8 : 4;
-                const cartPayload = {
-                    product_id: data?.product?.id,
-                    qty: 1,
-                    customization_id: customizationId,
-                    price,
-                };
-                await addToCart(cartPayload).unwrap();
-                dispatch(eCommerceApi.util.invalidateTags(["Cart"]));
-            } else {
-                alert("Product customize Updated");
-            }
+            const cartPayload = {
+                product_id: data?.product?.id,
+                qty: 1,
+                customization_id: customizationId,
+                price,
+            };
 
+            await addToCart(cartPayload).unwrap();
+            dispatch(eCommerceApi.util.invalidateTags(["Cart"]));
+
+            toast.success("Successfully added to cart!");
             navigate("/cart");
         } catch (error) {
-            alert(
+            toast.error(
                 `Failed: ${
                     error?.data?.message || error?.message || "Unknown error"
                 }`
@@ -469,18 +484,17 @@ const CustomizeProduct = () => {
                 cacheBust: true,
                 pixelRatio: 2,
             });
-            if (textContainerRef.current) {
+            if (textContainerRef.current)
                 textContainerRef.current.className = originalClassName;
-            }
+
             const link = document.createElement("a");
             link.download = `custom-${currentSide}.png`;
             link.href = dataUrl;
             link.click();
         } catch (error) {
-            if (textContainerRef.current) {
+            if (textContainerRef.current)
                 textContainerRef.current.className = originalClassName;
-            }
-            alert("Download failed.");
+            toast.error("Download failed");
         }
     };
 
@@ -491,7 +505,7 @@ const CustomizeProduct = () => {
 
     const openPreview = () => {
         if (!data?.product?.customization?.[currentSide + "_image"]) {
-            alert(`No ${currentSide} image available.`);
+            toast.error(`No ${currentSide} image available.`);
             return;
         }
         setIsPreviewOpen(true);
@@ -896,7 +910,6 @@ const CustomizeProduct = () => {
                             </div>
                         )}
 
-                        {/* Side Toggle */}
                         <div className="mb-4">
                             <label className="block text-sm font-bold text-cream mb-2">
                                 Design Side
@@ -919,11 +932,10 @@ const CustomizeProduct = () => {
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="grid grid-cols-2 gap-4">
                             <button
                                 onClick={openPreview}
-                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 wokół-lg transition duration-300 mt-4"
+                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4"
                                 disabled={
                                     isUpdating ||
                                     isCustomizeLoading ||
@@ -989,8 +1001,6 @@ const CustomizeProduct = () => {
                                     </svg>
                                     Processing...
                                 </>
-                            ) : productInCart ? (
-                                "Update Customization"
                             ) : (
                                 "Customize & Add to Cart"
                             )}
@@ -1010,7 +1020,7 @@ const CustomizeProduct = () => {
                         ) : (
                             <figure
                                 ref={previewRef}
-                                className="relative w-[700px]  h-auto"
+                                className="relative w-[700px] h-auto"
                             >
                                 <div>
                                     <img
@@ -1020,13 +1030,13 @@ const CustomizeProduct = () => {
                                             ]
                                         }`}
                                         alt={`${currentSide} view`}
-                                        className=" w-full h-full object-contain"
+                                        className="w-full h-full object-contain"
                                         crossOrigin="anonymous"
                                     />
                                 </div>
                                 <div
                                     ref={textContainerRef}
-                                    className="absolute flex items-center justify-center rounded-xl  overflow-hidden border-2 border-dotted border-white"
+                                    className="absolute flex items-center justify-center rounded-xl overflow-hidden border-2 border-dotted border-white"
                                     style={containerStyle}
                                 >
                                     {currentDesign.uploadedImage && (
@@ -1053,7 +1063,6 @@ const CustomizeProduct = () => {
                 </div>
             </div>
 
-            {/* Preview Modal */}
             <Modal
                 isOpen={isPreviewOpen}
                 onRequestClose={closePreview}
@@ -1084,7 +1093,7 @@ const CustomizeProduct = () => {
                             <p>No {currentSide} image available for preview.</p>
                         ) : (
                             <figure className="relative w-full max-w-md h-auto">
-                                <div className="relative w full aspect-7/6">
+                                <div className="relative w-full aspect-7/6">
                                     <img
                                         src={`/${
                                             data.product.customization[
