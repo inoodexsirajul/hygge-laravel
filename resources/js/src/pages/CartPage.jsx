@@ -354,14 +354,14 @@ const CartPage = () => {
                                                                 </p>
                                                             )}
 
-                                                            {item.customization_id ? (
+                                                            {/* {item.customization_id ? (
                                                                 <Link
                                                                     to={{
                                                                         pathname: `/product/${item.product.slug}/customize`,
                                                                         state: {
-                                                                            redo: true, // এটাই ম্যাজিক
+                                                                            redo: true,  
                                                                             cartItemId:
-                                                                                item.id, // পুরানো আইটেম মুছার জন্য
+                                                                                item.id,  
                                                                         },
                                                                     }}
                                                                     className="text-indigo-600 hover:underline font-medium"
@@ -369,20 +369,20 @@ const CartPage = () => {
                                                                     Redo
                                                                     Customization
                                                                 </Link>
-                                                            ) : null}
-                                                            <Link
+                                                            ) : null} */}
+                                                            {/* <Link
                                                                 to={{
                                                                     pathname: `/product/${item?.product?.slug}/customize`,
                                                                     state: {
-                                                                        removeFromCartFirst: true, // এটাই ম্যাজিক
+                                                                        removeFromCartFirst: true, 
                                                                         cartItemId:
-                                                                            item.id, // কোন আইটেমটা মুছতে হবে
+                                                                            item.id, 
                                                                     },
                                                                 }}
                                                                 className="text-green-600 hover:text-green-400 font-medium underline"
                                                             >
                                                                 Customize Again
-                                                            </Link>
+                                                            </Link> */}
                                                             <button
                                                                 onClick={() =>
                                                                     removeFromCart(

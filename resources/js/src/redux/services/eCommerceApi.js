@@ -6,7 +6,7 @@ export const eCommerceApi = createApi({
     reducerPath: "eCommerceApi",
     baseQuery: fetchBaseQuery({
         baseUrl: "/api/v1",
-        credentials: "include",
+
         // Send token if logged in, otherwise session_id for guest
         prepareHeaders: (headers) => {
             const token = localStorage.getItem("authToken");

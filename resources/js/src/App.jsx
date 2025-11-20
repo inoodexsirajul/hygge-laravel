@@ -26,7 +26,7 @@ import {
     useGetCartDetailsQuery,
     useGetUserProfileQuery,
 } from "./redux/services/eCommerceApi";
-import store from "./redux/store";
+
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
@@ -44,11 +44,6 @@ const App = () => {
     const location = useLocation();
     const token = useSyncToken();
 
-    useEffect(() => {
-        fetch("/sanctum/csrf-cookie", {
-            credentials: "include",
-        });
-    }, []);
     // এই দুটো কুয়েরি শুধু টোকেন থাকলে চলবে
     useGetUserProfileQuery(undefined, { skip: !token });
     useGetCartDetailsQuery(undefined, { skip: !token });
