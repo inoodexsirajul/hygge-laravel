@@ -560,7 +560,7 @@ const CheckoutPage = () => {
                                 </h2>
                                 <div className="space-y-3">
                                     {[
-                                        // "cashOnDelivery",
+                                        "cashOnDelivery",
                                         "paypal",
                                         "payoneer",
                                         "mobilePay",
