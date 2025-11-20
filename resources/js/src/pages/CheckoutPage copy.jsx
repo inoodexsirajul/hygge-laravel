@@ -372,183 +372,59 @@ const CheckoutPage = () => {
                             </div>
 
                             {/* Billing Address Form */}
-                            {/* Ship to Different Address - Full Matching Design */}
                             {formData.shipToDifferentAddress && (
-                                <div className="mt-8">
-                                    <h3 className="text-xl font-semibold text-cream mb-4">
-                                        Shipping Address (Different)
+                                <div className="mt-8 p-6 bg-dark1/50 rounded-lg border border-red/40">
+                                    <h3 className="text-xl font-bold text-cream mb-4">
+                                        Billing Address (Different)
                                     </h3>
-
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray mb-2">
-                                                    First Name *
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="bill_firstName"
-                                                    required
-                                                    value={
-                                                        formData.bill_firstName
-                                                    }
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-3 py-2 border border-gray/30 focus:border-gray rounded-md bg-dark1 text-cream"
-                                                    placeholder="Enter shipping first name"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray mb-2">
-                                                    Last Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="bill_lastName"
-                                                    value={
-                                                        formData.bill_lastName
-                                                    }
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-3 py-2 border border-gray/30 focus:border-gray rounded-md bg-dark1 text-cream"
-                                                    placeholder="Enter shipping last name"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray mb-2">
-                                                    Email Address *
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    name="bill_email"
-                                                    required
-                                                    value={formData.bill_email}
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-3 py-2 border border-gray/30 focus:border-gray rounded-md bg-dark1 text-cream"
-                                                    placeholder="Shipping email"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray mb-2">
-                                                    Phone Number
-                                                </label>
-                                                <input
-                                                    type="tel"
-                                                    name="bill_phone"
-                                                    value={formData.bill_phone}
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-3 py-2 border border-gray/30 focus:border-gray rounded-md bg-dark1 text-cream"
-                                                    placeholder="Shipping phone"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray mb-2">
-                                                    Street Address *
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="bill_address"
-                                                    required
-                                                    value={
-                                                        formData.bill_address
-                                                    }
-                                                    onChange={handleInputChange}
-                                                    className="w-full px-3 py-2 border border-gray/30 focus:border-gray rounded-md bg-dark1 text-cream"
-                                                    placeholder="House, road, area"
-                                                />
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray mb-2">
-                                                        City *
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="bill_city"
-                                                        required
-                                                        value={
-                                                            formData.bill_city
-                                                        }
-                                                        onChange={
-                                                            handleInputChange
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray/30 rounded-md bg-dark1 text-cream"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray mb-2">
-                                                        State *
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="bill_state"
-                                                        required
-                                                        value={
-                                                            formData.bill_state
-                                                        }
-                                                        onChange={
-                                                            handleInputChange
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray/30 rounded-md bg-dark1 text-cream"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray mb-2">
-                                                        ZIP Code *
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="bill_zipCode"
-                                                        required
-                                                        value={
-                                                            formData.bill_zipCode
-                                                        }
-                                                        onChange={
-                                                            handleInputChange
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray/30 rounded-md bg-dark1 text-cream"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray mb-2">
-                                                        Country *
-                                                    </label>
-                                                    <select
-                                                        name="bill_country"
-                                                        required
-                                                        value={
-                                                            formData.bill_country
-                                                        }
-                                                        onChange={
-                                                            handleInputChange
-                                                        }
-                                                        className="w-full px-3 py-2 border border-gray/30 rounded-md bg-dark1 text-cream"
-                                                    >
-                                                        <option value="">
-                                                            Select Country
-                                                        </option>
-                                                        {checkoutData?.countries?.map(
-                                                            (c) => (
-                                                                <option
-                                                                    key={c}
-                                                                    value={c}
-                                                                >
-                                                                    {c}
-                                                                </option>
-                                                            )
-                                                        )}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    {/* আপনি চাইলে এখানে আপনার বিলিং ফিল্ডগুলো রাখতে পারেন – একই রকম হবে */}
+                                    {/* উদাহরণস্বরূপ কয়েকটা ফিল্ড */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <input
+                                            type="text"
+                                            name="bill_firstName"
+                                            required
+                                            placeholder="Billing First Name *"
+                                            value={formData.bill_firstName}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="bill_lastName"
+                                            placeholder="Billing Last Name"
+                                            value={formData.bill_lastName}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                        />
+                                        <input
+                                            type="email"
+                                            name="bill_email"
+                                            required
+                                            placeholder="Billing Email *"
+                                            value={formData.bill_email}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="bill_phone"
+                                            required
+                                            placeholder="Billing Phone *"
+                                            value={formData.bill_phone}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="bill_address"
+                                            required
+                                            placeholder="Billing Address *"
+                                            value={formData.bill_address}
+                                            onChange={handleInputChange}
+                                            className="w-full col-span-2 px-3 py-2 border border-red/50 rounded-md bg-dark1 text-cream"
+                                        />
+                                        {/* বাকি ফিল্ডগুলো যোগ করুন যেমন city, state, zip, country */}
                                     </div>
                                 </div>
                             )}
@@ -560,7 +436,7 @@ const CheckoutPage = () => {
                                 </h2>
                                 <div className="space-y-3">
                                     {[
-                                        // "cashOnDelivery",
+                                        "cashOnDelivery",
                                         "paypal",
                                         "payoneer",
                                         "mobilePay",
@@ -611,7 +487,7 @@ const CheckoutPage = () => {
 
                                 {/* ১. শিপিং না পিকআপ? */}
                                 <div className="space-y-4 mb-6">
-                                    {/* <label className="flex items-center space-x-3 cursor-pointer">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
                                         <input
                                             type="radio"
                                             name="deliveryType"
@@ -626,7 +502,7 @@ const CheckoutPage = () => {
                                         <span className="text-cream font-medium">
                                             Ship to My Address
                                         </span>
-                                    </label> */}
+                                    </label>
 
                                     {!isPickupDisabled && (
                                         <label className="flex items-center space-x-3 cursor-pointer">
@@ -655,7 +531,7 @@ const CheckoutPage = () => {
                                 </div>
 
                                 {/* ২. শিপিং মেথড সিলেক্ট (শুধু যদি শিপিং হয়) */}
-                                {/* {formData.deliveryType === "shipping" &&
+                                {formData.deliveryType === "shipping" &&
                                     checkoutData?.shipping_methods?.length >
                                         0 && (
                                         <div className="mt-6 p-5 bg-dark1/50 rounded-lg border border-gray/30">
@@ -700,7 +576,7 @@ const CheckoutPage = () => {
                                                 )}
                                             </div>
                                         </div>
-                                    )} */}
+                                    )}
 
                                 {/* ৩. পিকআপ লোকেশন */}
                                 {formData.deliveryType === "pickup" &&
