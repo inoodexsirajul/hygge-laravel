@@ -60,7 +60,7 @@
   .reset-button {
     display: inline-block;
     background: linear-gradient(135deg, #4a6cf7 0%, #2541b2 100%);
-    color: #ffffff;
+    color: #ffffff !important;
     text-decoration: none;
     padding: 14px 30px;
     border-radius: 50px;

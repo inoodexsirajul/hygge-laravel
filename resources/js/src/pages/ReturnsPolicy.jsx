@@ -14,17 +14,17 @@ const ReturnsPolicy = () => {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-5xl md:text-6xl font-bold text-dark2 mb-4">
+                    <h1 className="text-xl lg:text-4xl font-bold text-dark2 mb-4">
                         Refunds & Returns
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-700">
+                    <p className="text-sm lg:text-xl text-gray-700">
                         Your happiness is our priority ♡
                     </p>
                 </div>
 
                 {/* Main Card */}
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 py-12 text-center">
+                    <div className="bg-red py-12 text-center px-4">
                         <FaHeart className="text-6xl text-cream mx-auto mb-4" />
                         <p className="text-cream text-2xl font-medium">
                             We want you to love everything you buy from us
@@ -51,8 +51,8 @@ const ReturnsPolicy = () => {
                         {/* Key Info Grid */}
                         <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
                             <div className="text-center">
-                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                                    <FaClock className="text-3xl text-green-700" />
+                                <div className="w-20 h-20 bg-red/30 rounded-full flex items-center justify-center mx-auto mb-5">
+                                    <FaClock className="text-3xl text-red" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-3">
                                     Return Window
@@ -64,8 +64,8 @@ const ReturnsPolicy = () => {
                             </div>
 
                             <div className="text-center">
-                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                                    <FaEnvelope className="text-3xl text-green-700" />
+                                <div className="w-20 h-20 bg-red/30 rounded-full flex items-center justify-center mx-auto mb-5">
+                                    <FaEnvelope className="text-3xl text-red " />
                                 </div>
                                 <h3 className="text-xl font-bold mb-3">
                                     How to Start
@@ -75,7 +75,7 @@ const ReturnsPolicy = () => {
                                     <br />
                                     <a
                                         href="mailto:hyggecotton2025@gmail.com"
-                                        className="text-green-700 font-bold hover:underline"
+                                        className="text-red  font-bold hover:underline"
                                     >
                                         hyggecotton2025@gmail.com
                                     </a>
@@ -83,8 +83,8 @@ const ReturnsPolicy = () => {
                             </div>
 
                             <div className="text-center">
-                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                                    <FaUndoAlt className="text-3xl text-green-700" />
+                                <div className="w-20 h-20 bg-red/30 rounded-full flex items-center justify-center mx-auto mb-5">
+                                    <FaUndoAlt className="text-3xl text-red" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-3">
                                     Refund Time
@@ -98,8 +98,8 @@ const ReturnsPolicy = () => {
                         </div>
 
                         {/* What to Include */}
-                        <div className="bg-green-50 rounded-2xl p-8 text-center">
-                            <FaBoxOpen className="text-4xl text-green-700 mx-auto mb-4" />
+                        <div className="bg-red/10 rounded-2xl p-8 text-center">
+                            <FaBoxOpen className="text-4xl text-red mx-auto mb-4" />
                             <p className="text-lg font-medium text-gray-800">
                                 Please include your{" "}
                                 <strong>order number</strong> and{" "}

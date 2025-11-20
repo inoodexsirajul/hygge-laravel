@@ -90,25 +90,26 @@ const Career = () => {
     };
 
     return (
-        <div className="flex min-h-screen w-full bg-dark2">
-            <div className="w-full flex flex-col items-center justify-center px-4 py-12">
+        <div className="flex min-h-screen w-full bg-dark1 xl:px-20">
+            <div className="w-full grid xl:grid-cols-2 gap-4   px-4 py-12">
                 {/* নতুন কন্টেন্ট যোগ করা হয়েছে এখানে */}
-                <div className="w-full max-w-5xl text-center mb-16">
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-8">
-                        Careers at Hygge Cotton
+                <div className="w-full max-w-md text-center xl:text-left mb-16 pt-20">
+                    <h1 className="text-5xl md:text-5xl font-bold text-white mb-8">
+                        Careers at{" "}
+                        <span className="text-red">Hygge Cotton</span>
                     </h1>
-                    <p className="text-xl md:text-2xl text-red/80 leading-relaxed max-w-4xl mx-auto">
+                    <p className="text-sm lg:text-lg text-cream    leading-relaxed max-w-4xl mx-auto">
                         We’re always looking for creative minds who share our
                         love for design, sustainability, and craftsmanship.
                     </p>
-                    <p className="text-lg md:text-xl text-gray-300 mt-6 max-w-3xl mx-auto">
+                    <p className="text-sm lg:text-lg text-gray-300 mt-4 max-w-3xl mx-auto">
                         If you’d like to join our growing team in Copenhagen,
                         send your CV and a short introduction to:
                     </p>
                     <div className="mt-8">
                         <a
                             href="mailto:inf@hyggecotton.dk"
-                            className="inline-flex items-center gap-3 text-2xl font-bold text-red hover:text-purple-300 transition"
+                            className="inline-flex items-center gap-3 text-2xl font-bold text-cream hover:text-red transition"
                         >
                             inf@hyggecotton.dk
                         </a>
@@ -119,12 +120,12 @@ const Career = () => {
                 </div>
 
                 {/* আগের ফর্ম কার্ড */}
-                <div className="w-full max-w-5xl bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 md:p-12">
-                    <div className="text-center mb-10">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                <div className="w-full   bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 md:p-12">
+                    <div className="text-center mb-4">
+                        <h2 className="text-4xl md:text-3xl font-bold text-white mb-4">
                             Join Our Team
                         </h2>
-                        <p className="text-lg text-gray-300">
+                        <p className="text-sm text-gray-300">
                             We're excited to have you apply! Please fill out the
                             form below.
                         </p>
@@ -155,7 +156,7 @@ const Career = () => {
                                         required: "Name is required",
                                     })}
                                     placeholder="John Doe"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.name && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -178,7 +179,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="john@example.com"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.email && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -188,7 +189,7 @@ const Career = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
-                                    Phone Number{" "}
+                                    Phone Number
                                     <span className="text-red-400">*</span>
                                 </label>
                                 <input
@@ -201,7 +202,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="+880 17XX-XXXXXX"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.phone && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -220,7 +221,7 @@ const Career = () => {
                                         required: "Position is required",
                                     })}
                                     placeholder="e.g. Graphic Designer"
-                                    className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.position && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -239,7 +240,7 @@ const Career = () => {
                             {!uploadedFile ? (
                                 <label
                                     htmlFor="resume"
-                                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300  group"
+                                    className="flex  items-center justify-center w-full h-38 py-2 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300  group"
                                 >
                                     <div className="flex flex-col items-center pt-8 pb-6">
                                         <svg
@@ -274,7 +275,7 @@ const Career = () => {
                                     />
                                 </label>
                             ) : (
-                                <div className="relative p-6 bg-white/10 border-2 border-red rounded-xl">
+                                <div className="relative p-2 bg-white/10 border-2 border-red rounded-xl">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-red rounded-lg">

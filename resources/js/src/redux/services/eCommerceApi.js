@@ -387,7 +387,7 @@ export const eCommerceApi = createApi({
                 method: "POST",
                 body: customizationData,
             }),
-            invalidatesTags: ["Cart"],
+            invalidatesTags: ["Cart", "Customization"],
         }),
 
         // ==================== CATEGORIES & TYPES ====================

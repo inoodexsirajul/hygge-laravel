@@ -6,7 +6,7 @@ import { useGetFooterQuery } from "../../redux/services/eCommerceApi";
 
 // Skeleton Component
 const FooterSkeleton = () => (
-    <footer className="bg-dark1 text-white py-10">
+    <footer className="bg-dark2 text-white py-10">
         <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
                 {/* Logo & Info */}
@@ -98,14 +98,15 @@ const Footer = () => {
 
     return (
         <footer
-            className={`bg-dark1 text-white py-10 xl:px-20 transition-opacity duration-700 ${
+            className={`bg-dark2 text-white py-10 xl:px-20 transition-opacity duration-700 ${
                 isFetching ? "opacity-90" : "opacity-100"
             }`}
         >
             <div className="  mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
                     {/* Company Info */}
-                    <div>
+                    <div className="col-span-2">
+                        <h2 className="text-3xl mb-3 text-red">Hygge Cotton</h2>
                         {footer_info.logo && (
                             <img
                                 src={footer_info.logo}
@@ -235,10 +236,8 @@ const Footer = () => {
                 {/* Copyright */}
                 <div className="mt-10 pt-6 border-t border-cream/70 text-center">
                     <p className="text-cream">
-                        {footer_info.copyright ||
-                            `© ${new Date().getFullYear()} Hygge Cotton. Made with `}
-                        <FaHeart className="inline text-red-500 mx-1 animate-pulse" />{" "}
-                        {" in Copenhagen"}
+                        {footer_info.copyright}
+                        <FaHeart className="inline text-red-500 mx-1 animate-pulse" />
                     </p>
                 </div>
             </div>

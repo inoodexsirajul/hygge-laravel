@@ -354,25 +354,12 @@ const CartPage = () => {
                                                                 </p>
                                                             )}
 
-                                                            {/* <Link
+                                                            <Link
                                                                 to={`/product/${item?.product?.slug}/customize`}
                                                                 className="text-green-600 hover:text-green-400 text-sm md:text-base"
                                                             >
                                                                 Customize
                                                                 Product
-                                                            </Link> */}
-                                                            <Link
-                                                                to={{
-                                                                    pathname: `/product/${item?.product?.slug}/customize`,
-                                                                    state: {
-                                                                        removeFromCartFirst: true, // এটাই ম্যাজিক
-                                                                        cartItemId:
-                                                                            item.id, // কোন আইটেমটা মুছতে হবে
-                                                                    },
-                                                                }}
-                                                                className="text-green-600 hover:text-green-400 font-medium underline"
-                                                            >
-                                                                Customize Again
                                                             </Link>
                                                             <button
                                                                 onClick={() =>

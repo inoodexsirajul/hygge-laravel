@@ -27,34 +27,27 @@ const Login = () => {
     const onSubmit = async (data) => {
         try {
             const response = await login(data).unwrap();
-
             const token = response?.data?.access_token;
 
-            if (!token) {
-                throw new Error("No token received from server");
-            }
+            if (!token) throw new Error("No token received");
 
             localStorage.setItem("authToken", token);
-
             dispatch(eCommerceApi.util.invalidateTags(["Cart", "UserProfile"]));
 
             clearErrors();
             resetForm();
-            navigate("/");
-        } catch (err) {
-            // এখানে reset() কল করা হয়েছে — এটাই মূল ফিক্স
-            reset();
 
+            // এখানে ম্যাজিক! কোথা থেকে এসেছে সেখানেই ফিরে যাবে
+            const redirectTo = location.state?.from || "/cart";
+            navigate(redirectTo);
+        } catch (err) {
+            reset();
             setError("general", {
                 type: "manual",
-                message:
-                    err?.data?.message ||
-                    err?.message ||
-                    "Invalid email or password. Please try again.",
+                message: err?.data?.message || "Invalid email or password.",
             });
         }
     };
-
     // অটোমেটিক এরর মেসেজ ৬ সেকেন্ড পর ক্লিয়ার (UX ভালো হয়)
     useEffect(() => {
         if (errors.general) {

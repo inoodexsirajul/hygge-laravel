@@ -9,57 +9,37 @@ import { toast } from "react-toastify";
 // import baseurl from "../utils/url";
 
 const ProductCardTwo = ({ product }) => {
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState(1); // ডিফল্ট কোয়ান্টিটি
     const [isHovered, setIsHovered] = useState(false);
-    const [addToCart, { isLoading }] = useAddToCartMutation();
-    const { refetch } = useGetCartDetailsQuery();
+    const [addToCart, { isLoading, error }] = useAddToCartMutation();
+    const { refetch } = useGetCartDetailsQuery(); // কার্ট আপডেট করার জন্য
 
     const token = localStorage.getItem("authToken");
 
-    // এখানে চেক করো প্রোডাক্ট স্টকে আছে কি না
-    const isOutOfStock = !product.qty || product.qty <= 0;
-    const hasOptions =
-        product?.colors?.length > 0 || product?.sizes?.length > 0;
-
     const handleAddToCart = async () => {
-        if (isOutOfStock) {
-            toast.error("This product is out of stock!");
-            return;
-        }
-        // বাকি কোড same...
         try {
-            const cartItem = { product_id: product.id, qty: quantity };
+            const cartItem = {
+                product_id: product.id,
+                qty: quantity,
+            };
             await addToCart(cartItem).unwrap();
-            refetch();
+            refetch(); // কার্ট আপডেট
             toast.success("Product added to cart!");
         } catch (err) {
-            toast.error(err?.data?.message || "Failed to add to cart");
+            toast.error(err?.data?.message || "  to add to cart");
+            // console.log(err);
         }
     };
 
+    // চেক করো colors এবং sizes খালি কিনা
+    const hasOptions =
+        product?.colors?.length > 0 || product?.sizes?.length > 0;
+
     return (
-        <div className="w-full mx-auto transition-all duration-500 overflow-hidden hover:-translate-y-1 relative">
-            {/* Out of Stock Badge - সবসময় দেখাবে যদি স্টক না থাকে */}
-            {isOutOfStock && (
-                <div className="absolute top-3 left-3 z-10 bg-red text-cream text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                    Out of Stock
-                </div>
-            )}
-
-            {/* Sold Out Overlay - optional, আরো নজরে আনার জন্য */}
-            {/* {isOutOfStock && (
-                <div className="absolute inset-0 bg-dark2/80 z-10 flex items-center justify-center rounded-xl">
-                    <span className="text-cream text-xl font-bold tracking-wider">
-                        SOLD OUT
-                    </span>
-                </div>
-            )} */}
-
+        <div className="w-full mx-auto transition-all duration-500 overflow-hidden hover:-translate-y-1">
             {/* Product Image Container */}
             <div
-                className={`relative overflow-hidden rounded-xl ${
-                    isOutOfStock ? "opacity-70" : ""
-                }`}
+                className="relative overflow-hidden rounded-xl"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
@@ -70,38 +50,27 @@ const ProductCardTwo = ({ product }) => {
                     className="w-full object-cover transition-transform duration-500 hover:scale-105 h-full rounded-xl"
                 />
 
-                {/* Hover Overlay */}
+                {/* Overlay on hover */}
                 {isHovered && (
                     <div className="absolute inset-0 bg-dark2/70 flex items-center justify-center">
                         <div className="flex flex-col space-y-3">
-                            {isOutOfStock ? (
-                                // Out of stock হলে বাটন ডিজেবল + লাল
-                                <button
-                                    disabled
-                                    className="w-full flex justify-between items-center text-[12px] md:text-[18px] border border-red bg-red/80 text-cream rounded-[10px] mb-4 px-4 py-2 md:px-[30px] md:py-[15px] cursor-not-allowed opacity-80"
-                                >
-                                    Out of Stock
-                                    <span>
-                                        <GoArrowRight />
-                                    </span>
-                                </button>
-                            ) : !hasOptions ? (
+                            {!hasOptions ? (
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={isLoading}
-                                    className={`w-full flex justify-between items-center text-[12px] md:text-[18px] border border-transparent hover:border-cream rounded-[10px] text-cream mb-4 px-4 py-2 md:px-[30px] md:py-[15px] cursor-pointer ${
+                                    className={`w-full flex justify-between items-center text-[12px] md:text-[18px] border border-transparent hover:border-cream rounded-[10px] text-cream bg-opacity-100 mb-4 px-4 py-2 md:px-[30px] md:py-[15px] cursor-pointer ${
                                         isLoading ? "bg-gray-500" : "bg-red"
                                     }`}
                                 >
                                     {isLoading ? "Adding..." : "Add to cart"}
-                                    <span>
+                                    <span className="">
                                         <GoArrowRight />
                                     </span>
                                 </button>
                             ) : (
                                 <Link
                                     to={`/product-details/${product?.slug}`}
-                                    className="w-full flex justify-between items-center text-[12px] md:text-[18px] bg-red border border-transparent hover:border-cream rounded-[10px] text-cream mb-4 px-4 py-2 md:px-[30px] md:py-[15px]"
+                                    className="w-full flex justify-between items-center text-[12px] md:text-[18px] md:p-[30px] bg-red border border-transparent hover:border-cream rounded-[10px] text-cream bg-opacity-100 mb-4 px-4 py-2 md:px-[30px] md:py-[15px]"
                                 >
                                     Select Option
                                     <span>
@@ -109,10 +78,9 @@ const ProductCardTwo = ({ product }) => {
                                     </span>
                                 </Link>
                             )}
-
                             <Link
                                 to={`/product-details/${product?.slug}`}
-                                className="w-full flex justify-between items-center text-[12px] md:text-[18px] bg-dark2 border border-transparent hover:border-cream rounded-[10px] text-cream mb-4 px-4 py-2 md:px-[30px] md:py-[15px]"
+                                className="w-full flex justify-between items-center text-[12px] md:text-[18px] md:p-[30px] bg-dark2 border border-transparent hover:border-cream rounded-[10px] text-cream bg-opacity-100 mb-4 px-4 py-2 md:px-[30px] md:py-[15px]"
                             >
                                 Details
                                 <span>
@@ -126,25 +94,58 @@ const ProductCardTwo = ({ product }) => {
 
             {/* Product Info */}
             <div className="px-2 mt-2">
+                {/* Product title */}
                 <h4 className="text-cream text-[12px] 2xl:text-[18px] font-normal md:font-semibold font-manrope mb-2.5">
                     <Link to={`/product-details/${product?.slug}`}>
                         {product?.name}
                     </Link>
                 </h4>
+                {/* Price section */}
 
                 <div className="flex gap-4">
-                    <p className="text-[12px] 2xl:text-[16px] text-cream">
+                    {/* Offer price or regular price */}
+                    <p
+                        className={`text-[12px] 2xl:text-[16px] ${
+                            product?.offer_price ? "text-cream" : "text-cream"
+                        }`}
+                    >
                         $
                         {product?.offer_price
                             ? product?.offer_price
                             : product?.price}
                     </p>
+
+                    {/* Regular price with line-through if offer price exists */}
                     {product?.offer_price && (
                         <p className="text-red line-through decoration-cream text-[12px] 2xl:text-[16px]">
                             ${product?.price}
                         </p>
                     )}
                 </div>
+
+                {/* Color swatches */}
+                {product.colors?.length > 0 && (
+                    <div className="flex space-x-1 mt-2 2xl:mt-4">
+                        {product.colors.map((color, index) => (
+                            <button
+                                key={index}
+                                className={`w-3 lg:w-[18px] h-3 lg:h-[18px] border rounded-[5px]  `}
+                                style={{ backgroundColor: color?.color_code }}
+                                onClick={() =>
+                                    setSelectedColor(color?.color_code)
+                                }
+                                aria-label={`Color: ${color?.color_code}`}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {/* Error message */}
+                {error && (
+                    <p className="text-red text-[12px] mt-2">
+                        {error?.data?.message || "Error adding to cart"}
+                    </p>
+                )}
             </div>
         </div>
     );

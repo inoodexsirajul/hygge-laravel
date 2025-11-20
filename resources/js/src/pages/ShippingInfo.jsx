@@ -14,10 +14,10 @@ const ShippingInfo = () => {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-5xl md:text-6xl font-bold text-dark2 mb-4">
+                    <h1 className="text-xl lg:text-4xl font-bold text-dark2 mb-4">
                         Shipping Information
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-700">
+                    <p className="text-sm lg:text-xl text-gray-700">
                         From Copenhagen with love ♡
                     </p>
                 </div>

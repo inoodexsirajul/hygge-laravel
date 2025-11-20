@@ -47,63 +47,64 @@ const ProductDetails = () => {
 
     // Calculate total price based on selected color and size
     useEffect(() => {
-        if (data?.product) {
-            setNav1(sliderRef1.current);
-            setNav2(sliderRef2.current);
+        if (!data?.product) return;
 
-            // Set default color and size
-            if (data?.product?.colors?.length > 0 && !selectedColor) {
-                setSelectedColor(data.product.colors[0]);
-            }
-            if (data?.product?.sizes?.length > 0 && !selectedSizeId) {
-                const validSizes = data.product.sizes.filter(
-                    (size) => size.size_id && size.size_name
-                );
-                if (validSizes.length > 0) {
-                    setSelectedSizeId(validSizes[0].size_id);
-                }
-            }
+        setNav1(sliderRef1.current);
+        setNav2(sliderRef2.current);
 
-            // Calculate base price
-            const currentDate = new Date();
-            const offerStart = data?.product?.offer_start_date
-                ? new Date(data.product.offer_start_date)
-                : null;
-            const offerEnd = data?.product?.offer_end_date
-                ? new Date(data.product.offer_end_date)
-                : null;
-            const isOfferValid =
-                offerStart &&
-                offerEnd &&
-                currentDate >= offerStart &&
-                currentDate <= offerEnd;
-            const basePrice = isOfferValid
-                ? Number(
-                      data?.product?.offer_price || data?.product?.price || 0
-                  )
-                : Number(data?.product?.price || 0);
-
-            // Get color price
-            const colorPrice =
-                selectedColor?.pivot?.color_price &&
-                !isNaN(Number(selectedColor.pivot.color_price))
-                    ? Number(selectedColor.pivot.color_price)
-                    : 0;
-
-            // Get size price
-            const selectedSize = data?.product?.sizes?.find(
-                (size) => size.size_id === selectedSizeId
-            );
-            const sizePrice =
-                selectedSize?.pivot?.size_price &&
-                !isNaN(Number(selectedSize.pivot.size_price))
-                    ? Number(selectedSize.pivot.size_price)
-                    : 0;
-
-            // Calculate total price
-            const calculatedPrice = basePrice + colorPrice + sizePrice;
-            setTotalPrice(isNaN(calculatedPrice) ? 0 : calculatedPrice);
+        // Default color & size selection
+        if (data.product.colors?.length > 0 && !selectedColor) {
+            setSelectedColor(data.product.colors[0]);
         }
+        if (data.product.sizes?.length > 0 && !selectedSizeId) {
+            const validSize = data.product.sizes.find(
+                (s) => s.size_id && s.size_name
+            );
+            if (validSize) setSelectedSizeId(validSize.size_id);
+        }
+
+        // ===== এখানে সিম্পল লজিক =====
+        const regularPrice = Number(data.product.price) || 0;
+        const offerPrice =
+            data.product.offer_price != null &&
+            data.product.offer_price !== "" &&
+            !isNaN(Number(data.product.offer_price))
+                ? Number(data.product.offer_price)
+                : null;
+
+        // যদি offer_price থাকে এবং সেটা regular price এর চেয়ে কম বা সমান হয়
+        const isOfferApplied = offerPrice !== null && offerPrice < regularPrice;
+
+        // বেস প্রাইস নির্ধারণ
+        const basePrice = isOfferApplied ? offerPrice : regularPrice;
+
+        // Color extra
+        const colorExtra = selectedColor?.pivot?.color_price
+            ? Number(selectedColor.pivot.color_price)
+            : 0;
+
+        // Size extra
+        const selectedSizeObj = data.product.sizes?.find(
+            (s) => s.size_id === selectedSizeId
+        );
+        const sizeExtra = selectedSizeObj?.pivot?.size_price
+            ? Number(selectedSizeObj.pivot.size_price)
+            : 0;
+
+        // ফাইনাল প্রাইস
+        const total = basePrice + colorExtra + sizeExtra;
+        setTotalPrice(total > 0 ? total : regularPrice);
+
+        // Debug
+        console.log("Price Debug:", {
+            regularPrice,
+            offerPrice,
+            isOfferApplied,
+            basePrice,
+            colorExtra,
+            sizeExtra,
+            totalPrice: total,
+        });
     }, [data?.product, selectedColor, selectedSizeId]);
 
     // Handle Add to Cart
@@ -411,13 +412,18 @@ const ProductDetails = () => {
                             />
                         </div>
                         <div className="flex gap-[30px] xl:gap-[60px] items-center mb-4 3xl:mb-[30px]">
-                            <p className="text-[16px] xl:text-[24px] text-cream">
-                                ${Number(totalPrice)}
+                            {/* মূল দাম - offer_price থাকলে সেটা, না থাকলে regular price */}
+                            <p className="text-[16px] xl:text-[24px] text-cream font-bold">
+                                ${totalPrice}
                             </p>
-                            {data?.product?.offer_price &&
-                                data?.product?.price && (
-                                    <p className="text-[16px] xl:text-[24px] text-red line-through decoration-red">
-                                        ${Number(data?.product?.price)}
+
+                            {/* লাইন থ্রু - শুধু যদি offer_price থাকে এবং regular price এর থেকে কম হয় */}
+                            {data?.product?.offer_price != null &&
+                                data?.product?.offer_price !== "" &&
+                                Number(data.product.offer_price) <
+                                    Number(data.product.price) && (
+                                    <p className="text-[16px] xl:text-[24px] text-gray-500 line-through">
+                                        ${Number(data.product.price)}
                                     </p>
                                 )}
                         </div>
@@ -756,60 +762,60 @@ const ProductDetails = () => {
                                         />
                                     </div>
                                     {/* <table className="mt-[72px]">
-                                        <tbody>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Material
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.material ||
-                                                        "100% Cotton"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Brand
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.brand ||
-                                                        "Hygee"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Color
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {selectedColor?.color_name ||
-                                                        "Not selected"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Size
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.sizes
-                                                        ?.find(
-                                                            (size) =>
-                                                                size.size_id ===
-                                                                selectedSizeId
-                                                        )
-                                                        ?.size_name?.toUpperCase() ||
-                                                        "Not selected"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Origin
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.origin ||
-                                                        "Denmark"}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table> */}
+                                          <tbody>
+                                              <tr>
+                                                  <th className="text-left py-2 text-cream">
+                                                      Material
+                                                  </th>
+                                                  <td className="p-2 text-cream">
+                                                      {data?.product?.material ||
+                                                          "100% Cotton"}
+                                                  </td>
+                                              </tr>
+                                              <tr>
+                                                  <th className="text-left py-2 text-cream">
+                                                      Brand
+                                                  </th>
+                                                  <td className="p-2 text-cream">
+                                                      {data?.product?.brand ||
+                                                          "Hygee"}
+                                                  </td>
+                                              </tr>
+                                              <tr>
+                                                  <th className="text-left py-2 text-cream">
+                                                      Color
+                                                  </th>
+                                                  <td className="p-2 text-cream">
+                                                      {selectedColor?.color_name ||
+                                                          "Not selected"}
+                                                  </td>
+                                              </tr>
+                                              <tr>
+                                                  <th className="text-left py-2 text-cream">
+                                                      Size
+                                                  </th>
+                                                  <td className="p-2 text-cream">
+                                                      {data?.product?.sizes
+                                                          ?.find(
+                                                              (size) =>
+                                                                  size.size_id ===
+                                                                  selectedSizeId
+                                                          )
+                                                          ?.size_name?.toUpperCase() ||
+                                                          "Not selected"}
+                                                  </td>
+                                              </tr>
+                                              <tr>
+                                                  <th className="text-left py-2 text-cream">
+                                                      Origin
+                                                  </th>
+                                                  <td className="p-2 text-cream">
+                                                      {data?.product?.origin ||
+                                                          "Denmark"}
+                                                  </td>
+                                              </tr>
+                                          </tbody>
+                                      </table> */}
                                 </div>
                             </div>
                         </TabPanel>

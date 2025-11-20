@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { toPng } from "html-to-image";
 import Modal from "react-modal";
 import { useDispatch } from "react-redux";
@@ -8,9 +8,8 @@ import {
     useAddToCartMutation,
     useGetCartDetailsQuery,
     eCommerceApi,
-    useRemoveFromCartMutation,
 } from "../redux/services/eCommerceApi";
-import { useParams, useNavigate, useLocation } from "react-router";
+import { useParams, useNavigate } from "react-router";
 
 const customStyles = {
     content: {
@@ -38,7 +37,6 @@ const CustomizeProduct = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const location = useLocation();
 
     const [currentSide, setCurrentSide] = useState("front");
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -58,31 +56,6 @@ const CustomizeProduct = () => {
     const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
 
     const { data: cartData } = useGetCartDetailsQuery();
-
-    const { cartItemId, removeFromCartFirst } = location.state || {};
-
-    // এই মিউটেশনটা তোমার কোডে আগে থেকেই আছে (CartPage এ ব্যবহার করেছো)
-    const [removeFromCartMutation] = useRemoveFromCartMutation();
-
-    // পেজ লোড হওয়ার সাথে সাথে পুরানো আইটেম মুছে ফেলো
-    useEffect(() => {
-        if (removeFromCartFirst && cartItemId) {
-            // কার্ট থেকে পুরানো আইটেমটা মুছে ফেলি
-            removeFromCartMutation(cartItemId)
-                .unwrap()
-                .then(() => {
-                    toast.success(
-                        "Previous item removed. Start fresh customization!",
-                        {
-                            position: "top-center",
-                        }
-                    );
-                })
-                .catch(() => {
-                    toast.error("Failed to remove old item");
-                });
-        }
-    }, [removeFromCartFirst, cartItemId, removeFromCartMutation]);
 
     const containerSizes = { width: "248px", height: "264px" };
 

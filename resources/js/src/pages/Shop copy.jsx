@@ -26,6 +26,7 @@ const Shop = () => {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [selectedColors, setSelectedColors] = useState([]);
     const [selectedSizes, setSelectedSizes] = useState([]); // ← নতুন
+    const [userTouchedMax, setUserTouchedMax] = useState(false);
 
     // URL Params
     const searchQuery = searchParams.get("q") || "";
@@ -186,15 +187,26 @@ const Shop = () => {
     };
 
     // Handlers
+    // const handleRangeChange = (values) => {
+    //     setRangeValues(values);
+    //     updateURL({
+    //         min_price: values[0] > 0 ? values[0] : "",
+    //         max_price: values[1] < 5000 ? values[1] : "",
+    //         page: 1,
+    //     });
+    // };
     const handleRangeChange = (values) => {
-        setRangeValues(values);
+        const newMin = values[0];
+
+        // ম্যাক্স সবসময় ৫০০০ ফিক্সড
+        setRangeValues([newMin, 5000]);
+
         updateURL({
-            min_price: values[0] > 0 ? values[0] : "",
-            max_price: values[1] < 5000 ? values[1] : "",
+            min_price: newMin > 0 ? newMin : "",
+            max_price: 5000, // সবসময় ৫০০০ পাঠাবে
             page: 1,
         });
     };
-
     const handleSortChange = (value) => updateURL({ sort_by: value, page: 1 });
     const handlePageClick = (page) => {
         setActivePage(page);
@@ -493,8 +505,10 @@ const Shop = () => {
                             >
                                 <option value="">Default</option>
                                 <option value="latest">Latest</option>
+                                <option value="featureproduct">Featured</option>
                                 <option value="lowtohigh">Low to High</option>
                                 <option value="hightolow">High to Low</option>
+                                <option value="recommended">Recommended</option>
                             </select>
                         </div>
 

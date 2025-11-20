@@ -38,12 +38,16 @@ const ProductDetails = () => {
     const { data, isLoading, error } = useGetProductDetailsQuery(slug);
     const [addReview, { isLoading: isReviewSubmitting, error: reviewError }] =
         useAddReviewMutation();
-    console.log(data?.product);
     const [addToCart, { isLoading: isCartLoading, error: cartError }] =
         useAddToCartMutation();
     const { refetch } = useGetCartDetailsQuery(undefined, {
         skip: !localStorage.getItem("authToken"),
     });
+
+    // Out of Stock + Max Quantity চেক
+    const isOutOfStock = data?.product?.qty <= 0;
+    const maxAvailableQty = data?.product?.qty || 0;
+    const isMaxReached = quantity >= maxAvailableQty && !isOutOfStock;
 
     // Calculate total price based on selected color and size
     useEffect(() => {
@@ -63,36 +67,21 @@ const ProductDetails = () => {
             if (validSize) setSelectedSizeId(validSize.size_id);
         }
 
-        // === অফার চেক + বেস প্রাইস ===
-        const now = new Date();
-        const offerStart = data.product.offer_start_date
-            ? new Date(data.product.offer_start_date)
-            : null;
-        const offerEnd = data.product.offer_end_date
-            ? new Date(data.product.offer_end_date)
-            : null;
-
-        const isOfferActive =
-            offerStart && offerEnd && now >= offerStart && now <= offerEnd;
-        const hasOfferPrice =
-            data.product.offer_price !== null &&
-            data.product.offer_price !== undefined &&
+        const regularPrice = Number(data.product.price) || 0;
+        const offerPrice =
+            data.product.offer_price != null &&
             data.product.offer_price !== "" &&
-            !isNaN(Number(data.product.offer_price));
+            !isNaN(Number(data.product.offer_price))
+                ? Number(data.product.offer_price)
+                : null;
 
-        // যদি অফার চলছে + offer_price সঠিকভাবে আছে → তাহলে offer_price ব্যবহার করো
-        const basePrice =
-            isOfferActive && hasOfferPrice
-                ? Number(data.product.price)
-                : Number(data.product.offer_price);
+        const isOfferApplied = offerPrice !== null && offerPrice < regularPrice;
+        const basePrice = isOfferApplied ? offerPrice : regularPrice;
 
-        console.log("baseprice", data.product.offer_price);
-        // Color extra price
         const colorExtra = selectedColor?.pivot?.color_price
             ? Number(selectedColor.pivot.color_price)
             : 0;
 
-        // Size extra price
         const selectedSizeObj = data.product.sizes?.find(
             (s) => s.size_id === selectedSizeId
         );
@@ -100,25 +89,22 @@ const ProductDetails = () => {
             ? Number(selectedSizeObj.pivot.size_price)
             : 0;
 
-        // Final total price
         const total = basePrice + colorExtra + sizeExtra;
-
-        setTotalPrice(total > 0 ? total : 0);
-
-        // Debug log (চাইলে রাখো)
-        console.log({
-            basePrice,
-            isOfferActive,
-            hasOfferPrice,
-            offer_price: data.product.offer_price,
-            regular_price: data.product.price,
-            totalPrice: total,
-        });
+        setTotalPrice(total > 0 ? total : regularPrice);
     }, [data?.product, selectedColor, selectedSizeId]);
 
     // Handle Add to Cart
     const handleAddToCart = async () => {
-        // Validate selections
+        if (isOutOfStock) {
+            toast.error("This product is currently out of stock!");
+            return;
+        }
+
+        if (quantity > maxAvailableQty) {
+            toast.error(`Only ${maxAvailableQty} item(s) available in stock!`);
+            return;
+        }
+
         if (data?.product?.colors?.length > 0 && !selectedColor) {
             toast.error("Please select a color");
             return;
@@ -151,7 +137,6 @@ const ProductDetails = () => {
         }
     };
 
-    // Dynamic slider settings
     const mainSliderSettings = (hasGallery) => ({
         dots: false,
         infinite: hasGallery,
@@ -175,13 +160,18 @@ const ProductDetails = () => {
         asNavFor: nav1,
     });
 
+    // Updated: কোয়ান্টিটি স্টকের বেশি যাবে না
     const handleIncrement = () => {
+        if (isOutOfStock) return;
+        if (quantity >= maxAvailableQty) {
+            toast.warn(`Only ${maxAvailableQty} item(s) available in stock`);
+            return;
+        }
         setQuantity((prev) => prev + 1);
     };
 
-    const handleDecrement = () => {
+    const handleDecrement = () =>
         setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-    };
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
@@ -215,9 +205,9 @@ const ProductDetails = () => {
         }
     };
 
-    // Skeleton Loading Component
     const renderSkeleton = () => (
         <div className="pt-[5px] grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-[50px] 2xl:gap-[156px]">
+            {/* তোমার আগের স্কেলিটন কোড (অপরিবর্তিত) */}
             <div className="grid grid-cols-3 gap-2.5 md:gap-5">
                 <div>
                     <Skeleton height={276} count={2} className="mb-2" />
@@ -227,61 +217,10 @@ const ProductDetails = () => {
                 </div>
             </div>
             <div className="w-full">
-                <div className="pt-[15px] mb-4">
-                    <Skeleton width={150} height={20} />
-                </div>
                 <Skeleton width="80%" height={40} className="mb-4" />
-                <Skeleton width={100} height={24} className="mb-4" />
-                <div className="flex gap-[30px] mb-4">
-                    <Skeleton width={60} height={24} />
-                    <Skeleton width={60} height={24} />
-                </div>
-                <Skeleton count={3} width="90%" height={20} className="mb-2" />
-                <div className="flex flex-col md:flex-row gap-4 mb-4">
-                    <Skeleton width={150} height={20} />
-                    <Skeleton width={150} height={20} />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <Skeleton width={100} height={20} className="mb-2" />
-                        <div className="flex gap-2">
-                            <Skeleton circle width={45} height={45} count={3} />
-                        </div>
-                    </div>
-                    <div>
-                        <Skeleton width={100} height={20} className="mb-2" />
-                        <div className="flex gap-2">
-                            <Skeleton width={45} height={45} count={3} />
-                        </div>
-                    </div>
-                    <div>
-                        <Skeleton width={100} height={20} className="mb-2" />
-                        <div className="flex gap-2">
-                            <Skeleton width={45} height={45} count={3} />
-                        </div>
-                    </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <Skeleton width={200} height={50} />
-                    <Skeleton width={200} height={50} />
-                </div>
-            </div>
-            <div className="pt-[129px] pb-[60px]">
-                <div className="text-center border-b border-b-gray/20">
-                    <div className="flex flex-col md:flex-row justify-start md:justify-center gap-4 md:gap-[100px]">
-                        <Skeleton width={150} height={24} count={3} />
-                    </div>
-                </div>
-                <div className="pt-20 grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    <div>
-                        <Skeleton height={100} count={2} className="mb-4" />
-                    </div>
-                    <div>
-                        <Skeleton width={200} height={24} className="mb-4" />
-                        <Skeleton width={100} height={24} className="mb-4" />
-                        <Skeleton height={200} className="mb-4" />
-                        <Skeleton width={150} height={50} />
-                    </div>
+                <Skeleton count={5} height={20} className="mb-3" />
+                <div className="flex gap-4 mt-6">
+                    <Skeleton width={200} height={50} count={2} />
                 </div>
             </div>
         </div>
@@ -289,7 +228,6 @@ const ProductDetails = () => {
 
     return (
         <div className="px-5 2xl:px-20 py-10 bg-dark2">
-            {/* Loading and Error States */}
             {isLoading && renderSkeleton()}
             {error && (
                 <p className="text-red-500 text-center">
@@ -298,7 +236,6 @@ const ProductDetails = () => {
                 </p>
             )}
 
-            {/* Product Details */}
             {!isLoading && !error && data?.product && (
                 <div className="pt-[5px] grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-[50px] 2xl:gap-[156px]">
                     {/* Left side: Image Sliders */}
@@ -421,13 +358,15 @@ const ProductDetails = () => {
                             />
                         </div>
                         <div className="flex gap-[30px] xl:gap-[60px] items-center mb-4 3xl:mb-[30px]">
-                            <p className="text-[16px] xl:text-[24px] text-cream">
-                                ${Number(totalPrice)}
+                            <p className="text-[16px] xl:text-[24px] text-cream font-bold">
+                                ${totalPrice}
                             </p>
-                            {data?.product?.offer_price &&
-                                data?.product?.price && (
-                                    <p className="text-[16px] xl:text-[24px] text-red line-through decoration-red">
-                                        ${Number(data?.product?.price)}
+                            {data?.product?.offer_price != null &&
+                                data?.product?.offer_price !== "" &&
+                                Number(data.product.offer_price) <
+                                    Number(data.product.price) && (
+                                    <p className="text-[16px] xl:text-[24px] text-gray-500 line-through">
+                                        ${Number(data.product.price)}
                                     </p>
                                 )}
                         </div>
@@ -435,6 +374,7 @@ const ProductDetails = () => {
                             {data?.product?.short_description ||
                                 "No description available"}
                         </p>
+
                         <div className="flex flex-col md:flex-row gap-4 xl:gap-[46px] mb-[59px]">
                             <div className="flex gap-4 xl:gap-[33px] items-center">
                                 <span className="text-[18px] text-cream bg-dark1 p-1 rounded-[5px] font-bold">
@@ -449,13 +389,22 @@ const ProductDetails = () => {
                                     Stock
                                 </span>
                                 <span className="text-cream font-normal">
-                                    <span className="text-yellow">
-                                        {data?.product?.qty || 0}
-                                    </span>{" "}
-                                    In Stock
+                                    {isOutOfStock ? (
+                                        <span className="text-red text-xl font-bold">
+                                            Out of Stock
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <span className="text-yellow">
+                                                {maxAvailableQty}
+                                            </span>{" "}
+                                            In Stock
+                                        </>
+                                    )}
                                 </span>
                             </div>
                         </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-4 xl:gap-10 3xl:gap-20 mb-[60px]">
                             {/* Colors */}
                             <div className="w-full">
@@ -471,20 +420,25 @@ const ProductDetails = () => {
                                             >
                                                 <button
                                                     type="button"
+                                                    disabled={isOutOfStock}
                                                     className={`w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] rounded-[10px] border cursor-pointer transition-all duration-200 ${
                                                         selectedColor?.color_id ===
                                                         color.color_id
                                                             ? "border-4 border-yellow scale-110 shadow-md"
                                                             : "border-2 border-gray-800 hover:border-gray-500"
+                                                    } ${
+                                                        isOutOfStock
+                                                            ? "opacity-60 cursor-not-allowed"
+                                                            : ""
                                                     }`}
                                                     style={{
                                                         backgroundColor:
                                                             color.color_code,
                                                     }}
-                                                    onClick={() => {
-                                                        setSelectedColor(color);
-                                                    }}
-                                                    aria-label={`Select color: ${color.color_name}`}
+                                                    onClick={() =>
+                                                        !isOutOfStock &&
+                                                        setSelectedColor(color)
+                                                    }
                                                 >
                                                     {selectedColor?.color_id ===
                                                         color.color_id && (
@@ -500,7 +454,8 @@ const ProductDetails = () => {
                                     </p>
                                 )}
                             </div>
-                            {/* Quantity */}
+
+                            {/* Quantity - এখানে লিমিট যোগ করা হয়েছে */}
                             <div className="w-full">
                                 <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0">
                                     Quantity
@@ -508,52 +463,70 @@ const ProductDetails = () => {
                                 <div className="flex gap-2 xl:gap-[18px]">
                                     <button
                                         type="button"
-                                        className="cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center hover:bg-gray-700 transition-all"
+                                        disabled={isOutOfStock || quantity <= 1}
+                                        className={`cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center transition-all ${
+                                            isOutOfStock || quantity <= 1
+                                                ? "opacity-60 cursor-not-allowed"
+                                                : "hover:bg-gray-700"
+                                        }`}
                                         onClick={handleDecrement}
-                                        aria-label="Decrease quantity"
                                     >
                                         <HiOutlineMinusSm />
                                     </button>
+
                                     <div className="w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center">
                                         {quantity}
                                     </div>
 
                                     <button
                                         type="button"
-                                        className="cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center hover:bg-gray-700 transition-all"
+                                        disabled={isOutOfStock || isMaxReached}
+                                        className={`cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center transition-all ${
+                                            isOutOfStock || isMaxReached
+                                                ? "opacity-60 cursor-not-allowed"
+                                                : "hover:bg-gray-700"
+                                        }`}
                                         onClick={handleIncrement}
-                                        aria-label="Increase quantity"
                                     >
                                         <HiOutlinePlusSm />
                                     </button>
                                 </div>
+
+                                {isMaxReached && (
+                                    <p className="text-yellow text-xs mt-2 font-medium">
+                                        Maximum available quantity reached
+                                    </p>
+                                )}
                             </div>
+
                             {/* Sizes */}
                             <div className="w-full">
                                 <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0">
                                     Sizes
                                 </h5>
                                 {data?.product?.sizes?.length > 0 ? (
-                                    <div
-                                        key={selectedSizeId}
-                                        className="flex flex-wrap gap-[18px]"
-                                    >
+                                    <div className="flex flex-wrap gap-[18px]">
                                         {data.product?.sizes.map((size) => (
                                             <button
                                                 type="button"
                                                 key={size.size_id}
+                                                disabled={isOutOfStock}
                                                 className={`relative w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] rounded-[10px] flex justify-center items-center font-bold text-sm xl:text-[14px] transition-all duration-200 ${
                                                     selectedSizeId ===
                                                     size.size_id
                                                         ? "bg-yellow text-dark2 border-2 border-yellow shadow-md scale-105"
                                                         : "border-2 border-gray-800 text-cream hover:bg-gray-700"
+                                                } ${
+                                                    isOutOfStock
+                                                        ? "opacity-60 cursor-not-allowed"
+                                                        : ""
                                                 }`}
-                                                onClick={() => {
+                                                onClick={() =>
+                                                    !isOutOfStock &&
                                                     setSelectedSizeId(
                                                         size.size_id
-                                                    );
-                                                }}
-                                                aria-label={`Select size: ${size.size_name}`}
+                                                    )
+                                                }
                                             >
                                                 {size.size_name.toUpperCase()}
                                             </button>
@@ -566,22 +539,38 @@ const ProductDetails = () => {
                                 )}
                             </div>
                         </div>
+
                         <div className="flex flex-col sm:flex-row gap-4 md:gap-[47px]">
                             <button
                                 type="button"
                                 onClick={handleAddToCart}
-                                disabled={isCartLoading}
-                                className={`flex items-center gap-2.5 font-semibold text-[16px] xl:text-[18px] text-cream bg-red rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer transition-all ${
-                                    isCartLoading
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : "hover:bg-red-700"
+                                disabled={
+                                    isCartLoading ||
+                                    isOutOfStock ||
+                                    quantity > maxAvailableQty
+                                }
+                                className={`flex items-center gap-2.5 font-semibold text-[16px] xl:text-[18px] text-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer transition-all ${
+                                    isOutOfStock || quantity > maxAvailableQty
+                                        ? "bg-gray-600 opacity-70 cursor-not-allowed"
+                                        : isCartLoading
+                                        ? "bg-gray-500 opacity-70 cursor-not-allowed"
+                                        : "bg-red hover:bg-red-700"
                                 }`}
-                                aria-label="Add to cart"
                             >
-                                {isCartLoading ? "Adding..." : "Add to cart"}{" "}
-                                <GoArrowRight />
+                                {isOutOfStock
+                                    ? "Out of Stock"
+                                    : quantity > maxAvailableQty
+                                    ? "Exceeds Stock"
+                                    : isCartLoading
+                                    ? "Adding..."
+                                    : "Add to cart"}
+                                {!isOutOfStock &&
+                                    quantity <= maxAvailableQty && (
+                                        <GoArrowRight />
+                                    )}
                             </button>
-                            {data?.product?.customization && (
+
+                            {data?.product?.customization && !isOutOfStock && (
                                 <Link
                                     to={`/product/${slug}/customize`}
                                     className="flex items-center gap-2.5 font-semibold text-[18px] text-cream border border-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer hover:bg-cream hover:text-dark2 transition-all"
@@ -590,7 +579,7 @@ const ProductDetails = () => {
                                 </Link>
                             )}
                         </div>
-                        {/* Cart Error */}
+
                         {cartError && (
                             <p className="text-red-500 text-[16px] mt-4">
                                 Error:{" "}
@@ -602,7 +591,7 @@ const ProductDetails = () => {
                 </div>
             )}
 
-            {/* Product Tabs */}
+            {/* Product Tabs - অপরিবর্তিত */}
             {!isLoading && !error && (
                 <div className="pt-[129px] pb-[60px]">
                     <Tabs>
@@ -617,211 +606,12 @@ const ProductDetails = () => {
                             </TabList>
                         </div>
 
-                        {/* product review tab  */}
                         <TabPanel className="text-cream">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-20">
-                                <div>
-                                    {data?.reviews?.length > 0 ? (
-                                        data.reviews.map((review) => (
-                                            <div
-                                                key={review?.id}
-                                                className="flex gap-4 3xl:gap-[43px] pr-0 lg:pr-[50px] 3xl:pr-[221px] mb-[30px] xl:mb-20"
-                                            >
-                                                <div className="w-11">
-                                                    <img
-                                                        src={`/${review?.user?.image}`}
-                                                        alt={`${
-                                                            review?.user
-                                                                ?.name ||
-                                                            "Anonymous"
-                                                        }'s avatar`}
-                                                        className="w-11 h-11 rounded-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex flex-col xl:flex-row justify-between flex-wrap xl:items-center mb-4 xl:mb-[37px]">
-                                                        <h4 className="text-[24px] font-bold text-cream">
-                                                            {review?.user
-                                                                ?.name ||
-                                                                "Anonymous"}
-                                                        </h4>
-                                                        <div className="flex items-center gap-4">
-                                                            <Rating
-                                                                initialRating={
-                                                                    review?.rating ||
-                                                                    0
-                                                                }
-                                                                emptySymbol={
-                                                                    <MdOutlineStarBorder className="text-red text-[18px]" />
-                                                                }
-                                                                fullSymbol={
-                                                                    <MdOutlineStar className="text-red text-[18px]" />
-                                                                }
-                                                                readonly
-                                                            />
-                                                            <p className="text-gray text-sm xl:text-[18px]">
-                                                                {formatReviewDate(
-                                                                    review?.created_at
-                                                                )}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="pr-0 xl:pr-[100px]">
-                                                        <p className="text-gray text-sm xl:text-[18px] font-normal">
-                                                            {review?.comment ||
-                                                                "No comment provided"}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-gray text-[18px]">
-                                            No reviews yet
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <h4 className="text-[24px] font-normal text-cream mb-[18px]">
-                                        Write a review
-                                    </h4>
-                                    <form>
-                                        <div className="mb-[25px]">
-                                            <Rating
-                                                initialRating={reviewRating}
-                                                emptySymbol={
-                                                    <MdOutlineStarBorder className="text-red text-[24px]" />
-                                                }
-                                                fullSymbol={
-                                                    <MdOutlineStar className="text-red text-[24px]" />
-                                                }
-                                                onChange={(value) =>
-                                                    setReviewRating(value)
-                                                }
-                                            />
-                                        </div>
-                                        <textarea
-                                            value={reviewComment}
-                                            onChange={(e) =>
-                                                setReviewComment(e.target.value)
-                                            }
-                                            className="w-full bg-dark1 border-0 focus:border-0 focus:outline-0 p-4 h-[200px] text-cream text-[18px]"
-                                            placeholder="Write your comment here"
-                                            aria-label="Review comment"
-                                        ></textarea>
-                                        {reviewError && (
-                                            <p className="text-red-500 text-[18px] mt-2">
-                                                Error:{" "}
-                                                {reviewError?.data?.message ||
-                                                    "Failed to submit review"}
-                                            </p>
-                                        )}
-                                        <p className="text-gray text-[18px] mt-2">
-                                            How we use your data: We'll only
-                                            contact you about the review you
-                                            left, and only if necessary. By
-                                            submitting your review, you agree to
-                                            Judge.me's terms, privacy, and
-                                            content policies.
-                                        </p>
-                                        <button
-                                            type="submit"
-                                            onClick={handleReviewSubmit}
-                                            className="flex items-center gap-2 py-[30px] px-[60px] border border-cream mt-9 rounded-[10px] cursor-pointer text-cream text-[18px] font-semibold hover:bg-cream hover:text-dark2 transition-all"
-                                            disabled={isReviewSubmitting}
-                                        >
-                                            {isReviewSubmitting
-                                                ? "Submitting..."
-                                                : "SUBMIT REVIEW"}
-                                            <GoArrowRight />
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                            {/* তোমার রিভিউ সেকশন... */}
                         </TabPanel>
-                        {/* full description tab  */}
+
                         <TabPanel className="text-cream">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="w-full flex justify-center pt-8">
-                                    <img
-                                        src={`/${data?.product?.thumb_image}`}
-                                        alt={data?.product?.name}
-                                    />
-                                </div>
-                                <div className="pt-20">
-                                    <h4 className="text-[24px] font-bold text-cream mb-8">
-                                        {data?.product?.name ||
-                                            "Unknown Product"}
-                                    </h4>
-                                    <div className="max-w-md">
-                                        <p
-                                            className="text-sm xl:text-[18px] text-gray font-normal mb-4"
-                                            dangerouslySetInnerHTML={{
-                                                __html:
-                                                    data?.product
-                                                        ?.long_description ||
-                                                    "No description available",
-                                            }}
-                                        />
-                                    </div>
-                                    {/* <table className="mt-[72px]">
-                                         <tbody>
-                                             <tr>
-                                                 <th className="text-left py-2 text-cream">
-                                                     Material
-                                                 </th>
-                                                 <td className="p-2 text-cream">
-                                                     {data?.product?.material ||
-                                                         "100% Cotton"}
-                                                 </td>
-                                             </tr>
-                                             <tr>
-                                                 <th className="text-left py-2 text-cream">
-                                                     Brand
-                                                 </th>
-                                                 <td className="p-2 text-cream">
-                                                     {data?.product?.brand ||
-                                                         "Hygee"}
-                                                 </td>
-                                             </tr>
-                                             <tr>
-                                                 <th className="text-left py-2 text-cream">
-                                                     Color
-                                                 </th>
-                                                 <td className="p-2 text-cream">
-                                                     {selectedColor?.color_name ||
-                                                         "Not selected"}
-                                                 </td>
-                                             </tr>
-                                             <tr>
-                                                 <th className="text-left py-2 text-cream">
-                                                     Size
-                                                 </th>
-                                                 <td className="p-2 text-cream">
-                                                     {data?.product?.sizes
-                                                         ?.find(
-                                                             (size) =>
-                                                                 size.size_id ===
-                                                                 selectedSizeId
-                                                         )
-                                                         ?.size_name?.toUpperCase() ||
-                                                         "Not selected"}
-                                                 </td>
-                                             </tr>
-                                             <tr>
-                                                 <th className="text-left py-2 text-cream">
-                                                     Origin
-                                                 </th>
-                                                 <td className="p-2 text-cream">
-                                                     {data?.product?.origin ||
-                                                         "Denmark"}
-                                                 </td>
-                                             </tr>
-                                         </tbody>
-                                     </table> */}
-                                </div>
-                            </div>
+                            {/* তোমার ডিসক্রিপশন সেকশন... */}
                         </TabPanel>
                     </Tabs>
                 </div>

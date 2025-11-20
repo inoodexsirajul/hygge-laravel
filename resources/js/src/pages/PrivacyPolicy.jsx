@@ -8,10 +8,10 @@ const PrivacyPolicy = () => {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-5xl md:text-6xl font-bold text-dark2 mb-6">
+                    <h1 className="text-3xl lg:text-4xl font-bold text-dark2 mb-6">
                         Privacy & Cookies Policy
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-700">
+                    <p className="text-md lg:text-xl text-gray-700">
                         Your trust means everything to us ♡
                     </p>
                 </div>
@@ -19,9 +19,9 @@ const PrivacyPolicy = () => {
                 {/* Main Card */}
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
                     {/* Privacy Section */}
-                    <div className="p-12 md:p-16 border-b border-gray-100">
+                    <div className="p-4 md:p-16 border-b border-gray-100">
                         <div className="flex items-start gap-6 mb-8">
-                            <div className="w-16 h-16 bg-green-100 rounded-full flex-shrink-0 flex items-center justify-center">
+                            <div className="w-16 h-16 bg-green-100 rounded-full shrink-0 flex items-center justify-center">
                                 <FaShieldAlt className="text-3xl text-green-700" />
                             </div>
                             <div>
@@ -58,18 +58,17 @@ const PrivacyPolicy = () => {
                             </div>
                         </div>
 
-                        <div className="bg-green-50 rounded-2xl p-8 mt-10">
-                            <p className="text-xl font-medium text-green-900 flex items-center gap-3">
-                                <FaLock className="text-2xl" />
-                                We <strong>never</strong> sell or share your
-                                personal data with third parties for marketing
-                                purposes.
+                        <div className="bg-red/10 rounded-2xl p-8 mt-10">
+                            <p className="inline-flex text-xl font-medium text-red items-center gap-3  ">
+                                <FaLock className="text-2xl" size={30} />
+                                We never sell or share your personal data with
+                                third parties for marketing purposes.
                             </p>
                         </div>
                     </div>
 
                     {/* Cookies Section */}
-                    <div className="p-12 md:p-16">
+                    <div className="p-4 md:p-16">
                         <div className="flex items-start gap-6">
                             <div className="w-16 h-16 bg-amber-100 rounded-full flex-shrink-0 flex items-center justify-center">
                                 <FaCookieBite className="text-3xl text-amber-700" />
@@ -114,7 +113,7 @@ const PrivacyPolicy = () => {
                     </div>
 
                     {/* Final Message */}
-                    <div className="bg-gradient-to-r from-green-600 600 to-emerald-600 py-12 text-center">
+                    <div className="bg-red/80 py-12 text-center px-4">
                         <p className="text-cream text-2xl font-medium flex items-center justify-center gap-3">
                             <FaHeart className="text-3xl" />
                             Your data is safe with us — always

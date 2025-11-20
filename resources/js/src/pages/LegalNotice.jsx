@@ -14,10 +14,10 @@ const LegalNotice = () => {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-5xl md:text-6xl font-bold text-dark2 mb-6">
+                    <h1 className="text-3xl md:text-4xl font-bold text-dark2 mb-4">
                         Legal Notice
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-700">
+                    <p className="text-md md:text-xl text-gray-700">
                         Protecting creativity, one stitch at a time
                     </p>
                 </div>
@@ -25,13 +25,13 @@ const LegalNotice = () => {
                 {/* Main Card */}
                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
                     {/* Copyright Section */}
-                    <div className="p-12 md:p-16 border-b border-gray-100">
-                        <div className="flex items-start gap-6">
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex-shrink-0 flex items-center justify-center">
+                    <div className="p-8 md:p-16 border-b border-gray-100">
+                        <div className="flex flex-col xl:flex-row items-start gap-6">
+                            <div className="w-16 h-16 bg-red-100 rounded-full shrink-0 flex items-center justify-center">
                                 <FaCopyright className="text-3xl text-red-700" />
                             </div>
                             <div>
-                                <h2 className="text-3xl font-bold text-dark2 mb-6">
+                                <h2 className="text-xl lg:text-3xl font-bold text-dark2 mb-6">
                                     Copyright & Intellectual Property
                                 </h2>
                                 <p className="text-lg text-gray-700 leading-relaxed">
@@ -52,15 +52,18 @@ const LegalNotice = () => {
                     </div>
 
                     {/* Company Details */}
-                    <div className="p-12 md:p-16 bg-gradient-to-r from-green-50 to-emerald-50">
-                        <h2 className="text-3xl font-bold text-dark2 mb-10 flex items-center gap-4">
-                            <FaShieldAlt className="text-3xl text-green-700" />
+                    <div className="p-12 md:p-16 bg-linear-to-r from-green-50 to-emerald-50">
+                        <h2 className="text-lg lg:text-3xl  font-bold text-dark2 mb-10 flex items-center gap-4">
+                            <FaShieldAlt
+                                className="text-3xl text-red "
+                                size={40}
+                            />
                             Official Company Information
                         </h2>
 
                         <div className="grid md:grid-cols-2 gap-8 text-lg">
                             <div className="flex items-start gap-4">
-                                <FaHome className="text-2xl text-green-700 mt-1" />
+                                <FaHome className="text-2xl text-red  mt-1" />
                                 <div>
                                     <p className="font-semibold text-gray-800">
                                         Company Name
@@ -72,7 +75,7 @@ const LegalNotice = () => {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <FaHome className="text-2xl text-green-700 mt-1" />
+                                <FaHome className="text-2xl text-red  mt-1" />
                                 <div>
                                     <p className="font-semibold text-gray-800">
                                         Registered Address
@@ -87,7 +90,7 @@ const LegalNotice = () => {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <FaEnvelope className="text-2xl text-green-700 mt-1" />
+                                <FaEnvelope className="text-2xl text-red mt-1" />
                                 <div>
                                     <p className="font-semibold text-gray-800">
                                         Email
@@ -111,7 +114,7 @@ const LegalNotice = () => {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <FaPhoneAlt className="text-2xl text-green-700 mt-1" />
+                                <FaPhoneAlt className="text-2xl text-red mt-1" />
                                 <div>
                                     <p className="font-semibold text-gray-800">
                                         Phone
@@ -128,7 +131,7 @@ const LegalNotice = () => {
                     </div>
 
                     {/* Final Message */}
-                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 py-12 text-center">
+                    <div className="bg-red/80 py-12 text-center">
                         <p className="text-cream text-2xl font-medium">
                             Thank you for respecting our work and creativity
                         </p>

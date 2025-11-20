@@ -30,7 +30,7 @@ const About = () => {
 
             {/* Our Story */}
             <section className="py-20 px-5 2xl:px-20 bg-dark1/5">
-                <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div className="max-w-xl mx-auto   gap-12 items-center text-center">
                     <div>
                         <h2 className="text-3xl md:text-5xl font-bold mb-6">
                             Our Story
@@ -59,22 +59,22 @@ const About = () => {
                         <p className="text-lg leading-relaxed font-medium text-green-800 mt-6">
                             That’s when Hygge Cotton was born.
                         </p>
-                    </div>
-                    <div className="relative">
-                        <img
-                            src={founder}
-                            alt="Mohammed Tofayel - Founder"
-                            className="rounded-2xl shadow-2xl w-full object-cover h-[500px]"
-                        />
-                        <div className="absolute -bottom-6 -left-6 bg-red text-cream p-6 rounded-xl shadow-xl">
+                        <button className="inline-block  bg-red text-cream p-6 rounded-xl shadow-xl mt-4">
                             <p className="text-2xl font-bold">
                                 Mohammed Tofayel
                             </p>
                             <p className="text-sm opacity-90">
                                 Founder & Dreamer
                             </p>
-                        </div>
+                        </button>
                     </div>
+                    {/* <div className="relative">
+                        <img
+                            src={founder}
+                            alt="Mohammed Tofayel - Founder"
+                            className="rounded-2xl shadow-2xl w-full object-cover h-[500px]"
+                        />
+                    </div> */}
                 </div>
             </section>
 
