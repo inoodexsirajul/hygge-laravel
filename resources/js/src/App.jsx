@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router";
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Layout from "./components/Layout/Layout";
@@ -43,6 +44,11 @@ const App = () => {
     const location = useLocation();
     const token = useSyncToken();
 
+    useEffect(() => {
+        fetch("/sanctum/csrf-cookie", {
+            credentials: "include",
+        });
+    }, []);
     // এই দুটো কুয়েরি শুধু টোকেন থাকলে চলবে
     useGetUserProfileQuery(undefined, { skip: !token });
     useGetCartDetailsQuery(undefined, { skip: !token });
