@@ -611,7 +611,7 @@ const CheckoutPage = () => {
 
                                 {/* ১. শিপিং না পিকআপ? */}
                                 <div className="space-y-4 mb-6">
-                                    {/* <label className="flex items-center space-x-3 cursor-pointer">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
                                         <input
                                             type="radio"
                                             name="deliveryType"
@@ -626,7 +626,7 @@ const CheckoutPage = () => {
                                         <span className="text-cream font-medium">
                                             Ship to My Address
                                         </span>
-                                    </label> */}
+                                    </label>
 
                                     {!isPickupDisabled && (
                                         <label className="flex items-center space-x-3 cursor-pointer">
@@ -655,7 +655,7 @@ const CheckoutPage = () => {
                                 </div>
 
                                 {/* ২. শিপিং মেথড সিলেক্ট (শুধু যদি শিপিং হয়) */}
-                                {/* {formData.deliveryType === "shipping" &&
+                                {formData.deliveryType === "shipping" &&
                                     checkoutData?.shipping_methods?.length >
                                         0 && (
                                         <div className="mt-6 p-5 bg-dark1/50 rounded-lg border border-gray/30">
@@ -700,7 +700,7 @@ const CheckoutPage = () => {
                                                 )}
                                             </div>
                                         </div>
-                                    )} */}
+                                    )}
 
                                 {/* ৩. পিকআপ লোকেশন */}
                                 {formData.deliveryType === "pickup" &&
