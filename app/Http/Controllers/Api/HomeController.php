@@ -76,7 +76,7 @@ class HomeController extends Controller
     {
         $homeProducts = Category::where(['front_show' => 1, 'status' => 1])
             ->select('id', 'name', 'slug', 'icon', 'image')
-            ->orderBy('id', 'desc')
+            ->orderBy('id', 'asc')
             ->with(['products' => function ($q) {
                 $q->active()
                     ->select('id', 'name', 'slug', 'category_id', 'price', 'offer_price', 'img_alt_text', 'qty', 'thumb_image')

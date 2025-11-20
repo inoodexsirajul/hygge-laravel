@@ -302,6 +302,23 @@ class CartController extends Controller
     public function removeCart(Request $request, $id)
     {
         $cart = Cart::findOrFail($id);
+
+        // if user login (user_id)
+        if ($cart->user_id) {
+            customerCustomization::where('user_id', $cart->user_id)
+                ->where('product_id', $cart->product_id)
+                ->delete();
+        }
+        // if guest (session_id)
+        else {
+            CustomerCustomization::where('session_id', $cart->session_id)
+                ->where('product_id', $cart->product_id)
+                ->delete();
+            // guest user (if not set session id then use this one)
+            // customerCustomization::whereNull('user_id')
+            //     ->where('product_id', $cart->product_id)
+            //     ->delete();
+        }
         $cart->delete();
         return apiResponse('success', 'Cart item removed successfully!');
     }

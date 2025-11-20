@@ -55,48 +55,7 @@ use Intervention\Image\Facades\Image;
 
 
 // Welcome page
-// Route::get('/', fn() => view('Auth/Login'))->name('welcome');
 Route::get('/', fn() => view('welcome'))->name('welcome');
-// Dashboard
-// Route::get('/dashboard', fn() => view('backend.dashboard'))
-//     ->middleware(['auth', 'verified', 'role:SuperAdmin|Manager'])
-//     ->name('dashboard');
-
-// Route::get('/user-dashboard', fn() => view('name'))->middleware(['auth', 'role:Customer'])->name('user.dashboard');
-
-// ===================== AUTHENTICATED ROUTES =====================
-// Route::middleware('auth')->group(function () {
-//     // Profile
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-//     // Cart
-//     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
-//     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-//     Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
-//     Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-
-//     // ===================== RESOURCES (SuperAdmin gets all via Gate::before) =====================
-//     Route::resource('users', UserController::class);
-//     Route::resource('products', ProductController::class);
-//     Route::resource('roles', RoleController::class);
-//     Route::resource('orders', OrderController::class);
-//     Route::resource('invoices', InvoiceController::class);
-
-// });
-
-// ===================== STAFF ROLES =====================
-
-// Accountants: limited orders
-// Route::middleware(['auth', 'role:SuperAdmin|Accountants'])->group(function () {
-//     Route::resource('orders', OrderController::class)->except(['store', 'index']);
-// });
-
-// Customers, Manager, Accountants: can only view products
-// Route::middleware(['auth', 'role:Customer|Manager|Accountants|SuperAdmin'])->group(function () {
-//     Route::resource('products', ProductController::class)->only(['index', 'show']);
-// });
 
 Route::middleware(['web', 'auth', 'verified', 'check.permission'])->prefix('admin')->name('admin.')->group(function () {
     /** admin routes */
