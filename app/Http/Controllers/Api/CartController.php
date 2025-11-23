@@ -301,6 +301,7 @@ class CartController extends Controller
      */
     public function removeCart(Request $request, $id)
     {
+        // dd($request->all(), $id);
         $cart = Cart::findOrFail($id);
 
         // if user login (user_id)
