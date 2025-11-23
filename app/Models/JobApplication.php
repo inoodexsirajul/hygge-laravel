@@ -12,6 +12,8 @@ class JobApplication extends Model
         'phone',
         'position',
         'resume',
-        'cover_letter'
+        'cover_letter',
+        'video_cv',
+
     ];
 }

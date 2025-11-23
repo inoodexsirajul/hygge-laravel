@@ -45,16 +45,30 @@ class JobApplicationDataTable extends DataTable
 
                 return $viewBtn . $downloadBtn . $deleteBtn;
             })
+            ->addColumn('video_cv', function ($query) {
+                if ($query->video_cv) {
+                    return "<video width='200' controls>
+                            <source src='" . asset($query->video_cv) . "' type='video/mp4'>
+                            Your browser does not support the video tag.
+                        </video>
+                        <br>
+                        <a href='" . asset($query->video_cv) . "' class='btn btn-info btn-sm mt-1' download>
+                            <i class='fas fa-download'></i> Download Video
+                        </a>";
+                }
+                return '';
+            })
+
             ->addColumn('cover_letter', function ($query) {
                 $coverLetterBtn = $query->cover_letter
                     ? "<button class='btn btn-sm btn-info mr-1' onclick='showCoverLetter(`" . addslashes($query->cover_letter) . "`)'>
-            <i class='far fa-eye'></i> Cover Letter
+            <i class='far fa-eye'></i> C-L
           </button>"
                     : '';
 
                 return $coverLetterBtn;
             })
-            ->rawColumns(['action', 'cover_letter'])
+            ->rawColumns(['action', 'cover_letter', 'video_cv'])
             ->setRowId('id');
     }
 
@@ -97,16 +111,17 @@ class JobApplicationDataTable extends DataTable
     {
         return [
             Column::make('id'),
-            Column::make('name'),
-            Column::make('email'),
-            Column::make('phone'),
-            Column::make('position'),
-            Column::make('cover_letter'),
+            Column::make('name')->addClass('text-center align-middle'),
+            Column::make('email')->addClass('text-center align-middle'),
+            Column::make('phone')->addClass('text-center align-middle'),
+            Column::make('position')->addClass('text-center align-middle'),
+            Column::make('cover_letter')->addClass('text-center align-middle'),
+            Column::make('video_cv')->title('Video CV')->addClass('text-center align-middle'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
-                ->width(260)
-                ->addClass('text-center'),
+                ->width(280)
+                ->addClass('text-center align-middle'),
         ];
     }
 

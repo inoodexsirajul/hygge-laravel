@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('phone');
             $table->string('position'); 
             $table->string('resume'); 
+            $table->string('video_cv');
             $table->text('cover_letter')->nullable();
             $table->timestamps();
         });

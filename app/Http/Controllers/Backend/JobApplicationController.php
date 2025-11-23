@@ -52,6 +52,10 @@ class JobApplicationController extends Controller
         if ($application->resume && file_exists(public_path($application->resume))) {
             unlink(public_path($application->resume));
         }
+        // Delete video_cv file if exists
+        if ($application->video_cv && file_exists(public_path($application->video_cv))) {
+            unlink(public_path($application->video_cv));
+        }
 
         // Delete record
         $application->delete();

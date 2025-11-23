@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\JobApplicationReceived;
 use App\Models\JobApplication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class JobApplicationController extends Controller
 {
     public function store(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'name' => 'required|max:200',
             'email' => 'required|email|max:200',
             'phone' => 'required|max:20',
             'position' => 'required|max:100',
             'resume' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,csv,txt|max:5120',
+            'video_cv' => 'required|file|mimes:mp4,mov,avi|max:51200',
             'cover_letter' => 'nullable|string',
         ]);
 
@@ -48,8 +52,24 @@ class JobApplicationController extends Controller
             $validated['resume'] = 'uploads/applications/' . $filename;
         }
 
+        if ($request->hasFile('video_cv')) {
+            $video = $request->file('video_cv');
+            $videoName = time() . '_' . uniqid() . '.' . $video->getClientOriginalExtension();
+            $videoUploadPath = public_path('uploads/video_cvs');
+
+            if (!file_exists($videoUploadPath)) {
+                mkdir($videoUploadPath, 0777, true);
+            }
+
+            $video->move($videoUploadPath, $videoName);
+
+            $validated['video_cv'] = 'uploads/video_cvs/' . $videoName;
+        }
+
         // Create application
         $application = JobApplication::create($validated);
+
+        Mail::to($application->email)->send(new JobApplicationReceived($application));
 
         return response()->json([
             'status' => 'success',
