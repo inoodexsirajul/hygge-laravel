@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
 import Modal from "react-modal";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify"; // <-- এটা যোগ করেছি
+import { toast } from "react-toastify";
 import {
     useGetProductDetailsQuery,
     useProductCustomizeMutation,
@@ -62,34 +62,21 @@ const CustomizeProduct = () => {
 
     const { redo, cartItemId } = location.state || {};
 
-    // নতুন useEffect: এই প্রোডাক্টের সব পুরানো আইটেম (নরমাল + কাস্টমাইজড) মুছে ফেলো
-    useEffect(() => {
-        if (!cartData?.data?.cart_items?.length || !data?.product?.id) return;
+    // Clear old items from cart
+    // useEffect(() => {
+    //     if (!cartData?.data?.cart_items?.length || !data?.product?.id) return;
 
-        const itemsToRemove = cartData.data.cart_items.filter(
-            (item) => item.product_id === data.product.id
-        );
+    //     const itemsToRemove = cartData.data.cart_items.filter(
+    //         (item) => item.product_id === data.product.id
+    //     );
 
-        if (itemsToRemove.length > 0) {
-            itemsToRemove.forEach((item) => {
-                removeFromCart(item.id)
-                    .unwrap()
-                    .catch(() => {
-                        toast.error("Failed to remove old item from cart");
-                    });
-            });
+    //     if (itemsToRemove.length > 0) {
+    //         itemsToRemove.forEach((item) => {
+    //             removeFromCart(item.id).unwrap();
+    //         });
+    //     }
+    // }, [cartData, data, removeFromCart]);
 
-            toast.success(
-                "Previous item removed. Starting fresh customization!",
-                {
-                    position: "top-center",
-                    autoClose: 2000,
-                }
-            );
-        }
-    }, [cartData, data, removeFromCart]);
-
-    // Redo Customization থেকে এলে পুরানোটা মুছে দাও (যদি থাকে)
     useEffect(() => {
         if (redo && cartItemId) {
             removeFromCart(cartItemId)
@@ -109,13 +96,17 @@ const CustomizeProduct = () => {
 
     const [designs, setDesigns] = useState({
         front: {
-            title: "",
-            titlePosition: "custom",
-            titleColor: "black",
-            textSize: 18,
-            fontFamily: "Story Script",
-            xAxis: 50,
-            yAxis: 50,
+            texts: [
+                {
+                    id: Date.now(),
+                    title: "",
+                    titleColor: "black",
+                    textSize: 18,
+                    fontFamily: "Story Script",
+                    xAxis: 50,
+                    yAxis: 50,
+                },
+            ],
             uploadedImage: null,
             imagePosition: "below",
             imageXAxis: 50,
@@ -125,13 +116,17 @@ const CustomizeProduct = () => {
             containerYAxis: 50,
         },
         back: {
-            title: "",
-            titlePosition: "custom",
-            titleColor: "black",
-            textSize: 18,
-            fontFamily: "Story Script",
-            xAxis: 50,
-            yAxis: 50,
+            texts: [
+                {
+                    id: Date.now() + 1,
+                    title: "",
+                    titleColor: "black",
+                    textSize: 18,
+                    fontFamily: "Story Script",
+                    xAxis: 50,
+                    yAxis: 50,
+                },
+            ],
             uploadedImage: null,
             imagePosition: "below",
             imageXAxis: 50,
@@ -148,12 +143,6 @@ const CustomizeProduct = () => {
 
     const currentDesign = designs[currentSide];
 
-    const customPositionStyle = {
-        left: `${currentDesign.xAxis}%`,
-        top: `${currentDesign.yAxis}%`,
-        transform: "translate(-50%, -50%)",
-    };
-
     const imagePositionStyle = {
         left: `${currentDesign.imageXAxis}%`,
         top: `${currentDesign.imageYAxis}%`,
@@ -161,14 +150,6 @@ const CustomizeProduct = () => {
         width: `${currentDesign.imageSize}%`,
         maxWidth: "200px",
         zIndex: currentDesign.imagePosition === "below" ? 1 : 10,
-    };
-
-    const textStyle = {
-        fontSize: `${currentDesign.textSize}px`,
-        color: currentDesign.titleColor,
-        fontFamily: currentDesign.fontFamily,
-        ...(currentDesign.titlePosition === "custom" && customPositionStyle),
-        zIndex: currentDesign.imagePosition === "below" ? 10 : 1,
     };
 
     const containerStyle = {
@@ -194,6 +175,48 @@ const CustomizeProduct = () => {
         { id: "green", name: "Green", value: "green" },
         { id: "purple", name: "Purple", value: "purple" },
     ];
+
+    // Text Management Functions
+    const addNewText = () => {
+        const newText = {
+            id: Date.now(),
+            title: "",
+            titleColor: "black",
+            textSize: 18,
+            fontFamily: "Story Script",
+            xAxis: 50,
+            yAxis: 50,
+        };
+        setDesigns((prev) => ({
+            ...prev,
+            [currentSide]: {
+                ...prev[currentSide],
+                texts: [...prev[currentSide].texts, newText],
+            },
+        }));
+    };
+
+    const removeText = (id) => {
+        setDesigns((prev) => ({
+            ...prev,
+            [currentSide]: {
+                ...prev[currentSide],
+                texts: prev[currentSide].texts.filter((t) => t.id !== id),
+            },
+        }));
+    };
+
+    const updateText = (id, updates) => {
+        setDesigns((prev) => ({
+            ...prev,
+            [currentSide]: {
+                ...prev[currentSide],
+                texts: prev[currentSide].texts.map((t) =>
+                    t.id === id ? { ...t, ...updates } : t
+                ),
+            },
+        }));
+    };
 
     const updateDesign = (updates) => {
         setDesigns((prev) => ({
@@ -248,40 +271,13 @@ const CustomizeProduct = () => {
                 });
             }
 
-            const uploadedImage = previewRef.current.querySelector(
-                "img[alt='Uploaded sticker']"
-            );
-            if (
-                uploadedImage &&
-                (uploadedImage.complete === false ||
-                    uploadedImage.naturalWidth === 0)
-            ) {
-                await new Promise((resolve, reject) => {
-                    uploadedImage.onload = resolve;
-                    uploadedImage.onerror = () =>
-                        reject(
-                            new Error(`Failed to load uploaded ${side} image`)
-                        );
-                    if (
-                        uploadedImage.complete &&
-                        uploadedImage.naturalWidth !== 0
-                    )
-                        resolve();
-                });
-            }
-
             const dataUrl = await toPng(previewRef.current, {
                 cacheBust: true,
                 pixelRatio: 2,
                 backgroundColor: "#ffffff",
                 canvasWidth: 700,
                 canvasHeight: 600,
-                style: {
-                    fontFamily: designs[side].fontFamily,
-                    transform: "none",
-                    width: "700px",
-                    height: "600px",
-                },
+                style: { width: "700px", height: "600px" },
             });
 
             textContainerRef.current.className = originalClassName;
@@ -297,39 +293,17 @@ const CustomizeProduct = () => {
         }
     };
 
-    // MAIN ACTION: সবসময় নতুন কাস্টমাইজড আইটেম এড করো (পুরানোটা আগেই মুছে গেছে)
     const handleUpdateProduct = async () => {
         if (isUpdating || isCustomizeLoading || isCartLoading) return;
         setIsUpdating(true);
 
         try {
             const isFrontCustomized =
-                designs.front.title !== "" ||
-                designs.front.uploadedImage ||
-                designs.front.textSize !== 18 ||
-                designs.front.xAxis !== 50 ||
-                designs.front.yAxis !== 50 ||
-                designs.front.containerXAxis !== 50 ||
-                designs.front.containerYAxis !== 50 ||
-                designs.front.imageXAxis !== 50 ||
-                designs.front.imageYAxis !== 30 ||
-                designs.front.imageSize !== 50 ||
-                designs.front.titleColor !== "black" ||
-                designs.front.fontFamily !== "Story Script";
-
+                designs.front.texts.some((t) => t.title.trim()) ||
+                designs.front.uploadedImage;
             const isBackCustomized =
-                designs.back.title !== "" ||
-                designs.back.uploadedImage ||
-                designs.back.textSize !== 18 ||
-                designs.back.xAxis !== 50 ||
-                designs.back.yAxis !== 50 ||
-                designs.back.containerXAxis !== 50 ||
-                designs.back.containerYAxis !== 50 ||
-                designs.back.imageXAxis !== 50 ||
-                designs.back.imageYAxis !== 30 ||
-                designs.back.imageSize !== 50 ||
-                designs.back.titleColor !== "black" ||
-                designs.back.fontFamily !== "Story Script";
+                designs.back.texts.some((t) => t.title.trim()) ||
+                designs.back.uploadedImage;
 
             if (!isFrontCustomized && !isBackCustomized) {
                 toast.error("Please customize at least one side!");
@@ -359,8 +333,6 @@ const CustomizeProduct = () => {
                     : isFrontCustomized
                     ? "front"
                     : "back";
-            const frontDesign = designs.front;
-            const backDesign = designs.back;
 
             const customizePayload = {
                 product_id: data?.product?.id,
@@ -369,9 +341,7 @@ const CustomizeProduct = () => {
                     ? data?.product?.customization?.front_price || 4
                     : 0,
                 back_price: isBackCustomized
-                    ? data?.product?.customization?.back_price ||
-                      data?.product?.customization?.front_price ||
-                      4
+                    ? data?.product?.customization?.back_price
                     : 0,
                 both_price:
                     isFrontCustomized && isBackCustomized
@@ -379,55 +349,50 @@ const CustomizeProduct = () => {
                         : 0,
                 front_image: frontImage,
                 back_image: backImage,
-                custom_text_front: isFrontCustomized ? frontDesign.title : "",
-                custom_text_back: isBackCustomized ? backDesign.title : "",
-                font_color_front: frontDesign.titleColor || "black",
-                font_color_back: backDesign.titleColor || "black",
-                font_size_front: `${frontDesign.textSize || 18}px`,
-                font_size_back: `${backDesign.textSize || 18}px`,
-                text_front: JSON.stringify({
-                    title: frontDesign.title || "Your Title",
-                    x_position: `${frontDesign.xAxis || 50}%`,
-                    y_position: `${frontDesign.yAxis || 50}%`,
-                    size: `${frontDesign.textSize || 18}px`,
-                    color: frontDesign.titleColor || "black",
-                    style: "bold",
-                    font_family: frontDesign.fontFamily || "Story Script",
-                }),
-                text_back: JSON.stringify({
-                    title: backDesign.title || "Back Title",
-                    x_position: `${backDesign.xAxis || 50}%`,
-                    y_position: `${backDesign.yAxis || 50}%`,
-                    size: `${backDesign.textSize || 18}px`,
-                    color: backDesign.titleColor || "black",
-                    style: "bold",
-                    font_family: backDesign.fontFamily || "Story Script",
-                }),
+                text_front: JSON.stringify(
+                    designs.front.texts.map((t) => ({
+                        title: t.title,
+                        x_position: `${t.xAxis}%`,
+                        y_position: `${t.yAxis}%`,
+                        size: `${t.textSize}px`,
+                        color: t.titleColor,
+                        font_family: t.fontFamily,
+                    }))
+                ),
+                text_back: JSON.stringify(
+                    designs.back.texts.map((t) => ({
+                        title: t.title,
+                        x_position: `${t.xAxis}%`,
+                        y_position: `${t.yAxis}%`,
+                        size: `${t.textSize}px`,
+                        color: t.titleColor,
+                        font_family: t.fontFamily,
+                    }))
+                ),
                 container_front: JSON.stringify({
-                    x_position: `${frontDesign.containerXAxis || 50}%`,
-                    y_position: `${frontDesign.containerYAxis || 50}%`,
+                    x_position: `${designs.front.containerXAxis}%`,
+                    y_position: `${designs.front.containerYAxis}%`,
                 }),
                 container_back: JSON.stringify({
-                    x_position: `${backDesign.containerXAxis || 50}%`,
-                    y_position: `${backDesign.containerYAxis || 50}%`,
+                    x_position: `${designs.back.containerXAxis}%`,
+                    y_position: `${designs.back.containerYAxis}%`,
                 }),
-                image_front: frontDesign.uploadedImage
+                image_front: designs.front.uploadedImage
                     ? JSON.stringify({
                           position: "below",
-                          x_position: `${frontDesign.imageXAxis}%`,
-                          y_position: `${frontDesign.imageYAxis}%`,
-                          size: `${frontDesign.imageSize}%`,
+                          x_position: `${designs.front.imageXAxis}%`,
+                          y_position: `${designs.front.imageYAxis}%`,
+                          size: `${designs.front.imageSize}%`,
                       })
                     : "",
-                image_back: backDesign.uploadedImage
+                image_back: designs.back.uploadedImage
                     ? JSON.stringify({
                           position: "below",
-                          x_position: `${backDesign.imageXAxis}%`,
-                          y_position: `${backDesign.imageYAxis}%`,
-                          size: `${backDesign.imageSize}%`,
+                          x_position: `${designs.back.imageXAxis}%`,
+                          y_position: `${designs.back.imageYAxis}%`,
+                          size: `${designs.back.imageSize}%`,
                       })
                     : "",
-                // এটা যোগ করে প্রতিবার নতুন রেকর্ড তৈরি হবে (যদি ব্যাকএন্ড ডুপ্লিকেট চেক করে)
                 _prevent_duplicate: Date.now(),
             };
 
@@ -441,22 +406,19 @@ const CustomizeProduct = () => {
             if (!customizationId)
                 throw new Error("Customization ID not returned");
 
-            // সবসময় নতুন আইটেম এড করো
             const price =
                 isFrontCustomized && isBackCustomized
                     ? data?.product?.customization?.both_price || 8
                     : 4;
 
-            const cartPayload = {
+            await addToCart({
                 product_id: data?.product?.id,
                 qty: 1,
                 customization_id: customizationId,
                 price,
-            };
+            }).unwrap();
 
-            await addToCart(cartPayload).unwrap();
             dispatch(eCommerceApi.util.invalidateTags(["Cart"]));
-
             toast.success("Successfully added to cart!");
             navigate("/cart");
         } catch (error) {
@@ -554,177 +516,179 @@ const CustomizeProduct = () => {
                             ))}
                         </div>
 
-                        {/* Text Tab */}
+                        {/* Text Tab - Multiple Texts */}
                         {activeTab === "text" && (
-                            <div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-bold text-cream mb-2">
-                                        Title
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={currentDesign.title}
-                                        onChange={(e) =>
-                                            updateDesign({
-                                                title: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg text-cream focus:outline-none"
-                                        placeholder={`Enter ${currentSide} title`}
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-semibold text-cream mb-2">
-                                        Title Position
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-medium text-cream/70 mb-1">
-                                                X-Axis: {currentDesign.xAxis}%
-                                            </label>
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="100"
-                                                value={currentDesign.xAxis}
-                                                onChange={(e) =>
-                                                    updateDesign({
-                                                        xAxis: parseInt(
-                                                            e.target.value
-                                                        ),
-                                                    })
+                            <div className="space-y-6">
+                                {currentDesign.texts.map((textItem, index) => (
+                                    <div
+                                        key={textItem.id}
+                                        className="relative p-4 border border-gray-600 rounded-lg bg-dark2/50"
+                                    >
+                                        {currentDesign.texts.length > 1 && (
+                                            <button
+                                                onClick={() =>
+                                                    removeText(textItem.id)
                                                 }
-                                                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                                            />
-                                            <div className="flex justify-between text-xs text-cream/70 mt-1">
-                                                <span>0%</span>
-                                                <span>50%</span>
-                                                <span>100%</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-cream/70 mb-1">
-                                                Y-Axis: {currentDesign.yAxis}%
-                                            </label>
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="100"
-                                                value={currentDesign.yAxis}
-                                                onChange={(e) =>
-                                                    updateDesign({
-                                                        yAxis: parseInt(
-                                                            e.target.value
-                                                        ),
-                                                    })
-                                                }
-                                                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                                            />
-                                            <div className="flex justify-between text-xs text-cream/70 mt-1">
-                                                <span>0%</span>
-                                                <span>50%</span>
-                                                <span>100%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-semibold text-cream mb-1">
-                                        Text Size: {currentDesign.textSize}px
-                                    </label>
-                                    <input
-                                        type="range"
-                                        min="12"
-                                        max="48"
-                                        value={currentDesign.textSize}
-                                        onChange={(e) =>
-                                            updateDesign({
-                                                textSize: parseInt(
-                                                    e.target.value
-                                                ),
-                                            })
-                                        }
-                                        className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                                    />
-                                    <div className="flex justify-between text-xs text-cream/70 mt-1">
-                                        <span>12px</span>
-                                        <span>30px</span>
-                                        <span>48px</span>
-                                    </div>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-semibold text-cream mb-2">
-                                        Title Color
-                                    </label>
-                                    <div className="flex flex-wrap gap-3 mt-3">
-                                        {colorOptions.map((color) => (
-                                            <div
-                                                key={color.id}
-                                                className="flex items-center"
+                                                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-2xl font-bold"
                                             >
+                                                ×
+                                            </button>
+                                        )}
+                                        <h4 className="text-sm font-bold text-cream mb-3">
+                                            Text Layer {index + 1}
+                                        </h4>
+
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                value={textItem.title}
+                                                onChange={(e) =>
+                                                    updateText(textItem.id, {
+                                                        title: e.target.value,
+                                                    })
+                                                }
+                                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg text-cream bg-dark1 focus:outline-none"
+                                                placeholder={`Enter text ${
+                                                    index + 1
+                                                }`}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 mb-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-cream/70 mb-1">
+                                                    X-Axis: {textItem.xAxis}%
+                                                </label>
                                                 <input
-                                                    type="radio"
-                                                    id={color.id}
-                                                    name="textColor"
-                                                    value={color.value}
-                                                    checked={
-                                                        currentDesign.titleColor ===
-                                                        color.value
-                                                    }
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={textItem.xAxis}
                                                     onChange={(e) =>
-                                                        updateDesign({
-                                                            titleColor:
-                                                                e.target.value,
-                                                        })
+                                                        updateText(
+                                                            textItem.id,
+                                                            {
+                                                                xAxis: parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                            }
+                                                        )
                                                     }
-                                                    className="hidden"
+                                                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
                                                 />
-                                                <label
-                                                    htmlFor={color.id}
-                                                    className={`flex items-center cursor-pointer text-cream text-xs px-3 py-1 rounded-lg border-2 transition-all ${
-                                                        currentDesign.titleColor ===
-                                                        color.value
-                                                            ? "bg-blue-50 text-dark1"
-                                                            : "border-gray-300 hover:border-gray-400"
-                                                    }`}
-                                                >
-                                                    <span
-                                                        className="w-3 h-3 rounded-full mr-2 border border-gray-300"
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-cream/70 mb-1">
+                                                    Y-Axis: {textItem.yAxis}%
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={textItem.yAxis}
+                                                    onChange={(e) =>
+                                                        updateText(
+                                                            textItem.id,
+                                                            {
+                                                                yAxis: parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                            }
+                                                        )
+                                                    }
+                                                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-xs font-medium text-cream/70 mb-1">
+                                                Text Size: {textItem.textSize}px
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="12"
+                                                max="48"
+                                                value={textItem.textSize}
+                                                onChange={(e) =>
+                                                    updateText(textItem.id, {
+                                                        textSize: parseInt(
+                                                            e.target.value
+                                                        ),
+                                                    })
+                                                }
+                                                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-sm font-semibold text-cream mb-2">
+                                                Title Color
+                                            </label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {colorOptions.map((color) => (
+                                                    <button
+                                                        key={color.id}
+                                                        onClick={() =>
+                                                            updateText(
+                                                                textItem.id,
+                                                                {
+                                                                    titleColor:
+                                                                        color.value,
+                                                                }
+                                                            )
+                                                        }
+                                                        className={`w-10 h-10 rounded-full border-2 ${
+                                                            textItem.titleColor ===
+                                                            color.value
+                                                                ? "border-white"
+                                                                : "border-gray-500"
+                                                        }`}
                                                         style={{
                                                             backgroundColor:
                                                                 color.value,
                                                         }}
-                                                    ></span>
-                                                    {color.name}
-                                                </label>
+                                                    />
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-semibold text-cream mb-2">
-                                        Text Style
-                                    </label>
-                                    <select
-                                        value={currentDesign.fontFamily}
-                                        onChange={(e) =>
-                                            updateDesign({
-                                                fontFamily: e.target.value,
-                                            })
-                                        }
-                                        className="w-full px-2 py-1 border border-gray-300 rounded-lg text-xs text-cream focus:outline-none"
-                                    >
-                                        {fontOptions.map((font) => (
-                                            <option
-                                                key={font.id}
-                                                value={font.value}
-                                                className="text-dark1"
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-cream mb-2">
+                                                Text Style
+                                            </label>
+                                            <select
+                                                value={textItem.fontFamily}
+                                                onChange={(e) =>
+                                                    updateText(textItem.id, {
+                                                        fontFamily:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                className="w-full px-2 py-1 border border-gray-300 rounded-lg text-xs text-cream bg-dark1 focus:outline-none"
                                             >
-                                                {font.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                                {fontOptions.map((font) => (
+                                                    <option
+                                                        key={font.id}
+                                                        value={font.value}
+                                                        className="text-dark1"
+                                                    >
+                                                        {font.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <button
+                                    onClick={addNewText}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
+                                >
+                                    + Add Another Text
+                                </button>
                             </div>
                         )}
 
@@ -871,11 +835,6 @@ const CustomizeProduct = () => {
                                                 }
                                                 className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
                                             />
-                                            <div className="flex justify-between text-xs text-cream/70 mt-1">
-                                                <span>0%</span>
-                                                <span>50%</span>
-                                                <span>100%</span>
-                                            </div>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-cream/70 mb-1">
@@ -899,11 +858,6 @@ const CustomizeProduct = () => {
                                                 }
                                                 className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
                                             />
-                                            <div className="flex justify-between text-xs text-cream/70 mt-1">
-                                                <span>0%</span>
-                                                <span>50%</span>
-                                                <span>100%</span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1048,13 +1002,31 @@ const CustomizeProduct = () => {
                                             crossOrigin="anonymous"
                                         />
                                     )}
-                                    {currentDesign.title && (
-                                        <p
-                                            className="absolute wrap-word font-bold text-center w-full"
-                                            style={textStyle}
-                                        >
-                                            {currentDesign.title}
-                                        </p>
+                                    {currentDesign.texts.map(
+                                        (textItem) =>
+                                            textItem.title && (
+                                                <p
+                                                    key={textItem.id}
+                                                    className="absolute wrap-word font-bold text-center w-full"
+                                                    style={{
+                                                        fontSize: `${textItem.textSize}px`,
+                                                        color: textItem.titleColor,
+                                                        fontFamily:
+                                                            textItem.fontFamily,
+                                                        left: `${textItem.xAxis}%`,
+                                                        top: `${textItem.yAxis}%`,
+                                                        transform:
+                                                            "translate(-50%, -50%)",
+                                                        zIndex:
+                                                            currentDesign.imagePosition ===
+                                                            "below"
+                                                                ? 10
+                                                                : 1,
+                                                    }}
+                                                >
+                                                    {textItem.title}
+                                                </p>
+                                            )
                                     )}
                                 </div>
                             </figure>
@@ -1117,13 +1089,31 @@ const CustomizeProduct = () => {
                                             crossOrigin="anonymous"
                                         />
                                     )}
-                                    {currentDesign.title && (
-                                        <p
-                                            className="absolute wrap-word font-bold text-center w-full"
-                                            style={textStyle}
-                                        >
-                                            {currentDesign.title}
-                                        </p>
+                                    {currentDesign.texts.map(
+                                        (textItem) =>
+                                            textItem.title && (
+                                                <p
+                                                    key={textItem.id}
+                                                    className="absolute wrap-word font-bold text-center w-full"
+                                                    style={{
+                                                        fontSize: `${textItem.textSize}px`,
+                                                        color: textItem.titleColor,
+                                                        fontFamily:
+                                                            textItem.fontFamily,
+                                                        left: `${textItem.xAxis}%`,
+                                                        top: `${textItem.yAxis}%`,
+                                                        transform:
+                                                            "translate(-50%, -50%)",
+                                                        zIndex:
+                                                            currentDesign.imagePosition ===
+                                                            "below"
+                                                                ? 10
+                                                                : 1,
+                                                    }}
+                                                >
+                                                    {textItem.title}
+                                                </p>
+                                            )
                                     )}
                                 </div>
                             </figure>

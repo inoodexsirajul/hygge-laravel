@@ -140,7 +140,7 @@ const Navbar = () => {
                             <li className="relative group">
                                 <Link
                                     to="/shop"
-                                    className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] cursor-pointer flex items-center text-lg uppercase"
+                                    className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] cursor-pointer flex items-center text-md uppercase"
                                 >
                                     Our Products
                                     <FaChevronDown className="ml-2 text-xs transition-transform group-hover:rotate-180" />
@@ -275,7 +275,7 @@ const Navbar = () => {
                                 <li key={title}>
                                     <Link
                                         to={`/${title.toLowerCase()}`}
-                                        className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] text-lg"
+                                        className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] text-md"
                                     >
                                         {title}
                                     </Link>

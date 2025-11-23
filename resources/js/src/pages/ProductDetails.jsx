@@ -3,7 +3,7 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { Link, useLocation, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { MdOutlineStarBorder, MdOutlineStar } from "react-icons/md";
 import { HiOutlinePlusSm, HiOutlineMinusSm } from "react-icons/hi";
 import { GoArrowRight } from "react-icons/go";
@@ -18,6 +18,7 @@ import {
     useGetProductDetailsQuery,
     useAddToCartMutation,
     useGetCartDetailsQuery,
+    useRemoveFromCartMutation,
 } from "../redux/services/eCommerceApi";
 
 const ProductDetails = () => {
@@ -40,9 +41,13 @@ const ProductDetails = () => {
         useAddReviewMutation();
     const [addToCart, { isLoading: isCartLoading, error: cartError }] =
         useAddToCartMutation();
-    const { refetch } = useGetCartDetailsQuery(undefined, {
-        skip: !localStorage.getItem("authToken"),
-    });
+    // const { refetch } = useGetCartDetailsQuery(undefined, {
+    //     skip: !localStorage.getItem("authToken"),
+    // });
+
+    const { data: cartData } = useGetCartDetailsQuery();
+    const [removeFromCart] = useRemoveFromCartMutation();
+    const navigate = useNavigate();
 
     // Out of Stock + Max Quantity চেক
     const isOutOfStock = data?.product?.qty <= 0;
@@ -92,6 +97,31 @@ const ProductDetails = () => {
         const total = basePrice + colorExtra + sizeExtra;
         setTotalPrice(total > 0 ? total : regularPrice);
     }, [data?.product, selectedColor, selectedSizeId]);
+
+    const handleCustomizeClick = async () => {
+        if (!cartData?.data?.cart_items?.length) {
+            // কার্ট খালি → সরাসরি কাস্টমাইজ পেজে যাও
+            navigate(`/product/${slug}/customize`);
+            return;
+        }
+
+        // চেক করো এই প্রোডাক্টটা কার্টে আছে কিনা (নরমাল + কাস্টমাইজড দুটোই)
+        const existingItem = cartData.data.cart_items.find(
+            (item) => item.product_id === data?.product?.id
+        );
+
+        if (existingItem) {
+            // কার্টে আছে → রিমুভ করো
+            try {
+                await removeFromCart(existingItem.id).unwrap();
+            } catch (err) {
+                return; // রিমুভ না হলে এগোবো না
+            }
+        }
+
+        // এখন কাস্টমাইজ পেজে নিয়ে যাও
+        navigate(`/product/${slug}/customize`);
+    };
 
     // Handle Add to Cart
     const handleAddToCart = async () => {
@@ -571,12 +601,12 @@ const ProductDetails = () => {
                             </button>
 
                             {data?.product?.customization && !isOutOfStock && (
-                                <Link
-                                    to={`/product/${slug}/customize`}
+                                <button
+                                    onClick={handleCustomizeClick} // ← এখানে Link এর বদলে button + onClick
                                     className="flex items-center gap-2.5 font-semibold text-[18px] text-cream border border-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer hover:bg-cream hover:text-dark2 transition-all"
                                 >
                                     Customize <GoArrowRight />
-                                </Link>
+                                </button>
                             )}
                         </div>
 
