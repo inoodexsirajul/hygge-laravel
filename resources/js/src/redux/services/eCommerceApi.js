@@ -5,8 +5,9 @@ import { toast } from "react-toastify";
 export const eCommerceApi = createApi({
     reducerPath: "eCommerceApi",
     baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_BASE_URL,
-        // || "/api/v1"
+        // baseUrl: import.meta.env.VITE_API_BASE_URL,
+        baseUrl: "/api/v1",
+        // ||
 
         // Send token if logged in, otherwise session_id for guest
         prepareHeaders: (headers) => {
