@@ -2,6 +2,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Michroma&family=Monsieur+La+Doulaise&family=Story+Script&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&family=Michroma&family=Vidaloka&family=Story+Script&display=swap");
 
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
 @import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -61,7 +63,8 @@ body {
     margin: 0;
     outline: none;
     box-sizing: border-box;
-    font-family: "Manrope", sans-serif;
+    /* font-family: "Manrope", sans-serif; */
+    font-family: "Montserrat", sans-serif;
     font-size: 18px;
 }
 /* 
@@ -74,17 +77,22 @@ body {
 
 h1,
 h2,
+h4,
+h5,
+h3,
 h6 {
-    font-family: "Vidaloka", serif;
+    font-family: "Montserrat", sans-serif;
 }
 
 ul {
     padding: 0;
     margin: 0;
     list-style: none;
+    font-family: "Montserrat", sans-serif;
 }
 a {
     text-decoration: none;
+    font-family: "Montserrat", sans-serif;
 }
 .bg-nav-gradient {
     background: linear-gradient(

@@ -35,6 +35,7 @@ export default {
                 story: ['"Story Script"', "sans-serif"],
                 curs: ['"Monsieur La Doulaise"', "cursive"],
                 michroma: ['"Michroma"', "sans-serif"],
+                mont: ['"Montserrat"', "sans-serif"],
             },
             colors: {
                 red: "#e65237",

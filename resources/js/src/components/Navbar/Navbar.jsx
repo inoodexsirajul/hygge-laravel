@@ -271,7 +271,7 @@ const Navbar = () => {
                                 </div>
                             </li>
 
-                            {["ABOUT", "CONTACT", "CAREER"].map((title) => (
+                            {["ABOUT", "CONTACT", "CUSTOMIZE"].map((title) => (
                                 <li key={title}>
                                     <Link
                                         to={`/${title.toLowerCase()}`}

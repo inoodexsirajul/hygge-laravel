@@ -39,6 +39,7 @@ import ReturnsPolicy from "./pages/ReturnsPolicy";
 import HowToOrder from "./pages/HowToOrder";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import LegalNotice from "./pages/LegalNotice";
+import CustomizePage from "./pages/CustomizePage";
 
 const App = () => {
     const location = useLocation();
@@ -100,6 +101,7 @@ const App = () => {
                     <Route path="customer-register" element={<Register />} />
                     <Route path="verify-email-f" element={<VerifyEmail />} />
                     <Route path="career" element={<Career />} />
+                    <Route path="customize" element={<CustomizePage />} />
                     <Route
                         path="update-password"
                         element={<UpdatePassword />}

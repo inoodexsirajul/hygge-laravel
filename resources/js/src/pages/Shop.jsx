@@ -182,28 +182,25 @@ const Shop = () => {
     const isChecked = (id, type = "cat") => {
         if (type === "brand") return selectedBrands.includes(id);
         if (type === "color") return selectedColors.includes(id);
-        if (type === "size") return selectedSizes.includes(id); // ← নতুন
+        if (type === "size") return selectedSizes.includes(id);
         return selectedCategories.includes(id);
     };
 
-    // Handlers
-    // const handleRangeChange = (values) => {
-    //     setRangeValues(values);
-    //     updateURL({
-    //         min_price: values[0] > 0 ? values[0] : "",
-    //         max_price: values[1] < 5000 ? values[1] : "",
-    //         page: 1,
-    //     });
-    // };
     const handleRangeChange = (values) => {
-        const newMin = values[0];
+        const [newMin, newMax] = values;
 
-        // ম্যাক্স সবসময় ৫০০০ ফিক্সড
-        setRangeValues([newMin, 5000]);
+        setRangeValues([newMin, newMax]);
+
+        const shouldSetMaxTo5000 = newMin > 0;
+        const finalMaxPrice = shouldSetMaxTo5000
+            ? 5000
+            : newMax < 5000
+            ? newMax
+            : "";
 
         updateURL({
             min_price: newMin > 0 ? newMin : "",
-            max_price: 5000, // সবসময় ৫০০০ পাঠাবে
+            max_price: finalMaxPrice,
             page: 1,
         });
     };
@@ -343,7 +340,7 @@ const Shop = () => {
                                     <button
                                         key={cat.id}
                                         onClick={() => toggleCategory(cat.id)}
-                                        className={`flex items-center gap-3 w-full text-left mt-2 ${
+                                        className={`flex items-center gap-3 w-full text-left mt-2 font-mont ${
                                             isChecked(cat.id)
                                                 ? "text-cream font-medium"
                                                 : "text-gray"

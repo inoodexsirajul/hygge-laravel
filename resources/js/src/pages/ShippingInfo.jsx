@@ -10,21 +10,21 @@ import {
 
 const ShippingInfo = () => {
     return (
-        <div className="min-h-screen bg-cream py-20 px-6 2xl:px-20">
+        <div className="min-h-screen bg-dark1 py-20 px-6 2xl:px-20">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-xl lg:text-4xl font-bold text-dark2 mb-4">
+                    <h1 className="text-xl lg:text-4xl font-bold text-cream mb-4">
                         Shipping Information
                     </h1>
-                    <p className="text-sm lg:text-xl text-gray-700">
+                    <p className="text-sm lg:text-xl text-gray">
                         From Copenhagen with love ♡
                     </p>
                 </div>
 
                 {/* Main Card */}
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                    <div className="bg-linear-to-r from-red/60 to-red/80 py-12 text-center">
+                <div className="bg-dark1 rounded-3xl shadow-2xl overflow-hidden">
+                    <div className="bg-dark2 py-10 text-center">
                         <FaTruck className="text-6xl text-cream mx-auto mb-4" />
                         <p className="text-cream text-2xl font-medium">
                             Every order is packed with care
@@ -34,14 +34,14 @@ const ShippingInfo = () => {
                     <div className="p-12 md:p-16">
                         <div className="grid md:grid-cols-2 gap-10 max-w-3xl mx-auto">
                             <div className="flex gap-6">
-                                <div className="w-16 h-16 bg-red/30 rounded-full shrink-0 flex items-center justify-center">
-                                    <FaGlobeEurope className="text-3xl text-red" />
+                                <div className="w-16 h-16 bg-dark2 rounded-full shrink-0 flex items-center justify-center">
+                                    <FaGlobeEurope className="text-3xl text-cream" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-dark2 mb-2">
+                                    <h3 className="text-xl font-bold text-cream mb-2">
                                         We Ship From
                                     </h3>
-                                    <p className="text-gray-700 leading-relaxed">
+                                    <p className="text-gray leading-relaxed">
                                         Denmark — straight from Copenhagen to
                                         <strong>most EU countries</strong>.
                                     </p>
@@ -49,14 +49,14 @@ const ShippingInfo = () => {
                             </div>
 
                             <div className="flex gap-6">
-                                <div className="w-16 h-16 bg-red/30 rounded-full shrink-0 flex items-center justify-center">
-                                    <FaClock className="text-3xl text-red" />
+                                <div className="w-16 h-16 bg-dark2 rounded-full shrink-0 flex items-center justify-center">
+                                    <FaClock className="text-3xl text-cream" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-dark2 mb-2">
+                                    <h3 className="text-xl font-bold text-cream mb-2">
                                         Processing Time
                                     </h3>
-                                    <p className="text-gray-700 leading-relaxed">
+                                    <p className="text-gray leading-relaxed">
                                         Orders are processed within{" "}
                                         <strong>3–7 business days</strong>.
                                         <br />
@@ -69,14 +69,14 @@ const ShippingInfo = () => {
                             </div>
 
                             <div className="flex gap-6">
-                                <div className="w-16 h-16 bg-red/30 rounded-full shrink-0 flex items-center justify-center">
-                                    <FaTruck className="text-3xl text-red" />
+                                <div className="w-16 h-16 bg-dark2 rounded-full shrink-0 flex items-center justify-center">
+                                    <FaTruck className="text-3xl text-cream" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-dark2 mb-2">
+                                    <h3 className="text-xl font-bold text-cream mb-2">
                                         Delivery Time
                                     </h3>
-                                    <p className="text-gray-700 leading-relaxed">
+                                    <p className="text-gray leading-relaxed">
                                         Depends on your location —{" "}
                                         <strong>
                                             clearly shown at checkout
@@ -87,14 +87,14 @@ const ShippingInfo = () => {
                             </div>
 
                             <div className="flex gap-6">
-                                <div className="w-16 h-16 bg-red/30 rounded-full shrink-0 flex items-center justify-center">
-                                    <FaBoxOpen className="text-3xl text-red" />
+                                <div className="w-16 h-16 bg-dark2 rounded-full shrink-0 flex items-center justify-center">
+                                    <FaBoxOpen className="text-3xl text-cream" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-dark2 mb-2">
+                                    <h3 className="text-xl font-bold text-cream mb-2">
                                         Packaging
                                     </h3>
-                                    <p className="text-gray-700 leading-relaxed">
+                                    <p className="text-gray leading-relaxed">
                                         Every parcel is packed carefully by hand
                                         to ensure your products arrive{" "}
                                         <strong>safely and beautifully</strong>.
@@ -104,16 +104,16 @@ const ShippingInfo = () => {
                         </div>
 
                         <div className="mt-16 pt-10 border-t border-gray-200 text-center">
-                            <p className="text-2xl text-gray-800 font-medium italic flex items-center justify-center gap-3">
-                                <FaHeart className="text-red" />
+                            <p className="text-2xl text-gray font-medium italic flex items-center justify-center gap-3">
+                                <FaHeart className="text-cream" />
                                 We don’t just ship products — we deliver comfort
-                                <FaHeart className="text-red" />
+                                <FaHeart className="text-cream" />
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <p className="text-center text-gray-600 mt-12">
+                <p className="text-center text-gray mt-12">
                     Questions about shipping? Just drop us a message at
                     support@hyggecotton.dk
                 </p>

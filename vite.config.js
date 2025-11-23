@@ -9,7 +9,7 @@ export default defineConfig({
             input: ["resources/css/app.css", "resources/js/app.jsx"],
             refresh: false, // production
             build: {
-                outDir: "public_html/build",
+                outDir: "../public_html/build",
                 emptyOutDir: true,
                 manifest: true,
                 rollupOptions: {
@@ -23,7 +23,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     build: {
-        outDir: "public_html/build",
+        outDir: "../public_html/build",
         emptyOutDir: true,
         manifest: true,
         minify: "esbuild",

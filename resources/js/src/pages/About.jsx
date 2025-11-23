@@ -6,15 +6,15 @@ import founder from "../assets/founder.jpg";
 
 const About = () => {
     return (
-        <div className="min-h-screen bg-cream text-dark2">
+        <div className="min-h-screen bg-dark1 text-dark2">
             {/* Hero Section */}
             <section className="relative py-24 px-5 2xl:px-20 overflow-hidden">
                 <div className="max-w-6xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                    <h1 className="text-4xl text-cream md:text-6xl font-bold mb-6 leading-tight">
                         Welcome to{" "}
-                        <span className="text-red">Hygge Cotton</span>
+                        <span className="text-cream">Hygge Cotton</span>
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-700 max-w-xl mx-auto leading-relaxed">
+                    <p className="text-xl md:text-2xl text-gray max-w-xl mx-auto leading-relaxed">
                         Where comfort meets conscience. Inspired by the Danish
                         art of living well —
                         <span className="font-medium text-red">hygge</span> — we
@@ -29,34 +29,34 @@ const About = () => {
             </section>
 
             {/* Our Story */}
-            <section className="py-20 px-5 2xl:px-20 bg-dark1/5">
+            <section className="py-20 px-5 2xl:px-20 bg-dark2">
                 <div className="max-w-xl mx-auto   gap-12 items-center text-center">
                     <div>
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-cream">
                             Our Story
                         </h2>
-                        <p className="text-lg leading-relaxed text-gray-700 mb-6">
+                        <p className="text-lg leading-relaxed text-gray mb-6">
                             Hygge Cotton was born in the heart of Copenhagen as
                             a brother brand of{" "}
-                            <span className="font-semibold text-green-700">
+                            <span className="font-semibold text-red">
                                 Danish Souvenir
                             </span>
                             .
                         </p>
-                        <p className="text-lg leading-relaxed text-gray-700">
+                        <p className="text-lg leading-relaxed text-gray">
                             Founded by <strong>Mohammed Tofayel</strong> with
                             nothing but a dream, a small budget, and an
                             unbreakable passion for authentic Danish
                             craftsmanship — what started as a one-man journey
                             has now blossomed into a beloved lifestyle brand.
                         </p>
-                        <p className="text-lg leading-relaxed text-gray-700 mt-6">
+                        <p className="text-lg leading-relaxed text-gray mt-6">
                             In 2025, we took a brave step forward. We wanted
                             more than souvenirs. We wanted to bring{" "}
                             <em>true comfort</em> into people's daily lives —
                             sustainably, thoughtfully, and beautifully.
                         </p>
-                        <p className="text-lg leading-relaxed font-medium text-green-800 mt-6">
+                        <p className="text-lg leading-relaxed font-medium text-red mt-6">
                             That’s when Hygge Cotton was born.
                         </p>
                         <button className="inline-block  bg-red text-cream p-6 rounded-xl shadow-xl mt-4">
@@ -81,7 +81,7 @@ const About = () => {
             {/* Philosophy Cards */}
             <section className="py-20 px-5 2xl:px-20">
                 <div className="max-w-6xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-cream">
                         Our Philosophy
                     </h2>
                     <div className="grid md:grid-cols-3 gap-10">
@@ -95,7 +95,7 @@ const About = () => {
                             },
                             {
                                 icon: (
-                                    <FaLeaf className="text-5xl text-green-600" />
+                                    <FaLeaf className="text-5xl text-cream" />
                                 ),
                                 title: "Sustainability First",
                                 desc: "Natural, recycled cotton. Ethical production. A lighter footprint — because comfort should never cost the earth.",
@@ -110,7 +110,7 @@ const About = () => {
                         ].map((item, i) => (
                             <div
                                 key={i}
-                                className="bg-white rounded-3xl p-10 shadow-xl hover:shadow-2xl transition-shadow text-center"
+                                className="bg-dark2 rounded-3xl p-10 shadow-xl hover:shadow-2xl transition-shadow text-center"
                             >
                                 <div className="mb-6 flex justify-center">
                                     {item.icon}
@@ -118,7 +118,7 @@ const About = () => {
                                 <h3 className="text-2xl font-bold mb-4">
                                     {item.title}
                                 </h3>
-                                <p className="text-gray-600 leading-relaxed">
+                                <p className="text-gray leading-relaxed">
                                     {item.desc}
                                 </p>
                             </div>
@@ -126,46 +126,6 @@ const About = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Customization Section */}
-            {/* <section className="py-20 px-5 2xl:px-20 bg-green-50">
-                <div className="max-w-6xl mx-auto text-center">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-8">
-                        Customization — Made for You
-                    </h2>
-                    <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed mb-12">
-                        Your comfort should feel personal. That’s why every
-                        T-shirt, hoodie, or tote bag can be custom-made with
-                        your design, your words, your story.
-                    </p>
-                    <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                        <div className="bg-white p-8 rounded-2xl shadow-lg">
-                            <img
-                                src="/images/custom1.jpg"
-                                alt="Custom Print"
-                                className="w-full h-64 object-cover rounded-xl mb-4"
-                            />
-                            <p className="font-semibold">Upload Your Art</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-2xl shadow-lg">
-                            <img
-                                src="/images/custom2.jpg"
-                                alt="Custom Hoodie"
-                                className="w-full h-64 object-cover rounded-xl mb-4"
-                            />
-                            <p className="font-semibold">We Perfect It</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-2xl shadow-lg">
-                            <img
-                                src="/images/custom3.jpg"
-                                alt="Happy Customer"
-                                className="w-full h-64 object-cover rounded-xl mb-4"
-                            />
-                            <p className="font-semibold">Wear Your Story</p>
-                        </div>
-                    </div>
-                </div>
-            </section> */}
 
             {/* Values Grid */}
             <section className="py-20 px-5 2xl:px-20">
@@ -196,7 +156,7 @@ const About = () => {
                             desc: "Growing slowly, sustainably, and with purpose.",
                             icon: (
                                 <FaLeaf
-                                    className="text-green-600 text-4xl"
+                                    className="text-cream text-4xl"
                                     size={60}
                                 />
                             ),
@@ -207,17 +167,17 @@ const About = () => {
                             className="text-center flex flex-col items-center"
                         >
                             <div className="text-6xl mb-4">{val.icon}</div>
-                            <h3 className="text-2xl font-bold mb-3">
+                            <h3 className="text-2xl font-bold mb-3 text-cream">
                                 {val.title}
                             </h3>
-                            <p className="text-gray-600">{val.desc}</p>
+                            <p className="text-gray">{val.desc}</p>
                         </div>
                     ))}
                 </div>
             </section>
 
             {/* Mission & Vision */}
-            <section className="py-20 px-5 2xl:px-20 bg-dark1 text-cream">
+            <section className="py-20 px-5 2xl:px-20 bg-dark2 text-cream">
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16">
                     <div className="text-center md:text-left">
                         <h2 className="text-4xl md:text-5xl font-bold mb-8">
@@ -246,16 +206,16 @@ const About = () => {
             {/* Final CTA */}
             <section className="py-20 px-5 2xl:px-20 text-center">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-8">
+                    <h2 className="text-4xl md:text-5xl font-bold mb-8 text-cream">
                         You’re not just buying cotton.
                         <br />
-                        <span className="text-green-700">
+                        <span className="text-gray">
                             You’re choosing comfort.
                         </span>
                     </h2>
                     <Link
                         to="/shop"
-                        className="inline-block bg-green-700 text-cream px-12 py-5 rounded-full text-xl font-semibold hover:bg-green-800 transition shadow-xl"
+                        className="inline-block bg-red text-cream px-12 py-5 rounded-full text-xl font-semibold hover:bg-green-800 transition shadow-xl"
                     >
                         Explore Our Collection →
                     </Link>

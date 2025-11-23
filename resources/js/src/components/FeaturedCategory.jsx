@@ -2,10 +2,12 @@ import React from "react";
 import { useNavigate } from "react-router";
 import { useGetCategoriesQuery } from "../redux/services/eCommerceApi";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
+import { Autoplay, Navigation } from "swiper/modules"; // Navigation যোগ করলাম
 import "swiper/css";
+import "swiper/css/navigation"; // এই লাইনটা যোগ করো
 
-// Skeleton Card Component (একদম তোর ডিজাইনের মতো)
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa"; // react-icons
+
 const CategorySkeleton = () => (
     <div className="group cursor-pointer transform transition-all duration-300 mt-8">
         <div className="relative overflow-hidden rounded-lg shadow-2xl ring-4 ring-transparent">
@@ -26,7 +28,6 @@ const FeaturedCategory = () => {
         navigate(`/shop?category_ids[]=${categoryId}`);
     };
 
-    // লোডিং স্টেট — সুন্দর স্কেলিটন
     if (isLoading) {
         return (
             <div className="px-[18px] pt-[19px] lg:pt-[125px] pb-[33px] lg:pb-[100px] bg-dark2 lg:px-20">
@@ -34,15 +35,11 @@ const FeaturedCategory = () => {
                     <h2 className="text-3xl md:text-4xl font-bold text-cream text-center mb-12 tracking-wide">
                         Featured Categories
                     </h2>
-
-                    {/* Skeleton Grid — তোর আসল গ্রিডের মতো */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 lg:gap-8">
                         {[...Array(6)].map((_, i) => (
                             <CategorySkeleton key={i} />
                         ))}
                     </div>
-
-                    {/* Skeleton Button */}
                     <div className="text-center mt-12">
                         <div className="inline-block px-8 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-full w-64 h-12 animate-pulse"></div>
                     </div>
@@ -51,25 +48,38 @@ const FeaturedCategory = () => {
         );
     }
 
-    // যদি ডেটা না থাকে
-    if (!data || data.length === 0) {
-        return null;
-    }
+    if (!data || data.length === 0) return null;
 
-    // তোর আসল কন্টেন্ট — একদম আগের মতোই
     return (
-        <div className="px-[18px] pt-[19px] lg:pt-[125px] pb-[33px] lg:pb-[100px] bg-dark2 lg:px-20">
+        <div className="px-[18px] pt-[19px] lg:pt-[125px] pb-[33px] lg:pb-[100px] bg-dark2 lg:px-20 relative">
             <div className="max-w-7xl mx-auto">
                 <h2 className="text-3xl md:text-4xl font-bold text-cream text-center mb-12 tracking-wide">
                     Featured Categories
                 </h2>
 
+                {/* Arrows - বাম ও ডানে */}
+                <div className="hidden lg:flex absolute inset-y-0 left-20 items-center -ml-10 z-10">
+                    <button className="cursor-pointer featured-prev-btn w-12 h-12 bg-red/30 hover:bg-red/60 backdrop-blur-sm border border-red/50 rounded-full flex items-center justify-center text-cream shadow-2xl hover:shadow-red/50 transition-all duration-300">
+                        <FaChevronLeft size={24} />
+                    </button>
+                </div>
+
+                <div className="hidden lg:flex absolute inset-y-0 right-20 items-center -mr-10 z-10">
+                    <button className="cursor-pointer featured-next-btn w-12 h-12 bg-red/30 hover:bg-red/60 backdrop-blur-sm border border-red/50 rounded-full flex items-center justify-center text-cream shadow-2xl hover:shadow-red/50 transition-all duration-300">
+                        <FaChevronRight size={24} />
+                    </button>
+                </div>
+
                 <Swiper
-                    modules={[Autoplay]}
+                    modules={[Autoplay, Navigation]} // Navigation যোগ করলাম
                     spaceBetween={24}
                     slidesPerView={2}
                     autoplay={{ delay: 4000, disableOnInteraction: false }}
                     loop={data.length > 6}
+                    navigation={{
+                        nextEl: ".featured-next-btn",
+                        prevEl: ".featured-prev-btn",
+                    }}
                     breakpoints={{
                         640: { slidesPerView: 3, spaceBetween: 20 },
                         768: { slidesPerView: 4, spaceBetween: 24 },
@@ -77,7 +87,7 @@ const FeaturedCategory = () => {
                         1280: { slidesPerView: 6, spaceBetween: 30 },
                         1536: { slidesPerView: 6, spaceBetween: 32 },
                     }}
-                    className="featured-category-swiper"
+                    className="featured-category-swiper pb-10"
                 >
                     {data.map((cate) => (
                         <SwiperSlide key={cate?.id}>

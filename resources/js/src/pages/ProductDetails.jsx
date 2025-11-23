@@ -622,6 +622,7 @@ const ProductDetails = () => {
             )}
 
             {/* Product Tabs - অপরিবর্তিত */}
+            {/* Product Tabs */}
             {!isLoading && !error && (
                 <div className="pt-[129px] pb-[60px]">
                     <Tabs>
@@ -636,12 +637,211 @@ const ProductDetails = () => {
                             </TabList>
                         </div>
 
+                        {/* product review tab  */}
                         <TabPanel className="text-cream">
-                            {/* তোমার রিভিউ সেকশন... */}
-                        </TabPanel>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-20">
+                                <div>
+                                    {data?.reviews?.length > 0 ? (
+                                        data.reviews.map((review) => (
+                                            <div
+                                                key={review?.id}
+                                                className="flex gap-4 3xl:gap-[43px] pr-0 lg:pr-[50px] 3xl:pr-[221px] mb-[30px] xl:mb-20"
+                                            >
+                                                <div className="w-11">
+                                                    <img
+                                                        src={`/${review?.user?.image}`}
+                                                        alt={`${
+                                                            review?.user
+                                                                ?.name ||
+                                                            "Anonymous"
+                                                        }'s avatar`}
+                                                        className="w-11 h-11 rounded-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex flex-col xl:flex-row justify-between flex-wrap xl:items-center mb-4 xl:mb-[37px]">
+                                                        <h4 className="text-[24px] font-bold text-cream">
+                                                            {review?.user
+                                                                ?.name ||
+                                                                "Anonymous"}
+                                                        </h4>
+                                                        <div className="flex items-center gap-4">
+                                                            <Rating
+                                                                initialRating={
+                                                                    review?.rating ||
+                                                                    0
+                                                                }
+                                                                emptySymbol={
+                                                                    <MdOutlineStarBorder className="text-red text-[18px]" />
+                                                                }
+                                                                fullSymbol={
+                                                                    <MdOutlineStar className="text-red text-[18px]" />
+                                                                }
+                                                                readonly
+                                                            />
+                                                            <p className="text-gray text-sm xl:text-[18px]">
+                                                                {formatReviewDate(
+                                                                    review?.created_at
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="pr-0 xl:pr-[100px]">
+                                                        <p className="text-gray text-sm xl:text-[18px] font-normal">
+                                                            {review?.comment ||
+                                                                "No comment provided"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray text-[18px]">
+                                            No reviews yet
+                                        </p>
+                                    )}
+                                </div>
 
+                                <div>
+                                    <h4 className="text-[24px] font-normal text-cream mb-[18px]">
+                                        Write a review
+                                    </h4>
+                                    <form>
+                                        <div className="mb-[25px]">
+                                            <Rating
+                                                initialRating={reviewRating}
+                                                emptySymbol={
+                                                    <MdOutlineStarBorder className="text-red text-[24px]" />
+                                                }
+                                                fullSymbol={
+                                                    <MdOutlineStar className="text-red text-[24px]" />
+                                                }
+                                                onChange={(value) =>
+                                                    setReviewRating(value)
+                                                }
+                                            />
+                                        </div>
+                                        <textarea
+                                            value={reviewComment}
+                                            onChange={(e) =>
+                                                setReviewComment(e.target.value)
+                                            }
+                                            className="w-full bg-dark1 border-0 focus:border-0 focus:outline-0 p-4 h-[200px] text-cream text-[18px]"
+                                            placeholder="Write your comment here"
+                                            aria-label="Review comment"
+                                        ></textarea>
+                                        {reviewError && (
+                                            <p className="text-red-500 text-[18px] mt-2">
+                                                Error:{" "}
+                                                {reviewError?.data?.message ||
+                                                    "Failed to submit review"}
+                                            </p>
+                                        )}
+                                        <p className="text-gray text-[18px] mt-2">
+                                            How we use your data: We'll only
+                                            contact you about the review you
+                                            left, and only if necessary. By
+                                            submitting your review, you agree to
+                                            Judge.me's terms, privacy, and
+                                            content policies.
+                                        </p>
+                                        <button
+                                            type="submit"
+                                            onClick={handleReviewSubmit}
+                                            className="flex items-center gap-2 py-[30px] px-[60px] border border-cream mt-9 rounded-[10px] cursor-pointer text-cream text-[18px] font-semibold hover:bg-cream hover:text-dark2 transition-all"
+                                            disabled={isReviewSubmitting}
+                                        >
+                                            {isReviewSubmitting
+                                                ? "Submitting..."
+                                                : "SUBMIT REVIEW"}
+                                            <GoArrowRight />
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </TabPanel>
+                        {/* full description tab  */}
                         <TabPanel className="text-cream">
-                            {/* তোমার ডিসক্রিপশন সেকশন... */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div className="w-full flex justify-center pt-8">
+                                    <img
+                                        src={`/${data?.product?.thumb_image}`}
+                                        alt={data?.product?.name}
+                                    />
+                                </div>
+                                <div className="pt-20">
+                                    <h4 className="text-[24px] font-bold text-cream mb-8">
+                                        {data?.product?.name ||
+                                            "Unknown Product"}
+                                    </h4>
+                                    <div className="max-w-md">
+                                        <p
+                                            className="text-sm xl:text-[18px] text-gray font-normal mb-4"
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    data?.product
+                                                        ?.long_description ||
+                                                    "No description available",
+                                            }}
+                                        />
+                                    </div>
+                                    {/* <table className="mt-[72px]">
+                                        <tbody>
+                                            <tr>
+                                                <th className="text-left py-2 text-cream">
+                                                    Material
+                                                </th>
+                                                <td className="p-2 text-cream">
+                                                    {data?.product?.material ||
+                                                        "100% Cotton"}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th className="text-left py-2 text-cream">
+                                                    Brand
+                                                </th>
+                                                <td className="p-2 text-cream">
+                                                    {data?.product?.brand ||
+                                                        "Hygee"}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th className="text-left py-2 text-cream">
+                                                    Color
+                                                </th>
+                                                <td className="p-2 text-cream">
+                                                    {selectedColor?.color_name ||
+                                                        "Not selected"}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th className="text-left py-2 text-cream">
+                                                    Size
+                                                </th>
+                                                <td className="p-2 text-cream">
+                                                    {data?.product?.sizes
+                                                        ?.find(
+                                                            (size) =>
+                                                                size.size_id ===
+                                                                selectedSizeId
+                                                        )
+                                                        ?.size_name?.toUpperCase() ||
+                                                        "Not selected"}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th className="text-left py-2 text-cream">
+                                                    Origin
+                                                </th>
+                                                <td className="p-2 text-cream">
+                                                    {data?.product?.origin ||
+                                                        "Denmark"}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table> */}
+                                </div>
+                            </div>
                         </TabPanel>
                     </Tabs>
                 </div>

@@ -1,111 +1,18 @@
 import React, { useState } from "react";
 import { IoLocationSharp } from "react-icons/io5";
 import { MdOutlineLocalPhone, MdEmail } from "react-icons/md";
+
 import {
     useGetContactQuery,
     useGetFooterQuery,
 } from "../redux/services/eCommerceApi";
 import axios from "axios";
+// import baseurl from "../utils/url";
 
 const API_URL = `/api/v1/contact-us`;
 
-// Skeleton Component - তোমার ডিজাইনের সাথে ১০০% মিল
-const ContactSkeleton = () => {
-    return (
-        <div className="min-h-screen bg-dark1 py-12 px-5 2xl:px-20 animate-pulse">
-            <div className="">
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <div className="h-12 bg-gray-800 rounded-2xl w-64 mx-auto mb-4"></div>
-                    <div className="h-4 bg-gray-800 rounded-full w-96 mx-auto"></div>
-                    <div className="h-4 bg-gray-800 rounded-full w-80 mx-auto mt-3"></div>
-                </div>
-
-                {/* Branches - ৪টা কার্ড */}
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-[30px] mb-8">
-                    {[...Array(4)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="bg-dark2 rounded-xl overflow-hidden"
-                        >
-                            <div className="p-6">
-                                <div className="h-8 bg-gray-700 rounded-lg w-48 mb-4"></div>
-                                <div className="h-4 bg-gray-700 rounded-full w-full"></div>
-                                <div className="h-4 bg-gray-700 rounded-full w-11/12 mt-2"></div>
-                                <div className="h-4 bg-gray-700 rounded-full w-10/12 mt-2"></div>
-                            </div>
-                            <div className="bg-gray-800 h-64 w-full"></div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Main Contact Area */}
-                <div className="flex flex-col lg:flex-row gap-12">
-                    {/* Left - Contact Info */}
-                    <div className="lg:w-2/5">
-                        <div className="bg-dark2 rounded-2xl p-8 shadow-lg">
-                            <div className="h-10 bg-gray-700 rounded-xl w-64 mb-8"></div>
-                            <div className="space-y-8">
-                                {[...Array(3)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-start gap-4"
-                                    >
-                                        <div className="w-12 h-12 bg-gray-700 rounded-full"></div>
-                                        <div className="flex-1">
-                                            <div className="h-6 bg-gray-700 rounded-lg w-24 mb-3"></div>
-                                            <div className="h-4 bg-gray-700 rounded-full w-56"></div>
-                                            <div className="h-4 bg-gray-700 rounded-full w-48 mt-2"></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right - Form */}
-                    <div className="lg:w-3/5">
-                        <div className="bg-dark2 rounded-2xl p-8 shadow-lg">
-                            <div className="h-10 bg-gray-700 rounded-xl w-56 mb-8"></div>
-                            <div className="space-y-6">
-                                {/* Name Row */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <div className="h-5 bg-gray-700 rounded-full w-24 mb-3"></div>
-                                        <div className="h-12 bg-gray-800 rounded-lg"></div>
-                                    </div>
-                                    <div>
-                                        <div className="h-5 bg-gray-700 rounded-full w-24 mb-3"></div>
-                                        <div className="h-12 bg-gray-800 rounded-lg"></div>
-                                    </div>
-                                </div>
-
-                                {/* Email, Phone, Subject */}
-                                {[...Array(3)].map((_, i) => (
-                                    <div key={i}>
-                                        <div className="h-5 bg-gray-700 rounded-full w-32 mb-3"></div>
-                                        <div className="h-12 bg-gray-800 rounded-lg"></div>
-                                    </div>
-                                ))}
-
-                                {/* Message */}
-                                <div>
-                                    <div className="h-5 bg-gray-700 rounded-full w-20 mb-3"></div>
-                                    <div className="h-32 bg-gray-800 rounded-lg"></div>
-                                </div>
-
-                                {/* Submit Button */}
-                                <div className="h-14 bg-gray-700 rounded-lg w-full"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const ContactPage = () => {
+    // Form state
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -118,6 +25,7 @@ const ContactPage = () => {
     const [submitStatus, setSubmitStatus] = useState("idle"); // idle | loading | success | error
     const [errorMsg, setErrorMsg] = useState("");
 
+    // Branch data
     const {
         data: branchData,
         isLoading: branchLoading,
@@ -127,24 +35,13 @@ const ContactPage = () => {
     const { data: contactInfo, isLoading: contactLoading } =
         useGetFooterQuery();
 
-    // Skeleton Loading - দুটো API লোডিং হলে দেখাবে
-    if (branchLoading || contactLoading) {
-        return <ContactSkeleton />;
-    }
-
-    if (isError) {
-        return (
-            <h2 className="text-center text-red-500">
-                Failed to load branches
-            </h2>
-        );
-    }
-
+    // Input change handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Form submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitStatus("loading");
@@ -182,6 +79,15 @@ const ContactPage = () => {
             setErrorMsg(msg);
         }
     };
+
+    if (branchLoading)
+        return <h2 className="text-center text-cream">Loading…</h2>;
+    if (isError)
+        return (
+            <h2 className="text-center text-red-500">
+                Failed to load branches
+            </h2>
+        );
 
     return (
         <div className="min-h-screen bg-dark1 py-12 px-5 2xl:px-20">
@@ -238,60 +144,63 @@ const ContactPage = () => {
                             </h2>
 
                             <div className="space-y-6">
-                                {contactInfo?.footer_info?.address && (
-                                    <div className="flex items-start">
-                                        <div className="bg-blue-100 p-3 rounded-full mr-4">
-                                            <IoLocationSharp />
+                                {contactInfo?.footer_info?.address &&
+                                    !contactLoading && (
+                                        <div className="flex items-start">
+                                            <div className="bg-blue-100 p-3 rounded-full mr-4">
+                                                <IoLocationSharp />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-medium text-cream">
+                                                    Address
+                                                </h3>
+                                                <p className="text-gray">
+                                                    {
+                                                        contactInfo?.footer_info
+                                                            ?.address
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-medium text-cream">
-                                                Address
-                                            </h3>
-                                            <p className="text-gray">
-                                                {
-                                                    contactInfo?.footer_info
-                                                        ?.address
-                                                }
-                                            </p>
+                                    )}
+                                {contactInfo?.footer_info?.phone &&
+                                    !contactLoading && (
+                                        <div className="flex items-start">
+                                            <div className="bg-blue-100 p-3 rounded-full mr-4">
+                                                <MdOutlineLocalPhone />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-medium text-cream">
+                                                    Phone
+                                                </h3>
+                                                <p className="text-gray">
+                                                    {
+                                                        contactInfo?.footer_info
+                                                            ?.phone
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                                {contactInfo?.footer_info?.phone && (
-                                    <div className="flex items-start">
-                                        <div className="bg-blue-100 p-3 rounded-full mr-4">
-                                            <MdOutlineLocalPhone />
+                                    )}
+                                {contactInfo?.footer_info?.email &&
+                                    !contactLoading && (
+                                        <div className="flex items-start">
+                                            <div className="bg-blue-100 p-3 rounded-full mr-4">
+                                                <MdEmail />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-medium text-cream">
+                                                    Email
+                                                </h3>
+                                                <p className="text-gray">
+                                                    {
+                                                        contactInfo?.footer_info
+                                                            ?.email
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-medium text-cream">
-                                                Phone
-                                            </h3>
-                                            <p className="text-gray">
-                                                {
-                                                    contactInfo?.footer_info
-                                                        ?.phone
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                                {contactInfo?.footer_info?.email && (
-                                    <div className="flex items-start">
-                                        <div className="bg-blue-100 p-3 rounded-full mr-4">
-                                            <MdEmail />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-medium text-cream">
-                                                Email
-                                            </h3>
-                                            <p className="text-gray">
-                                                {
-                                                    contactInfo?.footer_info
-                                                        ?.email
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
+                                    )}
                             </div>
                         </div>
                     </div>
@@ -307,11 +216,15 @@ const ContactPage = () => {
                                 {/* Name Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-cream mb-2">
+                                        <label
+                                            htmlFor="firstName"
+                                            className="block text-sm font-medium text-cream mb-2"
+                                        >
                                             First name
                                         </label>
                                         <input
                                             type="text"
+                                            id="firstName"
                                             name="firstName"
                                             value={formData.firstName}
                                             onChange={handleInputChange}
@@ -319,12 +232,17 @@ const ContactPage = () => {
                                             required
                                         />
                                     </div>
+
                                     <div>
-                                        <label className="block text-sm font-medium text-cream mb-2">
+                                        <label
+                                            htmlFor="lastName"
+                                            className="block text-sm font-medium text-cream mb-2"
+                                        >
                                             Last name
                                         </label>
                                         <input
                                             type="text"
+                                            id="lastName"
                                             name="lastName"
                                             value={formData.lastName}
                                             onChange={handleInputChange}
@@ -334,12 +252,17 @@ const ContactPage = () => {
                                     </div>
                                 </div>
 
+                                {/* Email */}
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label
+                                        htmlFor="email"
+                                        className="block text-sm font-medium text-cream mb-2"
+                                    >
                                         Email
                                     </label>
                                     <input
                                         type="email"
+                                        id="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
@@ -348,12 +271,17 @@ const ContactPage = () => {
                                     />
                                 </div>
 
+                                {/* Phone */}
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label
+                                        htmlFor="phone"
+                                        className="block text-sm font-medium text-cream mb-2"
+                                    >
                                         Phone number
                                     </label>
                                     <input
                                         type="tel"
+                                        id="phone"
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleInputChange}
@@ -361,25 +289,35 @@ const ContactPage = () => {
                                     />
                                 </div>
 
+                                {/* Subject */}
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label
+                                        htmlFor="subject"
+                                        className="block text-sm font-medium text-cream mb-2"
+                                    >
                                         Subject
                                     </label>
                                     <input
                                         type="text"
+                                        id="subject"
                                         name="subject"
                                         value={formData.subject}
                                         onChange={handleInputChange}
-                                        placeholder="e.g. General Inquiry"
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg text-cream outline-none transition"
+                                        placeholder="e.g. General Inquiry"
                                     />
                                 </div>
 
+                                {/* Message */}
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label
+                                        htmlFor="message"
+                                        className="block text-sm font-medium text-cream mb-2"
+                                    >
                                         Message
                                     </label>
                                     <textarea
+                                        id="message"
                                         name="message"
                                         rows={5}
                                         value={formData.message}
@@ -389,15 +327,19 @@ const ContactPage = () => {
                                     />
                                 </div>
 
+                                {/* Submit Button + Feedback */}
                                 <div>
                                     <button
                                         type="submit"
                                         disabled={submitStatus === "loading"}
-                                        className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
-                                            submitStatus === "loading"
-                                                ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-                                                : "bg-red text-white hover:bg-red-700"
-                                        }`}
+                                        className={`
+                      w-full py-3 px-6 rounded-lg font-medium transition-colors
+                      ${
+                          submitStatus === "loading"
+                              ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                              : "bg-red text-white hover:bg-red-700"
+                      }
+                    `}
                                     >
                                         {submitStatus === "loading"
                                             ? "Sending…"

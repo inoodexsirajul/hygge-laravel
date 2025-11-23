@@ -205,7 +205,7 @@ const Career = () => {
                                         required: "Name is required",
                                     })}
                                     placeholder="John Doe"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2   transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.name && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -228,7 +228,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="john@example.com"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2   transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.email && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -251,7 +251,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="+880 17XX-XXXXXX"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
                                 />
                                 {errors.phone && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -259,63 +259,19 @@ const Career = () => {
                                     </p>
                                 )}
                             </div>
-
-                            <div className="relative">
+                            <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Position{" "}
                                     <span className="text-red-400">*</span>
                                 </label>
-                                <select
+                                <input
+                                    type="text"
                                     {...register("position", {
-                                        required: "Please select a position",
+                                        required: "Position is required",
                                     })}
-                                    className="w-full px-5 py-3 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none    transition-all appearance-none cursor-pointer hover:bg-white/25"
-                                    defaultValue=""
-                                >
-                                    <option
-                                        value=""
-                                        disabled
-                                        className="bg-dark1"
-                                    >
-                                        -- Choose your position --
-                                    </option>
-                                    <option
-                                        value="Graphic Designer"
-                                        className="bg-dark1 text-cream"
-                                    >
-                                        Graphic Designer
-                                    </option>
-                                    <option
-                                        value="Sales Executive"
-                                        className="bg-dark1 text-cream"
-                                    >
-                                        Sales Executive
-                                    </option>
-                                    <option
-                                        value="Accountant"
-                                        className="bg-dark1 text-cream"
-                                    >
-                                        Accountant
-                                    </option>
-                                </select>
-
-                                {/* Custom Dropdown Arrow */}
-                                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none mt-8">
-                                    <svg
-                                        className="w-6 h-6 text-cream"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                </div>
-
+                                    placeholder="e.g. Graphic Designer"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                />
                                 {errors.position && (
                                     <p className="mt-2 text-sm text-red-400">
                                         {errors.position.message}
@@ -365,7 +321,6 @@ const Career = () => {
                                         accept="video/*"
                                         onChange={handleVideoChange}
                                         className="hidden"
-                                        required
                                     />
                                 </label>
                             ) : (
@@ -541,7 +496,7 @@ const Career = () => {
                                 })}
                                 rows="6"
                                 placeholder="Tell us why you're passionate about this role..."
-                                className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none   resize-none transition-all"
+                                className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red resize-none transition-all"
                             />
                             {errors.coverLetter && (
                                 <p className="mt-2 text-sm text-red-400">
