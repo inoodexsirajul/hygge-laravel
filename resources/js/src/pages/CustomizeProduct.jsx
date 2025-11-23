@@ -92,7 +92,7 @@ const CustomizeProduct = () => {
         }
     }, [redo, cartItemId, removeFromCart]);
 
-    const containerSizes = { width: "248px", height: "264px" };
+    const containerSizes = { width: "240px", height: "240px" };
 
     const [designs, setDesigns] = useState({
         front: {
@@ -657,7 +657,7 @@ const CustomizeProduct = () => {
 
                                         <div>
                                             <label className="block text-sm font-semibold text-cream mb-2">
-                                                Text Style
+                                                Font Style
                                             </label>
                                             <select
                                                 value={textItem.fontFamily}
@@ -673,7 +673,7 @@ const CustomizeProduct = () => {
                                                     <option
                                                         key={font.id}
                                                         value={font.value}
-                                                        className="text-dark1"
+                                                        className="text-cream"
                                                     >
                                                         {font.name}
                                                     </option>

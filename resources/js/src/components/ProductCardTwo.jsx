@@ -30,7 +30,7 @@ const ProductCardTwo = ({ product }) => {
         try {
             const cartItem = { product_id: product.id, qty: quantity };
             await addToCart(cartItem).unwrap();
-            refetch();
+            // refetch();
             toast.success("Product added to cart!");
         } catch (err) {
             toast.error(err?.data?.message || "Failed to add to cart");

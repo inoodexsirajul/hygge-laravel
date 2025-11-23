@@ -24,13 +24,13 @@ trait ImageUploadTrait
     }
 
     /** image upload handle with intervention */
-    public function uploadImage($request, $imageField, $directory, $width = 400, $height = 400)
+    public function uploadImage($request, $imageField, $directory, $width = 400, $height = 500)
     {
         if ($request->file($imageField)) {
             $image = $request->file($imageField);
 
             $width = $width ?: 400;
-            $height = $height ?: 400;
+            $height = $height ?: 500;
 
             $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
             $manager = new ImageManager(new Driver());
@@ -49,7 +49,7 @@ trait ImageUploadTrait
     }
 
     /** mulitple image upload */
-    public function uploadMultiImage(Request $request, $inputName, $directory, $width = 425, $height = 600)
+    public function uploadMultiImage(Request $request, $inputName, $directory, $width = 400, $height = 500)
     {
         $imagepaths = [];
         if ($request->hasFile($inputName)) {
@@ -65,7 +65,7 @@ trait ImageUploadTrait
         }
     }
     /** update image (handles optional width/height like uploadImage) */
-    public function updateImage($request, $imageField, $directory, $oldImage = null, $width = 400, $height = 400)
+    public function updateImage($request, $imageField, $directory, $oldImage = null, $width = 400, $height = 500)
     {
         if ($request->file($imageField)) {
             // delete old image if exists
@@ -75,7 +75,7 @@ trait ImageUploadTrait
 
             // fallback if null passed
             $width = $width ?: 400;
-            $height = $height ?: 400;
+            $height = $height ?: 500;
 
             // upload and return new image
             return $this->uploadImage($request, $imageField, $directory, $width, $height);
