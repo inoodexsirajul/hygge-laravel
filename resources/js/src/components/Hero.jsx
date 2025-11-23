@@ -53,7 +53,6 @@ const Hero = () => {
                                     alt={slide.title}
                                     loading="lazy"
                                     className="w-full max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] xl:max-w-[600px] object-contain"
-                                    loading="lazy"
                                 />
                             </div>
                             <div className="w-full order-1 lg:order-2 text-center lg:text-left px-4 sm:px-6 lg:px-0">

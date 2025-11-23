@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { IoSearchSharp } from "react-icons/io5";
 import { FaChevronDown, FaBars } from "react-icons/fa6";
-import { MdOutlineShoppingBag } from "react-icons/md";
 import { GrBasket } from "react-icons/gr";
 import {
     useGetCartDetailsQuery,
@@ -112,7 +111,7 @@ const Navbar = () => {
                 className={`px-4 sm:px-6 lg:px-10 xl:px-20 bg-dark2 flex justify-between items-center transition-all duration-500 ${
                     isSticky
                         ? "fixed top-0 left-0 right-0 z-50 py-4 shadow-md"
-                        : "py-6 lg:py-8"
+                        : "py-6 lg:py-4"
                 }`}
             >
                 <div
@@ -141,7 +140,7 @@ const Navbar = () => {
                             <li className="relative group">
                                 <Link
                                     to="/shop"
-                                    className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] cursor-pointer flex items-center text-lg"
+                                    className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] cursor-pointer flex items-center text-lg uppercase"
                                 >
                                     Our Products
                                     <FaChevronDown className="ml-2 text-xs transition-transform group-hover:rotate-180" />
