@@ -2,9 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
 import Modal from "react-modal";
 import { useDispatch } from "react-redux";
-import { MdOutlineFileDownload } from "react-icons/md";
 import { toast } from "react-toastify";
-import { FaEye } from "react-icons/fa";
 import {
     useGetProductDetailsQuery,
     useProductCustomizeMutation,
@@ -547,14 +545,14 @@ const CustomizeProduct = () => {
                     {/* Left: Form — শুধু এটার স্ক্রল হবে */}
                     <div className="order-2 md:order-1 bg-dark1 p-4 rounded-lg shadow-md md:max-h-screen md:overflow-y-auto">
                         {/* ট্যাব */}
-                        <div className="flex mb-8   rounded-xl   overflow-hidden border border-gray-700">
+                        <div className="flex mb-8 bg-gray-800/80 rounded-xl p-1.5 overflow-hidden border border-gray-700">
                             {["text", "image", "container"].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-300 ${
                                         activeTab === tab
-                                            ? "bg-cream text-dark1 shadow-lg shadow-purple-500/30"
+                                            ? "bg-linear-to-r from-pink-600 to-purple-600 text-white shadow-lg shadow-purple-500/30"
                                             : "text-gray-400 hover:text-white hover:bg-gray-700/70"
                                     }`}
                                 >
@@ -564,6 +562,7 @@ const CustomizeProduct = () => {
                         </div>
 
                         {/* Text Tab */}
+                        {/* Text Tab - 100% Error Free Accordion */}
                         {activeTab === "text" && (
                             <div className="space-y-4">
                                 {currentDesign.texts.map((textItem, index) => {
@@ -578,7 +577,7 @@ const CustomizeProduct = () => {
                                         >
                                             {/* Header */}
                                             <div
-                                                className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-700/80 transition-all duration-200"
+                                                className="flex items-center justify-between p-5 cursor-pointer hover:bg-gray-700/80 transition-all duration-200"
                                                 onClick={() =>
                                                     setOpenTextLayers(
                                                         (prev) => ({
@@ -591,12 +590,12 @@ const CustomizeProduct = () => {
                                                     )
                                                 }
                                             >
-                                                <h4 className="text-md font-bold text-white flex items-center gap-3">
-                                                    <span className="text-cream">
-                                                        Text {index + 1}
+                                                <h4 className="text-lg font-bold text-white flex items-center gap-3">
+                                                    <span className="text-purple-400">
+                                                        Text Layer {index + 1}
                                                     </span>
                                                     {textItem.title && (
-                                                        <span className="text-sm font-normal text-gray truncate max-w-xs">
+                                                        <span className="text-sm font-normal text-gray-300 truncate max-w-xs">
                                                             "{textItem.title}"
                                                         </span>
                                                     )}
@@ -837,9 +836,9 @@ const CustomizeProduct = () => {
 
                                 <button
                                     onClick={addNewText}
-                                    className="w-full py-3 mt-2 bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-md rounded-xl shadow-2xl  "
+                                    className="w-full py-5 mt-6 bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300"
                                 >
-                                    + Add New Text
+                                    + Add New Text Layer
                                 </button>
                             </div>
                         )}
@@ -1016,6 +1015,76 @@ const CustomizeProduct = () => {
                             </div>
                         )}
 
+                        {/* <div className="mb-4">
+                            <label className="block text-sm font-bold text-cream mb-2">
+                                Design Side
+                            </label>
+                            <div className="flex gap-4">
+                                {["front", "back"].map((side) => (
+                                    <button
+                                        key={side}
+                                        onClick={() => toggleSide(side)}
+                                        className={`px-4 py-2 rounded-lg ${
+                                            currentSide === side
+                                                ? "bg-blue-600 text-white"
+                                                : "bg-gray-300 text-dark1"
+                                        }`}
+                                    >
+                                        {side.charAt(0).toUpperCase() +
+                                            side.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div> */}
+
+                        <div className="mb-8">
+                            <label className="block text-lg font-semibold text-gray-200 mb-4">
+                                Select Side
+                            </label>
+                            <div className="flex gap-4">
+                                {["front", "back"].map((side) => (
+                                    <button
+                                        key={side}
+                                        onClick={() => toggleSide(side)}
+                                        className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg ${
+                                            currentSide === side
+                                                ? "bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/50"
+                                                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                        }`}
+                                    >
+                                        {side.charAt(0).toUpperCase() +
+                                            side.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={openPreview}
+                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4"
+                                disabled={
+                                    isUpdating ||
+                                    isCustomizeLoading ||
+                                    isCartLoading
+                                }
+                            >
+                                Preview Design
+                            </button>
+                            <button
+                                onClick={handleDownload}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4"
+                                disabled={
+                                    isUpdating ||
+                                    isCustomizeLoading ||
+                                    isCartLoading
+                                }
+                            >
+                                Download{" "}
+                                {currentSide.charAt(0).toUpperCase() +
+                                    currentSide.slice(1)}{" "}
+                                PNG
+                            </button>
+                        </div>
                         <button
                             onClick={handleUpdateProduct}
                             disabled={
@@ -1023,7 +1092,7 @@ const CustomizeProduct = () => {
                                 isCustomizeLoading ||
                                 isCartLoading
                             }
-                            className={`w-full py-3 mt-3 rounded-2xl font-bold text-lg text-white shadow-2xl transform transition-all duration-500 ${
+                            className={`w-full py-5 mt-6 rounded-2xl font-bold text-xl text-white shadow-2xl transform transition-all duration-500 ${
                                 isUpdating ||
                                 isCustomizeLoading ||
                                 isCartLoading
@@ -1063,49 +1132,7 @@ const CustomizeProduct = () => {
                     </div>
 
                     {/* Right: Preview (Desktop) — Sticky */}
-                    <div className="hidden md:flex order-2 flex-col items-start  justify-start sticky top-1 z-10">
-                        <div className=" z-20   p-4">
-                            <div className="flex justify-between items-center gap-4">
-                                {/* Front / Back Switch */}
-                                <div className="flex   rounded-xl p-1 border border-white/20">
-                                    {["front", "back"].map((side) => (
-                                        <button
-                                            key={side}
-                                            onClick={() => toggleSide(side)}
-                                            className={`px-5 py-1 rounded-lg font-bold text-sm transition-all duration-300 cursor-pointer ${
-                                                currentSide === side
-                                                    ? "bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50"
-                                                    : "text-gray-300 hover:text-white hover:bg-white/10"
-                                            }`}
-                                        >
-                                            {side.charAt(0).toUpperCase() +
-                                                side.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Preview & Download Icons */}
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={openPreview}
-                                        className="py-1 px-5 bg-white/10 cursor-pointer hover:bg-white/20 backdrop-blur-md rounded-xl transition-all hover:scale-110"
-                                        title="Full Preview"
-                                    >
-                                        <FaEye
-                                            className="w-6 h-6 text-white"
-                                            cursor-pointer
-                                        />
-                                    </button>
-                                    <button
-                                        onClick={handleDownload}
-                                        className="py-1 px-5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl transition-all hover:scale-110"
-                                        title="Download PNG"
-                                    >
-                                        <MdOutlineFileDownload className="w-6 h-6 text-white" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="hidden md:flex order-2 flex-col items-center justify-start sticky top-4 z-10">
                         {imageLoadError ? (
                             <p className="text-red-500">{imageLoadError}</p>
                         ) : !data?.product?.customization?.[

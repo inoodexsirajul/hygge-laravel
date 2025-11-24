@@ -2,9 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
 import Modal from "react-modal";
 import { useDispatch } from "react-redux";
-import { MdOutlineFileDownload } from "react-icons/md";
 import { toast } from "react-toastify";
-import { FaEye } from "react-icons/fa";
 import {
     useGetProductDetailsQuery,
     useProductCustomizeMutation,
@@ -48,7 +46,7 @@ const CustomizeProduct = () => {
     const [activeTab, setActiveTab] = useState("text");
     const [isUpdating, setIsUpdating] = useState(false);
     const [imageLoadError, setImageLoadError] = useState(null);
-    const [openTextLayers, setOpenTextLayers] = useState({});
+
     const {
         data,
         isLoading,
@@ -547,16 +545,16 @@ const CustomizeProduct = () => {
                     {/* Left: Form — শুধু এটার স্ক্রল হবে */}
                     <div className="order-2 md:order-1 bg-dark1 p-4 rounded-lg shadow-md md:max-h-screen md:overflow-y-auto">
                         {/* ট্যাব */}
-                        <div className="flex mb-8   rounded-xl   overflow-hidden border border-gray-700">
+                        <div className="flex mb-4 border-b-2 border-red">
                             {["text", "image", "container"].map((tab) => (
                                 <button
                                     key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`flex-1 py-3 px-6 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                                    className={`px-4 py-2 text-sm font-semibold cursor-pointer ${
                                         activeTab === tab
-                                            ? "bg-cream text-dark1 shadow-lg shadow-purple-500/30"
-                                            : "text-gray-400 hover:text-white hover:bg-gray-700/70"
+                                            ? "border-2 border-red rounded-t-md text-red font-bold"
+                                            : "text-cream hover:text-red border-2 border-transparent"
                                     }`}
+                                    onClick={() => setActiveTab(tab)}
                                 >
                                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
                                 </button>
@@ -565,281 +563,176 @@ const CustomizeProduct = () => {
 
                         {/* Text Tab */}
                         {activeTab === "text" && (
-                            <div className="space-y-4">
-                                {currentDesign.texts.map((textItem, index) => {
-                                    const isOpen =
-                                        openTextLayers[textItem.id] ??
-                                        index === 0; // প্রথমটা ডিফল্ট ওপেন
-
-                                    return (
-                                        <div
-                                            key={textItem.id}
-                                            className="border border-gray-600 rounded-xl overflow-hidden bg-gray-800/60 shadow-lg"
-                                        >
-                                            {/* Header */}
-                                            <div
-                                                className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-700/80 transition-all duration-200"
+                            <div className="space-y-6">
+                                {currentDesign.texts.map((textItem, index) => (
+                                    <div
+                                        key={textItem.id}
+                                        className="relative p-4 border border-gray-600 rounded-lg bg-dark2/50"
+                                    >
+                                        {currentDesign.texts.length > 1 && (
+                                            <button
                                                 onClick={() =>
-                                                    setOpenTextLayers(
-                                                        (prev) => ({
-                                                            ...prev,
-                                                            [textItem.id]:
-                                                                !prev[
-                                                                    textItem.id
-                                                                ],
-                                                        })
-                                                    )
+                                                    removeText(textItem.id)
                                                 }
+                                                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-2xl font-bold"
                                             >
-                                                <h4 className="text-md font-bold text-white flex items-center gap-3">
-                                                    <span className="text-cream">
-                                                        Text {index + 1}
-                                                    </span>
-                                                    {textItem.title && (
-                                                        <span className="text-sm font-normal text-gray truncate max-w-xs">
-                                                            "{textItem.title}"
-                                                        </span>
-                                                    )}
-                                                </h4>
+                                                ×
+                                            </button>
+                                        )}
+                                        <h4 className="text-sm font-bold text-cream mb-3">
+                                            Text Layer {index + 1}
+                                        </h4>
 
-                                                <div className="flex items-center gap-4">
-                                                    {currentDesign.texts
-                                                        .length > 1 && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                removeText(
-                                                                    textItem.id
-                                                                );
-                                                                setOpenTextLayers(
-                                                                    (prev) => {
-                                                                        const updated =
-                                                                            {
-                                                                                ...prev,
-                                                                            };
-                                                                        delete updated[
-                                                                            textItem
-                                                                                .id
-                                                                        ];
-                                                                        return updated;
-                                                                    }
-                                                                );
-                                                            }}
-                                                            className="text-red-400 hover:text-red-300 text-sm font-medium"
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    )}
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                value={textItem.title}
+                                                onChange={(e) =>
+                                                    updateText(textItem.id, {
+                                                        title: e.target.value,
+                                                    })
+                                                }
+                                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg text-cream bg-dark1 focus:outline-none"
+                                                placeholder={`Enter text ${
+                                                    index + 1
+                                                }`}
+                                            />
+                                        </div>
 
-                                                    <svg
-                                                        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${
-                                                            isOpen
-                                                                ? "rotate-180"
-                                                                : ""
-                                                        }`}
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M19 9l-7 7-7-7"
-                                                        />
-                                                    </svg>
-                                                </div>
+                                        <div className="grid grid-cols-2 gap-4 mb-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-cream/70 mb-1">
+                                                    X-Axis: {textItem.xAxis}%
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={textItem.xAxis}
+                                                    onChange={(e) =>
+                                                        updateText(
+                                                            textItem.id,
+                                                            {
+                                                                xAxis: parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                            }
+                                                        )
+                                                    }
+                                                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                                                />
                                             </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-cream/70 mb-1">
+                                                    Y-Axis: {textItem.yAxis}%
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={textItem.yAxis}
+                                                    onChange={(e) =>
+                                                        updateText(
+                                                            textItem.id,
+                                                            {
+                                                                yAxis: parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                ),
+                                                            }
+                                                        )
+                                                    }
+                                                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                                                />
+                                            </div>
+                                        </div>
 
-                                            {/* Body */}
-                                            {isOpen && (
-                                                <div className="p-6 border-t border-gray-700 space-y-6 bg-gray-800/40">
-                                                    <input
-                                                        type="text"
-                                                        value={textItem.title}
-                                                        onChange={(e) =>
+                                        <div className="mb-3">
+                                            <label className="block text-xs font-medium text-cream/70 mb-1">
+                                                Text Size: {textItem.textSize}px
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="12"
+                                                max="48"
+                                                value={textItem.textSize}
+                                                onChange={(e) =>
+                                                    updateText(textItem.id, {
+                                                        textSize: parseInt(
+                                                            e.target.value
+                                                        ),
+                                                    })
+                                                }
+                                                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-sm font-semibold text-cream mb-2">
+                                                Title Color
+                                            </label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {colorOptions.map((color) => (
+                                                    <button
+                                                        key={color.id}
+                                                        onClick={() =>
                                                             updateText(
                                                                 textItem.id,
                                                                 {
-                                                                    title: e
-                                                                        .target
-                                                                        .value,
+                                                                    titleColor:
+                                                                        color.value,
                                                                 }
                                                             )
                                                         }
-                                                        className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition"
-                                                        placeholder="Enter your text here..."
+                                                        className={`w-10 h-10 rounded-full border-2 ${
+                                                            textItem.titleColor ===
+                                                            color.value
+                                                                ? "border-white"
+                                                                : "border-gray-500"
+                                                        }`}
+                                                        style={{
+                                                            backgroundColor:
+                                                                color.value,
+                                                        }}
                                                     />
-
-                                                    <div className="grid grid-cols-2 gap-6">
-                                                        <div>
-                                                            <label className="block text-sm text-gray-300 mb-2">
-                                                                X Position:{" "}
-                                                                {textItem.xAxis}
-                                                                %
-                                                            </label>
-                                                            <input
-                                                                type="range"
-                                                                min="0"
-                                                                max="100"
-                                                                value={
-                                                                    textItem.xAxis
-                                                                }
-                                                                onChange={(e) =>
-                                                                    updateText(
-                                                                        textItem.id,
-                                                                        {
-                                                                            xAxis: +e
-                                                                                .target
-                                                                                .value,
-                                                                        }
-                                                                    )
-                                                                }
-                                                                className="w-full h-2 bg-gray-700 rounded-lg cursor-pointer accent-purple-500"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-sm text-gray-300 mb-2">
-                                                                Y Position:{" "}
-                                                                {textItem.yAxis}
-                                                                %
-                                                            </label>
-                                                            <input
-                                                                type="range"
-                                                                min="0"
-                                                                max="100"
-                                                                value={
-                                                                    textItem.yAxis
-                                                                }
-                                                                onChange={(e) =>
-                                                                    updateText(
-                                                                        textItem.id,
-                                                                        {
-                                                                            yAxis: +e
-                                                                                .target
-                                                                                .value,
-                                                                        }
-                                                                    )
-                                                                }
-                                                                className="w-full h-2 bg-gray-700 rounded-lg cursor-pointer accent-purple-500"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="block text-sm text-gray-300 mb-2">
-                                                            Text Size:{" "}
-                                                            {textItem.textSize}
-                                                            px
-                                                        </label>
-                                                        <input
-                                                            type="range"
-                                                            min="12"
-                                                            max="72"
-                                                            value={
-                                                                textItem.textSize
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateText(
-                                                                    textItem.id,
-                                                                    {
-                                                                        textSize:
-                                                                            +e
-                                                                                .target
-                                                                                .value,
-                                                                    }
-                                                                )
-                                                            }
-                                                            className="w-full h-2 bg-gray-700 rounded-lg cursor-pointer accent-purple-500"
-                                                        />
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-white mb-3">
-                                                            Text Color
-                                                        </label>
-                                                        <div className="flex gap-3 flex-wrap">
-                                                            {colorOptions.map(
-                                                                (color) => (
-                                                                    <button
-                                                                        key={
-                                                                            color.id
-                                                                        }
-                                                                        onClick={() =>
-                                                                            updateText(
-                                                                                textItem.id,
-                                                                                {
-                                                                                    titleColor:
-                                                                                        color.value,
-                                                                                }
-                                                                            )
-                                                                        }
-                                                                        className={`w-12 h-12 rounded-full border-4 transition-all ${
-                                                                            textItem.titleColor ===
-                                                                            color.value
-                                                                                ? "border-white shadow-lg scale-110"
-                                                                                : "border-gray-600 hover:border-gray-400"
-                                                                        }`}
-                                                                        style={{
-                                                                            backgroundColor:
-                                                                                color.value,
-                                                                        }}
-                                                                    />
-                                                                )
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-white mb-2">
-                                                            Font Style
-                                                        </label>
-                                                        <select
-                                                            value={
-                                                                textItem.fontFamily
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateText(
-                                                                    textItem.id,
-                                                                    {
-                                                                        fontFamily:
-                                                                            e
-                                                                                .target
-                                                                                .value,
-                                                                    }
-                                                                )
-                                                            }
-                                                            className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                                                        >
-                                                            {fontOptions.map(
-                                                                (font) => (
-                                                                    <option
-                                                                        key={
-                                                                            font.id
-                                                                        }
-                                                                        value={
-                                                                            font.value
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            font.name
-                                                                        }
-                                                                    </option>
-                                                                )
-                                                            )}
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            )}
+                                                ))}
+                                            </div>
                                         </div>
-                                    );
-                                })}
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-cream mb-2">
+                                                Font Style
+                                            </label>
+                                            <select
+                                                value={textItem.fontFamily}
+                                                onChange={(e) =>
+                                                    updateText(textItem.id, {
+                                                        fontFamily:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                className="w-full px-2 py-1 border border-gray-300 rounded-lg text-xs text-cream bg-dark1 focus:outline-none"
+                                            >
+                                                {fontOptions.map((font) => (
+                                                    <option
+                                                        key={font.id}
+                                                        value={font.value}
+                                                        className="text-cream"
+                                                    >
+                                                        {font.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                ))}
 
                                 <button
                                     onClick={addNewText}
-                                    className="w-full py-3 mt-2 bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-md rounded-xl shadow-2xl  "
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
                                 >
-                                    + Add New Text
+                                    + Add Another Text
                                 </button>
                             </div>
                         )}
@@ -947,7 +840,7 @@ const CustomizeProduct = () => {
                                             </div>
                                             <button
                                                 onClick={handleRemoveImage}
-                                                className="w-full bg-linear-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold py-3 rounded-lg shadow-md transition-all duration-300"
+                                                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
                                             >
                                                 Remove Image
                                             </button>
@@ -1016,6 +909,56 @@ const CustomizeProduct = () => {
                             </div>
                         )}
 
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold text-cream mb-2">
+                                Design Side
+                            </label>
+                            <div className="flex gap-4">
+                                {["front", "back"].map((side) => (
+                                    <button
+                                        key={side}
+                                        onClick={() => toggleSide(side)}
+                                        className={`px-4 py-2 rounded-lg ${
+                                            currentSide === side
+                                                ? "bg-blue-600 text-white"
+                                                : "bg-gray-300 text-dark1"
+                                        }`}
+                                    >
+                                        {side.charAt(0).toUpperCase() +
+                                            side.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={openPreview}
+                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4"
+                                disabled={
+                                    isUpdating ||
+                                    isCustomizeLoading ||
+                                    isCartLoading
+                                }
+                            >
+                                Preview Design
+                            </button>
+                            <button
+                                onClick={handleDownload}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4"
+                                disabled={
+                                    isUpdating ||
+                                    isCustomizeLoading ||
+                                    isCartLoading
+                                }
+                            >
+                                Download{" "}
+                                {currentSide.charAt(0).toUpperCase() +
+                                    currentSide.slice(1)}{" "}
+                                PNG
+                            </button>
+                        </div>
+
                         <button
                             onClick={handleUpdateProduct}
                             disabled={
@@ -1023,20 +966,21 @@ const CustomizeProduct = () => {
                                 isCustomizeLoading ||
                                 isCartLoading
                             }
-                            className={`w-full py-3 mt-3 rounded-2xl font-bold text-lg text-white shadow-2xl transform transition-all duration-500 ${
+                            className={`w-full text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-4 flex items-center justify-center ${
                                 isUpdating ||
                                 isCustomizeLoading ||
                                 isCartLoading
-                                    ? "bg-gray-700 cursor-not-allowed opacity-70"
-                                    : "bg-linear-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700 shadow-pink-500/50 active:scale-98"
+                                    ? "bg-gray-600 cursor-not-allowed"
+                                    : "bg-red-600 hover:bg-red-700 cursor-pointer"
                             }`}
                         >
                             {isUpdating ||
                             isCustomizeLoading ||
                             isCartLoading ? (
-                                <span className="flex items-center justify-center gap-3">
+                                <>
                                     <svg
-                                        className="animate-spin h-6 w-6"
+                                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                     >
@@ -1055,7 +999,7 @@ const CustomizeProduct = () => {
                                         ></path>
                                     </svg>
                                     Processing...
-                                </span>
+                                </>
                             ) : (
                                 "Customize & Add to Cart"
                             )}
@@ -1063,49 +1007,7 @@ const CustomizeProduct = () => {
                     </div>
 
                     {/* Right: Preview (Desktop) — Sticky */}
-                    <div className="hidden md:flex order-2 flex-col items-start  justify-start sticky top-1 z-10">
-                        <div className=" z-20   p-4">
-                            <div className="flex justify-between items-center gap-4">
-                                {/* Front / Back Switch */}
-                                <div className="flex   rounded-xl p-1 border border-white/20">
-                                    {["front", "back"].map((side) => (
-                                        <button
-                                            key={side}
-                                            onClick={() => toggleSide(side)}
-                                            className={`px-5 py-1 rounded-lg font-bold text-sm transition-all duration-300 cursor-pointer ${
-                                                currentSide === side
-                                                    ? "bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50"
-                                                    : "text-gray-300 hover:text-white hover:bg-white/10"
-                                            }`}
-                                        >
-                                            {side.charAt(0).toUpperCase() +
-                                                side.slice(1)}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Preview & Download Icons */}
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={openPreview}
-                                        className="py-1 px-5 bg-white/10 cursor-pointer hover:bg-white/20 backdrop-blur-md rounded-xl transition-all hover:scale-110"
-                                        title="Full Preview"
-                                    >
-                                        <FaEye
-                                            className="w-6 h-6 text-white"
-                                            cursor-pointer
-                                        />
-                                    </button>
-                                    <button
-                                        onClick={handleDownload}
-                                        className="py-1 px-5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl transition-all hover:scale-110"
-                                        title="Download PNG"
-                                    >
-                                        <MdOutlineFileDownload className="w-6 h-6 text-white" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="hidden md:flex order-2 flex-col items-center justify-start sticky top-4 z-10">
                         {imageLoadError ? (
                             <p className="text-red-500">{imageLoadError}</p>
                         ) : !data?.product?.customization?.[

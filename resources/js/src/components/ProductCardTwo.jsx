@@ -117,21 +117,21 @@ const ProductCardTwo = ({ product }) => {
 
             {/* Product Info */}
             <div className="px-2 mt-2">
-                <h4 className="text-cream text-[12px] xl:text-[16px] 2xl:text-[18px] font-normal md:font-semibold font-mont mb-2.5">
+                <h4 className="text-cream text-[12px] xl:text-[18px] font-normal md:font-semibold font-mont mb-2.5">
                     <Link to={`/product-details/${product?.slug}`}>
                         {product?.name}
                     </Link>
                 </h4>
 
                 <div className="flex gap-4">
-                    <p className="text-[12px] 2xl:text-[16px] text-cream">
+                    <p className="text-[12px] xl:text-[18px] text-cream">
                         $
                         {product?.offer_price
                             ? product?.offer_price
                             : product?.price}
                     </p>
                     {product?.offer_price && (
-                        <p className="text-red line-through decoration-cream text-[12px] 2xl:text-[16px]">
+                        <p className="text-red line-through decoration-cream text-[12px] xl:text-[18px]">
                             ${product?.price}
                         </p>
                     )}

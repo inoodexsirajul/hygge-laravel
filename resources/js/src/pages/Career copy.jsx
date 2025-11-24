@@ -169,7 +169,7 @@ const Career = () => {
                 </div>
 
                 {/* Form Card */}
-                <div className="w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 md:p-12">
+                <div className="w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-4 md:p-4">
                     <div className="text-center mb-4">
                         <h2 className="text-4xl md:text-3xl font-bold text-white mb-4">
                             Join Our Team
@@ -205,7 +205,7 @@ const Career = () => {
                                         required: "Name is required",
                                     })}
                                     placeholder="John Doe"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2   transition-all"
                                 />
                                 {errors.name && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -228,7 +228,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="john@example.com"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2   transition-all"
                                 />
                                 {errors.email && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -251,7 +251,7 @@ const Career = () => {
                                         },
                                     })}
                                     placeholder="+880 17XX-XXXXXX"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
+                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all"
                                 />
                                 {errors.phone && (
                                     <p className="mt-2 text-sm text-red-400">
@@ -259,19 +259,63 @@ const Career = () => {
                                     </p>
                                 )}
                             </div>
-                            <div>
+
+                            <div className="relative">
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
                                     Position{" "}
                                     <span className="text-red-400">*</span>
                                 </label>
-                                <input
-                                    type="text"
+                                <select
                                     {...register("position", {
-                                        required: "Position is required",
+                                        required: "Please select a position",
                                     })}
-                                    placeholder="e.g. Graphic Designer"
-                                    className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red transition-all"
-                                />
+                                    className="w-full px-5 py-3 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none    transition-all appearance-none cursor-pointer hover:bg-white/25"
+                                    defaultValue=""
+                                >
+                                    <option
+                                        value=""
+                                        disabled
+                                        className="bg-dark1"
+                                    >
+                                        -- Choose your position --
+                                    </option>
+                                    <option
+                                        value="Graphic Designer"
+                                        className="bg-dark1 text-cream"
+                                    >
+                                        Graphic Designer
+                                    </option>
+                                    <option
+                                        value="Sales Executive"
+                                        className="bg-dark1 text-cream"
+                                    >
+                                        Sales Executive
+                                    </option>
+                                    <option
+                                        value="Accountant"
+                                        className="bg-dark1 text-cream"
+                                    >
+                                        Accountant
+                                    </option>
+                                </select>
+
+                                {/* Custom Dropdown Arrow */}
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none mt-8">
+                                    <svg
+                                        className="w-6 h-6 text-cream"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </div>
+
                                 {errors.position && (
                                     <p className="mt-2 text-sm text-red-400">
                                         {errors.position.message}
@@ -280,208 +324,179 @@ const Career = () => {
                             </div>
                         </div>
 
-                        {/* Video CV Upload - নতুন section */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-200 mb-3">
-                                Video CV / Introduction{" "}
-                                <span className="text-red-400">*</span>
-                            </label>
-                            {!uploadedVideo ? (
-                                <label
-                                    htmlFor="video_cv"
-                                    className="flex items-center justify-center w-full h-38 py-2 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300 group"
-                                >
-                                    <div className="flex flex-col items-center pt-8 pb-6">
-                                        <svg
-                                            className="w-14 h-14 mb-4 text-red group-hover:scale-110 transition-transform"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M15.854 5.36A2.25 2.25 0 0118 9v10a2 2 0 01-2 2H8a2 2 0 01-2-2V9a2.25 2.25 0 012.146-2.64M12 6.75h.008v.008H12V6.75zm0 3.75h.008v.008H12V10.5zm0 3.75h.008v.008H12V14.25z"
-                                            />
-                                        </svg>
-                                        <p className="text-lg font-semibold text-white">
-                                            Drop your video CV here
-                                        </p>
-                                        <p className="text-sm text-gray-400 mt-2">
-                                            or click to browse
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-3">
-                                            MP4, AVI, MOV • Max 100MB
-                                        </p>
-                                    </div>
-                                    <input
-                                        id="video_cv"
-                                        type="file"
-                                        accept="video/*"
-                                        onChange={handleVideoChange}
-                                        className="hidden"
-                                    />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+                            {/* Video CV Upload - নতুন section */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-200 mb-3">
+                                    Video Introduction
+                                    <span className="text-red-400">*</span>
                                 </label>
-                            ) : (
-                                <div className="relative p-2 bg-white/10 border-2 border-red rounded-xl">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-red rounded-lg">
+                                {!uploadedVideo ? (
+                                    <label
+                                        htmlFor="video_cv"
+                                        className="flex items-center justify-center w-full   py-2 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300 group"
+                                    >
+                                        <div className="flex flex-col items-center  ">
+                                            <p className="text-sm font-semibold text-white">
+                                                Drop your video CV here
+                                            </p>
+                                            <p className="text-[10px] text-gray mt-2">
+                                                MP4, AVI, MOV • Max 100MB
+                                            </p>
+                                        </div>
+                                        <input
+                                            id="video_cv"
+                                            type="file"
+                                            accept="video/*"
+                                            onChange={handleVideoChange}
+                                            className="hidden"
+                                            required
+                                        />
+                                    </label>
+                                ) : (
+                                    <div className="relative p-2 bg-white/10 border-2 border-red rounded-xl">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-3 bg-red rounded-lg">
+                                                    <svg
+                                                        className="w-8 h-8 text-purple-300"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm0 5h6v3H7v-3z"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-white font-medium">
+                                                        {uploadedVideo.name}
+                                                    </p>
+                                                    <p className="text-sm text-gray-400">
+                                                        {(
+                                                            uploadedVideo.size /
+                                                            1024 /
+                                                            1024
+                                                        ).toFixed(2)}{" "}
+                                                        MB
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={removeVideo}
+                                                className="p-2 hover:bg-red-600/30 rounded-full transition-colors"
+                                            >
                                                 <svg
-                                                    className="w-8 h-8 text-purple-300"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
+                                                    className="w-5 h-5 text-red-400"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
                                                 >
                                                     <path
-                                                        fillRule="evenodd"
-                                                        d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm0 5h6v3H7v-3z"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M6 18L18 6M6 6l12 12"
                                                     />
                                                 </svg>
-                                            </div>
-                                            <div>
-                                                <p className="text-white font-medium">
-                                                    {uploadedVideo.name}
-                                                </p>
-                                                <p className="text-sm text-gray-400">
-                                                    {(
-                                                        uploadedVideo.size /
-                                                        1024 /
-                                                        1024
-                                                    ).toFixed(2)}{" "}
-                                                    MB
-                                                </p>
-                                            </div>
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={removeVideo}
-                                            className="p-2 hover:bg-red-600/30 rounded-full transition-colors"
-                                        >
-                                            <svg
-                                                className="w-5 h-5 text-red-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                            </svg>
-                                        </button>
                                     </div>
-                                </div>
-                            )}
-                            {errors.video_cv && (
-                                <p className="mt-2 text-sm text-red-400">
-                                    {errors.video_cv.message}
-                                </p>
-                            )}
-                        </div>
+                                )}
+                                {errors.video_cv && (
+                                    <p className="mt-2 text-sm text-red-400">
+                                        {errors.video_cv.message}
+                                    </p>
+                                )}
+                            </div>
 
-                        {/* Resume Upload - Resume এর উপরে video রাখা হয়েছে */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-200 mb-3">
-                                Resume / CV{" "}
-                                <span className="text-red-400">*</span>
-                            </label>
-                            {!uploadedFile ? (
-                                <label
-                                    htmlFor="resume"
-                                    className="flex items-center justify-center w-full h-38 py-2 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300 group"
-                                >
-                                    <div className="flex flex-col items-center pt-8 pb-6">
-                                        <svg
-                                            className="w-14 h-14 mb-4 text-red group-hover:scale-110 transition-transform"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M7 16h10M12 3v13m0 0l-4-4m4 4l4-4"
-                                            />
-                                        </svg>
-                                        <p className="text-lg font-semibold text-white">
-                                            Drop your resume here
-                                        </p>
-                                        <p className="text-sm text-gray-400 mt-2">
-                                            or click to browse
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-3">
-                                            PDF, DOC, DOCX • Max 10MB
-                                        </p>
-                                    </div>
-                                    <input
-                                        id="resume"
-                                        type="file"
-                                        accept=".pdf,.doc,.docx"
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                    />
+                            {/* Resume Upload - Resume এর উপরে video রাখা হয়েছে */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-200 mb-3">
+                                    Resume / CV
+                                    <span className="text-red-400">*</span>
                                 </label>
-                            ) : (
-                                <div className="relative p-2 bg-white/10 border-2 border-red rounded-xl">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-red rounded-lg">
+                                {!uploadedFile ? (
+                                    <label
+                                        htmlFor="resume"
+                                        className="flex items-center justify-center w-full   py-2 border-2 border-dashed border-white/40 rounded-xl cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300 group"
+                                    >
+                                        <div className="flex flex-col items-center ">
+                                            <p className="text-sm font-semibold text-white">
+                                                Drop your resume here
+                                            </p>
+                                            <p className="text-[10px] text-gray mt-2">
+                                                PDF, DOC, DOCX • Max 10MB
+                                            </p>
+                                        </div>
+                                        <input
+                                            id="resume"
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                ) : (
+                                    <div className="relative p-2 bg-white/10 border-2 border-red rounded-xl">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-3 bg-red rounded-lg">
+                                                    <svg
+                                                        className="w-8 h-8 text-purple-300"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-white font-medium">
+                                                        {uploadedFile.name}
+                                                    </p>
+                                                    <p className="text-sm text-gray-400">
+                                                        {(
+                                                            uploadedFile.size /
+                                                            1024 /
+                                                            1024
+                                                        ).toFixed(2)}{" "}
+                                                        MB
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={removeFile}
+                                                className="p-2 hover:bg-red-600/30 rounded-full transition-colors"
+                                            >
                                                 <svg
-                                                    className="w-8 h-8 text-purple-300"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
+                                                    className="w-5 h-5 text-red-400"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
                                                 >
                                                     <path
-                                                        fillRule="evenodd"
-                                                        d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M6 18L18 6M6 6l12 12"
                                                     />
                                                 </svg>
-                                            </div>
-                                            <div>
-                                                <p className="text-white font-medium">
-                                                    {uploadedFile.name}
-                                                </p>
-                                                <p className="text-sm text-gray-400">
-                                                    {(
-                                                        uploadedFile.size /
-                                                        1024 /
-                                                        1024
-                                                    ).toFixed(2)}{" "}
-                                                    MB
-                                                </p>
-                                            </div>
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={removeFile}
-                                            className="p-2 hover:bg-red-600/30 rounded-full transition-colors"
-                                        >
-                                            <svg
-                                                className="w-5 h-5 text-red-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                            </svg>
-                                        </button>
                                     </div>
-                                </div>
-                            )}
-                            {errors.resume && (
-                                <p className="mt-2 text-sm text-red-400">
-                                    {errors.resume.message}
-                                </p>
-                            )}
+                                )}
+                                {errors.resume && (
+                                    <p className="mt-2 text-sm text-red-400">
+                                        {errors.resume.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         {/* Cover Letter */}
@@ -496,7 +511,7 @@ const Career = () => {
                                 })}
                                 rows="6"
                                 placeholder="Tell us why you're passionate about this role..."
-                                className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red resize-none transition-all"
+                                className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none   resize-none transition-all"
                             />
                             {errors.coverLetter && (
                                 <p className="mt-2 text-sm text-red-400">
@@ -520,7 +535,7 @@ const Career = () => {
                         </button>
                     </form>
 
-                    <div className="text-center mt-12 pt-8 border-t border-white/10">
+                    <div className="text-center mt-12 pt-2 ">
                         <p className="text-gray-400 text-sm">
                             We typically respond within{" "}
                             <strong>3–5 business days</strong>.<br />
