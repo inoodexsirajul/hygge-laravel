@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { clearSessionId, getSessionId } from "../../utils/helper";
+import { clearSessionId, getSessionId, setSessionId } from "../../utils/helper";
 import { toast } from "react-toastify";
 
 export const eCommerceApi = createApi({
@@ -23,6 +23,27 @@ export const eCommerceApi = createApi({
             headers.set("Accept", "application/json");
             headers.set("X-Requested-With", "XMLHttpRequest");
             return headers;
+        },
+
+        async fetchFn(...args) {
+            const result = await fetch(...args);
+
+            // Laravel যদি Set-Cookie: session_id=abc123; দেয় — আমরা সেটা ধরব
+            const setCookieHeader = result.headers.get("set-cookie");
+            if (setCookieHeader) {
+                const match = setCookieHeader.match(/session_id=([^;]+)/);
+                if (match && match[1]) {
+                    const newSessionId = match[1];
+                    const currentSessionId = getSessionId();
+
+                    if (newSessionId !== currentSessionId) {
+                        setSessionId(newSessionId); // localStorage এ সেভ করো
+                        console.log("New Session ID saved:", newSessionId);
+                    }
+                }
+            }
+
+            return result;
         },
     }),
 
