@@ -102,7 +102,6 @@ const CartPage = () => {
             await removeFromCartMutation(id).unwrap();
         } catch {
             patchResult.undo();
-            toast.error("Failed to remove");
         }
     };
 
@@ -389,7 +388,7 @@ const CartPage = () => {
                                                                         item.id
                                                                     )
                                                                 }
-                                                                className="text-red-600 hover:text-red-700"
+                                                                className="text-red-600 hover:text-red-700 cursor-pointer"
                                                             >
                                                                 <FaRegTrashAlt />
                                                             </button>

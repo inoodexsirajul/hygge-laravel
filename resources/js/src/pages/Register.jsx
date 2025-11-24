@@ -29,7 +29,6 @@ const Register = () => {
     const password = watch("password");
 
     const onSubmit = async (data) => {
-        // Create payload (using JSON instead of FormData, adjust based on API requirements)
         const payload = {
             name: data.name.trim(),
             email: data.email.trim(),
@@ -51,8 +50,8 @@ const Register = () => {
             toast.success(
                 "Registration successful! Please check your email to verify your account.",
                 {
-                    position: "top-right",
-                    autoClose: 4000,
+                    position: "top-center",
+                    autoClose: 2000,
                     onClose: () => navigate("/resend-email"),
                 }
             );
@@ -96,16 +95,6 @@ const Register = () => {
                                 className="bg-transparent text-cream placeholder-cream outline-none text-sm w-full h-full"
                                 {...register("name", {
                                     required: "Full name is required",
-                                    minLength: {
-                                        value: 2,
-                                        message:
-                                            "Full name must be at least 2 characters",
-                                    },
-                                    maxLength: {
-                                        value: 50,
-                                        message:
-                                            "Full name cannot exceed 50 characters",
-                                    },
                                 })}
                             />
                         </div>
@@ -138,16 +127,6 @@ const Register = () => {
                                 className="bg-transparent text-cream placeholder-cream outline-none text-sm w-full h-full"
                                 {...register("email", {
                                     required: "Email is required",
-                                    pattern: {
-                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                        message:
-                                            "Please enter a valid email address",
-                                    },
-                                    maxLength: {
-                                        value: 100,
-                                        message:
-                                            "Email cannot exceed 100 characters",
-                                    },
                                 })}
                             />
                         </div>
@@ -178,21 +157,6 @@ const Register = () => {
                                 className="bg-transparent text-cream placeholder-cream outline-none text-sm w-full h-full"
                                 {...register("password", {
                                     required: "Password is required",
-                                    minLength: {
-                                        value: 8,
-                                        message:
-                                            "Password must be at least 8 characters",
-                                    },
-                                    maxLength: {
-                                        value: 50,
-                                        message:
-                                            "Password cannot exceed 50 characters",
-                                    },
-                                    pattern: {
-                                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                                        message:
-                                            "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character",
-                                    },
                                 })}
                             />
                             <button

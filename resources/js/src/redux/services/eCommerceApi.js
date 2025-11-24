@@ -11,31 +11,31 @@ export const eCommerceApi = createApi({
 
         credentials: "include", // এটাই ম্যাজিক! কুকি অটো যাবে + আসবে
 
-        prepareHeaders: (headers, { getState }) => {
-            const token = localStorage.getItem("authToken");
-
-            if (token) {
-                headers.set("authorization", `Bearer ${token}`);
-            }
-
-            headers.set("Accept", "application/json");
-            return headers;
-        },
-        // Send token if logged in, otherwise session_id for guest
-        // prepareHeaders: (headers) => {
+        // prepareHeaders: (headers, { getState }) => {
         //     const token = localStorage.getItem("authToken");
-        //     const sessionId = getSessionId();
 
         //     if (token) {
         //         headers.set("authorization", `Bearer ${token}`);
-        //     } else {
-        //         headers.set("X-Session-ID", sessionId);
         //     }
 
         //     headers.set("Accept", "application/json");
-        //     headers.set("X-Requested-With", "XMLHttpRequest");
         //     return headers;
         // },
+        // Send token if logged in, otherwise session_id for guest
+        prepareHeaders: (headers) => {
+            const token = localStorage.getItem("authToken");
+            const sessionId = getSessionId();
+
+            if (token) {
+                headers.set("authorization", `Bearer ${token}`);
+            } else {
+                headers.set("X-Session-ID", sessionId);
+            }
+
+            headers.set("Accept", "application/json");
+            headers.set("X-Requested-With", "XMLHttpRequest");
+            return headers;
+        },
     }),
 
     // keepUnusedDataFor: 5 * 60,

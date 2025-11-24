@@ -139,7 +139,7 @@ const Career = () => {
     };
 
     return (
-        <div className="flex min-h-screen w-full bg-dark1 xl:px-20">
+        <div className="flex min-h-screen w-full bg-dark1 xl:px-20 relative">
             <div className="w-full grid xl:grid-cols-2 gap-4 px-4 py-12">
                 {/* Left content - unchanged */}
                 <div className="w-full max-w-md text-center xl:text-left mb-16 pt-20">
@@ -167,6 +167,23 @@ const Career = () => {
                         Or apply directly using the form below
                     </p>
                 </div>
+                {isLoading && (
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-md rounded-3xl flex items-center justify-center z-50 transition-all duration-300">
+                        <div className="text-center">
+                            <div className="relative">
+                                {/* বড় স্পিনার */}
+                                <div className="w-20 h-20 border-4 mx-auto border-white/20 rounded-full animate-spin border-t-red"></div>
+                                {/* মাঝে ছোট সার্কেল */}
+                            </div>
+                            <p className="text-white text-lg font-medium mt-6 animate-pulse">
+                                Submitting your application...
+                            </p>
+                            <p className="text-gray-300 text-sm mt-2">
+                                Please wait a moment
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Form Card */}
                 <div className="w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-4 md:p-4">
@@ -193,10 +210,9 @@ const Career = () => {
 
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            {/* Name, Email, Phone, Position fields - unchanged */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">
-                                    Full Name{" "}
+                                    Full Name
                                     <span className="text-red-400">*</span>
                                 </label>
                                 <input
@@ -204,7 +220,6 @@ const Career = () => {
                                     {...register("name", {
                                         required: "Name is required",
                                     })}
-                                    placeholder="John Doe"
                                     className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2   transition-all"
                                 />
                                 {errors.name && (
@@ -227,7 +242,6 @@ const Career = () => {
                                             message: "Invalid email",
                                         },
                                     })}
-                                    placeholder="john@example.com"
                                     className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2   transition-all"
                                 />
                                 {errors.email && (
@@ -250,7 +264,6 @@ const Career = () => {
                                             message: "Invalid phone number",
                                         },
                                     })}
-                                    placeholder="+880 17XX-XXXXXX"
                                     className="w-full px-5 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all"
                                 />
                                 {errors.phone && (
@@ -280,22 +293,28 @@ const Career = () => {
                                         -- Choose your position --
                                     </option>
                                     <option
-                                        value="Graphic Designer"
-                                        className="bg-dark1 text-cream"
-                                    >
-                                        Graphic Designer
-                                    </option>
-                                    <option
                                         value="Sales Executive"
                                         className="bg-dark1 text-cream"
                                     >
                                         Sales Executive
                                     </option>
                                     <option
+                                        value="Sales Manager"
+                                        className="bg-dark1 text-cream"
+                                    >
+                                        Sales Manager
+                                    </option>
+                                    <option
                                         value="Accountant"
                                         className="bg-dark1 text-cream"
                                     >
                                         Accountant
+                                    </option>
+                                    <option
+                                        value="Graphic Designer"
+                                        className="bg-dark1 text-cream"
+                                    >
+                                        Graphic Designer
                                     </option>
                                 </select>
 
@@ -510,7 +529,6 @@ const Career = () => {
                                     required: "Cover letter is required",
                                 })}
                                 rows="6"
-                                placeholder="Tell us why you're passionate about this role..."
                                 className="w-full px-5 py-4 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none   resize-none transition-all"
                             />
                             {errors.coverLetter && (
