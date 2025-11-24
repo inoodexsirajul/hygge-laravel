@@ -34,7 +34,7 @@ return [
 
     'allowed_methods' => ['*'], 
 
-    'allowed_origins' => ['http://localhost:5173', 'http://192.168.0.238:5173'],
+    'allowed_origins' => ['http://localhost:5173', 'http://192.168.0.238:5173',"http://127.0.0.1:8000"],
 
     'allowed_headers' => ['*'],
 
@@ -42,5 +42,5 @@ return [
 
     'max_age' => 3600,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 ];

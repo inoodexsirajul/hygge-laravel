@@ -9,42 +9,33 @@ export const eCommerceApi = createApi({
         baseUrl: "/api/v1",
         // ||
 
-        // Send token if logged in, otherwise session_id for guest
-        prepareHeaders: (headers) => {
+        credentials: "include", // এটাই ম্যাজিক! কুকি অটো যাবে + আসবে
+
+        prepareHeaders: (headers, { getState }) => {
             const token = localStorage.getItem("authToken");
-            const sessionId = getSessionId();
 
             if (token) {
                 headers.set("authorization", `Bearer ${token}`);
-            } else {
-                headers.set("X-Session-ID", sessionId);
             }
 
             headers.set("Accept", "application/json");
-            headers.set("X-Requested-With", "XMLHttpRequest");
             return headers;
         },
+        // Send token if logged in, otherwise session_id for guest
+        // prepareHeaders: (headers) => {
+        //     const token = localStorage.getItem("authToken");
+        //     const sessionId = getSessionId();
 
-        async fetchFn(...args) {
-            const result = await fetch(...args);
+        //     if (token) {
+        //         headers.set("authorization", `Bearer ${token}`);
+        //     } else {
+        //         headers.set("X-Session-ID", sessionId);
+        //     }
 
-            // Laravel যদি Set-Cookie: session_id=abc123; দেয় — আমরা সেটা ধরব
-            const setCookieHeader = result.headers.get("set-cookie");
-            if (setCookieHeader) {
-                const match = setCookieHeader.match(/session_id=([^;]+)/);
-                if (match && match[1]) {
-                    const newSessionId = match[1];
-                    const currentSessionId = getSessionId();
-
-                    if (newSessionId !== currentSessionId) {
-                        setSessionId(newSessionId); // localStorage এ সেভ করো
-                        console.log("New Session ID saved:", newSessionId);
-                    }
-                }
-            }
-
-            return result;
-        },
+        //     headers.set("Accept", "application/json");
+        //     headers.set("X-Requested-With", "XMLHttpRequest");
+        //     return headers;
+        // },
     }),
 
     // keepUnusedDataFor: 5 * 60,
