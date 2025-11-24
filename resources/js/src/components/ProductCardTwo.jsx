@@ -30,7 +30,7 @@ const ProductCardTwo = ({ product }) => {
         try {
             const cartItem = { product_id: product.id, qty: quantity };
             await addToCart(cartItem).unwrap();
-            // refetch();
+            refetch();
             toast.success("Product added to cart!");
         } catch (err) {
             toast.error(err?.data?.message || "Failed to add to cart");
@@ -117,7 +117,7 @@ const ProductCardTwo = ({ product }) => {
 
             {/* Product Info */}
             <div className="px-2 mt-2">
-                <h4 className="text-cream text-[12px] 2xl:text-[18px] font-normal md:font-semibold font-mont mb-2.5">
+                <h4 className="text-cream text-[12px] xl:text-[16px] 2xl:text-[18px] font-normal md:font-semibold font-mont mb-2.5">
                     <Link to={`/product-details/${product?.slug}`}>
                         {product?.name}
                     </Link>

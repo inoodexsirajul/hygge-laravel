@@ -40,10 +40,14 @@ import HowToOrder from "./pages/HowToOrder";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import LegalNotice from "./pages/LegalNotice";
 import CustomizePage from "./pages/CustomizePage";
+import { getSessionId } from "./utils/helper";
 
 const App = () => {
     const location = useLocation();
     const token = useSyncToken();
+    useEffect(() => {
+        getSessionId();
+    }, []);
 
     // এই দুটো কুয়েরি শুধু টোকেন থাকলে চলবে
     useGetUserProfileQuery(undefined, { skip: !token });

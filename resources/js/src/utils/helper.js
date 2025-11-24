@@ -23,23 +23,51 @@ export const isTokenValid = () => {
 };
 
 // utils/session.js
-export const getSessionId = () => {
-    const KEY = "session_id";
-    let sessionId = localStorage.getItem(KEY);
+// export const getSessionId = () => {
+//     const KEY = "session_id";
+//     let sessionId = localStorage.getItem(KEY);
 
-    if (!sessionId) {
-        // প্রথমবার → তৈরি করো
-        sessionId =
-            "guest_" +
-            Date.now() +
-            "_" +
-            Math.random().toString(36).substr(2, 9);
-        localStorage.setItem(KEY, sessionId);
-    }
+//     if (!sessionId) {
+//         // প্রথমবার → তৈরি করো
+//         sessionId =
+//             "guest_" +
+//             Date.now() +
+//             "_" +
+//             Math.random().toString(36).substr(2, 9);
+//         localStorage.setItem(KEY, sessionId);
+//     }
 
-    return sessionId;
-};
+//     return sessionId;
+// };
 
 export const clearSessionId = () => {
     localStorage.removeItem("session_id");
+};
+
+let memorySessionId = null;
+
+export const getSessionId = () => {
+    const KEY = "session_id";
+
+    // 1. localStorage থেকে
+    try {
+        const saved = localStorage.getItem(KEY);
+        if (saved) return saved;
+    } catch (e) {}
+
+    // 2. মেমরিতে থাকলে
+    if (memorySessionId) return memorySessionId;
+
+    // 3. নতুন তৈরি করো
+    memorySessionId =
+        "guest_" +
+        (crypto.randomUUID?.() ||
+            Date.now() + "_" + Math.random().toString(36));
+
+    // 4. আবার সেভ করার চেষ্টা
+    try {
+        localStorage.setItem(KEY, memorySessionId);
+    } catch (e) {}
+
+    return memorySessionId;
 };
