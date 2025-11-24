@@ -301,17 +301,34 @@ class CartController extends Controller
         return apiResponse('success', 'Updated!', ['product_total' => number_format($total, 2)]);
     }
 
-    public function removeCart($id)
-    {
-        $cart = Cart::findOrFail($id);
-        if ($cart->user_id) {
-            CustomerCustomization::where('user_id', $cart->user_id)->where('product_id', $cart->product_id)->delete();
-        } else {
-            CustomerCustomization::where('session_id', $cart->session_id)->where('product_id', $cart->product_id)->delete();
-        }
-        $cart->delete();
-        return apiResponse('success', 'Removed!');
+ public function removeCart($id)
+{
+    $user_id    = auth('sanctum')->id();
+    $session_id = request()->cookie('cart_session');
+
+    
+    $cart = Cart::where('id', $id)
+        ->where(function ($q) use ($user_id, $session_id) {
+            $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
+              ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id));
+        })
+        ->firstOrFail();
+
+    // কাস্টমাইজেশন থাকলে ডিলিট করো
+    if ($cart->user_id) {
+        CustomerCustomization::where('user_id', $cart->user_id)
+            ->where('product_id', $cart->product_id)
+            ->delete();
+    } else {
+        CustomerCustomization::where('session_id', $cart->session_id)
+            ->where('product_id', $cart->product_id)
+            ->delete();
     }
+
+    $cart->delete();
+
+    return apiResponse('success', 'Product removed from cart!');
+}
 
     public function clearCart(Request $request)
     {
