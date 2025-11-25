@@ -735,7 +735,15 @@ class CartController extends Controller
     public function removeCart($id)
     {
         $user_id = auth('sanctum')->id();
-        $session_id = request()->cookie('cart_session');
+        // $session_id = request()->cookie('cart_session');
+        $session_id =  // cookie check
+            request()->header('X-Session-Id') // header check
+            ?? request()->cookie('cart_session')
+            ?? request()->input('session_id'); // body input check
+        if (!$session_id) {
+            $session_id = bin2hex(random_bytes(16)); // 32 char random id
+            cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
+        }
 
         $cart = Cart::where('id', $id)
             ->where(function ($q) use ($user_id, $session_id) {

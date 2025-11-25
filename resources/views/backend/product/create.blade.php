@@ -173,7 +173,7 @@
                                 <div class="form-group">
                                     <label>Add Size, Color, and Price Combinations</label>
                                     <div class="row mb-3">
-                                        <div class="col-md-4">
+                                        <div class="col-md-5">
                                             <select class="form-control" id="variantSize" name="proSize[]">
                                                 <option value="">Select Size (Optional)</option>
                                                 @foreach ($sizes as $size)
@@ -181,16 +181,18 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
+                                        {{-- <div class="col-md-4">
                                             <select class="form-control" id="variantColor" name="proColor[]">
                                                 <option value="">Select Color (Optional)</option>
                                                 @foreach ($colors as $color)
                                                     <option value="{{ $color->id }}">{{ $color->color_name }}</option>
                                                 @endforeach
                                             </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <input type="number" class="form-control" id="variantPrice" placeholder="vartiant Price (Optional)" min="0" step="0.01" name="variant_price">
+                                        </div> --}}
+                                        <div class="col-md-5">
+                                            <input type="number" class="form-control" id="variantPrice"
+                                                placeholder="vartiant Price (Optional)" min="0" step="0.01"
+                                                name="variant_price">
                                         </div>
                                         <div class="col-md-1">
                                             <button type="button" class="btn btn-primary" id="addVariant">Add</button>
@@ -198,45 +200,97 @@
                                     </div>
                                     <div class="mt-3" id="variantList"></div>
                                 </div>
+                                {{-- <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>Add Color with Image </label>
+                                        <select class="form-control" id="variantColor" name="proColor">
+                                            <option value="">Select Color (Optional)</option>
+                                            @foreach ($colors as $color)
+                                                <option value="{{ $color->id }}">{{ $color->color_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>Image</label>
+                                        <input type="file" class="form-control" name="color_image" required>
+                                    </div>
+                                </div> --}}
+                                <div id="colorImageWrapper">
+
+                                    <div class="row colorImageRow">
+                                        <div class="col-md-5 mb-3">
+                                            <label>Select Color</label>
+                                            <select class="form-control" name="proColor[]">
+                                                <option value="">Select Color</option>
+                                                @foreach ($colors as $color)
+                                                    <option value="{{ $color->id }}">{{ $color->color_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-5 mb-3">
+                                            <label>Image</label>
+                                            <input type="file" class="form-control colorImageInput"
+                                                name="color_image[]">
+
+                                            <!-- Image Preview -->
+                                            <img class="color-preview-img mt-2 d-none" />
+                                        </div>
+
+                                        <div class="col-md-2 mt-4">
+                                            <button type="button" class="btn btn-danger removeRow">X</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <button type="button" id="addMore" class="btn btn-primary mt-2">Add More Color +
+                                    Image</button>
+
+                                {{-- <hr> --}}
+
                                 <hr>
-<h5>🔧 Product Customization</h5>
+                                <h5>🔧 Product Customization</h5>
 
-<div class="form-group">
-    <label>Is Customizable?</label>
-    <select name="is_customizable" id="is_customizable" class="form-control">
-        <option value="0">No</option>
-        <option value="1">Yes</option>
-    </select>
-</div>
+                                <div class="form-group">
+                                    <label>Is Customizable?</label>
+                                    <select name="is_customizable" id="is_customizable" class="form-control">
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
+                                </div>
 
-<div id="customize_section" style="display: none;">
-    <div class="row">
-        <div class="form-group col-md-6">
-            <label>Front Side Customize Image</label>
-            <input type="file" name="front_image" class="form-control">
-        </div>
-        <div class="form-group col-md-6">
-            <label>Back Side Customize Image</label>
-            <input type="file" name="back_image" class="form-control">
-        </div>
-    </div>
+                                <div id="customize_section" style="display: none;">
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label>Front Side Customize Image</label>
+                                            <input type="file" name="front_image" class="form-control">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Back Side Customize Image</label>
+                                            <input type="file" name="back_image" class="form-control">
+                                        </div>
+                                    </div>
 
-    <div class="row">
-        <div class="form-group col-md-4">
-            <label>Front Side Extra Cost</label>
-            <input type="number" name="front_price" step="0.01" class="form-control" placeholder="0.00">
-        </div>
-        <div class="form-group col-md-4">
-            <label>Back Side Extra Cost</label>
-            <input type="number" name="back_price" step="0.01" class="form-control" placeholder="0.00">
-        </div>
-        <div class="form-group col-md-4">
-            <label>Both Side Extra Cost</label>
-            <input type="number" name="both_price" step="0.01" class="form-control" placeholder="0.00">
-        </div>
-    </div>
-</div>
-<hr>
+                                    <div class="row">
+                                        <div class="form-group col-md-4">
+                                            <label>Front Side Extra Cost</label>
+                                            <input type="number" name="front_price" step="0.01" class="form-control"
+                                                placeholder="0.00">
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label>Back Side Extra Cost</label>
+                                            <input type="number" name="back_price" step="0.01" class="form-control"
+                                                placeholder="0.00">
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label>Both Side Extra Cost</label>
+                                            <input type="number" name="both_price" step="0.01" class="form-control"
+                                                placeholder="0.00">
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
                                 <button type="submit" class="btn btn-primary mt-3">Create</button>
                             </form>
                         </div>
@@ -249,32 +303,50 @@
 @push('scripts')
     <style>
         .variant-item {
-            display: inline-block; /* Makes it behave like a button */
-            background-color: #007bff; /* Matches btn-primary */
-            color: #fff; /* Matches btn-primary text */
-            padding: 6px 12px; /* Matches btn padding */
-            margin: 0 10px 10px 0; /* Spacing between items */
-            border-radius: 4px; /* Matches btn border-radius */
-            border: 1px solid #0069d9; /* Matches btn-primary border */
-            font-size: 16px; /* Matches btn font-size */
-            font-weight: 400; /* Matches btn font-weight */
-            line-height: 1.5; /* Matches btn line-height */
+            display: inline-block;
+            /* Makes it behave like a button */
+            background-color: #007bff;
+            /* Matches btn-primary */
+            color: #fff;
+            /* Matches btn-primary text */
+            padding: 6px 12px;
+            /* Matches btn padding */
+            margin: 0 10px 10px 0;
+            /* Spacing between items */
+            border-radius: 4px;
+            /* Matches btn border-radius */
+            border: 1px solid #0069d9;
+            /* Matches btn-primary border */
+            font-size: 16px;
+            /* Matches btn font-size */
+            font-weight: 400;
+            /* Matches btn font-weight */
+            line-height: 1.5;
+            /* Matches btn line-height */
             text-align: center;
-            transition: background-color 0.2s, border-color 0.2s; /* Matches btn hover transition */
-            min-width: 200px; /* Ensures consistent width */
+            transition: background-color 0.2s, border-color 0.2s;
+            /* Matches btn hover transition */
+            min-width: 200px;
+            /* Ensures consistent width */
         }
+
         .variant-item:hover {
-            background-color: #0069d9; /* Matches btn-primary hover */
-            border-color: #0062cc; /* Matches btn-primary hover border */
+            background-color: #0069d9;
+            /* Matches btn-primary hover */
+            border-color: #0062cc;
+            /* Matches btn-primary hover border */
         }
+
         .variant-item .variant-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .variant-item .remove-variant {
             color: #fff;
-            background-color: #dc3545; /* Matches btn-danger */
+            background-color: #dc3545;
+            /* Matches btn-danger */
             padding: 2px 8px;
             border-radius: 3px;
             margin-left: 10px;
@@ -282,8 +354,21 @@
             line-height: 1;
             cursor: pointer;
         }
+
         .variant-item .remove-variant:hover {
-            background-color: #c82333; /* Matches btn-danger hover */
+            background-color: #c82333;
+            /* Matches btn-danger hover */
+        }
+    </style>
+    <style>
+        .color-preview-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            padding: 2px;
+            background: white;
         }
     </style>
     <script>
@@ -294,11 +379,15 @@
                 $.ajax({
                     url: "{{ route('admin.product.get-sub-categories') }}",
                     method: 'GET',
-                    data: { id: id },
+                    data: {
+                        id: id
+                    },
                     success: function(data) {
-                        $('.sub-category').html('<option value="">Select Sub Category</option>');
+                        $('.sub-category').html(
+                            '<option value="">Select Sub Category</option>');
                         $.each(data, function(i, item) {
-                            $('.sub-category').append(`<option value="${item.id}">${item.name}</option>`);
+                            $('.sub-category').append(
+                                `<option value="${item.id}">${item.name}</option>`);
                         });
                     },
                     error: function(xhr, status, error) {
@@ -315,11 +404,15 @@
                 $.ajax({
                     url: "{{ route('admin.product.get-child-categories') }}",
                     method: 'GET',
-                    data: { id: id },
+                    data: {
+                        id: id
+                    },
                     success: function(data) {
-                        $('.child-category').html('<option value="">Select Child Category</option>');
+                        $('.child-category').html(
+                            '<option value="">Select Child Category</option>');
                         $.each(data, function(i, item) {
-                            $('.child-category').append(`<option value="${item.id}">${item.name}</option>`);
+                            $('.child-category').append(
+                                `<option value="${item.id}">${item.name}</option>`);
                         });
                     },
                     error: function(xhr, status, error) {
@@ -403,13 +496,66 @@
         });
     </script>
     <script>
-    // Show/Hide customize section
-    document.getElementById('is_customizable').addEventListener('change', function() {
-        if (this.value == 1) {
-            document.getElementById('customize_section').style.display = 'block';
-        } else {
-            document.getElementById('customize_section').style.display = 'none';
-        }
-    });
-</script>
+        // Show/Hide customize section
+        document.getElementById('is_customizable').addEventListener('change', function() {
+            if (this.value == 1) {
+                document.getElementById('customize_section').style.display = 'block';
+            } else {
+                document.getElementById('customize_section').style.display = 'none';
+            }
+        });
+    </script>
+
+    <script>
+        // ADD MORE BUTTON
+        document.getElementById('addMore').addEventListener('click', function() {
+
+            let wrapper = document.getElementById('colorImageWrapper');
+
+            let firstRow = document.querySelector('.colorImageRow');
+
+            let newRow = firstRow.cloneNode(true);
+
+            // reset fields
+            newRow.querySelector('select').value = '';
+            newRow.querySelector('input[type="file"]').value = '';
+
+            // reset preview image
+            let img = newRow.querySelector('.color-preview-img');
+            img.src = '';
+            img.classList.add('d-none');
+
+            wrapper.appendChild(newRow);
+        });
+
+
+        // REMOVE BUTTON
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('removeRow')) {
+
+                // At least 1 row always keep
+                if (document.querySelectorAll('.colorImageRow').length > 1) {
+                    e.target.closest('.colorImageRow').remove();
+                }
+            }
+        });
+
+
+        // IMAGE PREVIEW (Circle)
+        document.addEventListener('change', function(e) {
+
+            if (e.target.classList.contains('colorImageInput')) {
+
+                let imgTag = e.target.closest('.col-md-5').querySelector('.color-preview-img');
+
+                let file = e.target.files[0];
+
+                if (file) {
+                    imgTag.src = URL.createObjectURL(file);
+                    imgTag.classList.remove('d-none');
+                }
+            }
+
+        });
+    </script>
 @endpush

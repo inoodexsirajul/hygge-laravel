@@ -33,6 +33,9 @@ class ProductUpdateRequest extends FormRequest
             'status'=>'required',
             'seo_title'=>'nullable|max:200',
             'seo_description'=>'nullable|max:250',
+
+            //color image
+            // 'color_image.*.color_id' => 'nullable|exists:colors,id',
         ];
     }
 }

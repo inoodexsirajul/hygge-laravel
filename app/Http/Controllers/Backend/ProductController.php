@@ -120,6 +120,32 @@ class ProductController extends Controller
         }
         $product->colors()->sync($colorData);
 
+        // dd($sizeData, $colorData);
+
+        // Multiple Color + Image Upload
+        if ($request->has('proColor') && $request->hasFile('color_image')) {
+
+    foreach ($request->proColor as $index => $color_id) {
+
+        if (!$color_id) continue; // skip empty
+
+        // file check
+        $imageFile = $request->file('color_image')[$index];
+
+        if ($imageFile) {
+            // image upload function (custom) – adjust path
+            $imagePathColor = $this->uploadImage($request, 'image', 'uploads/image-gallery');
+
+            // save to ProductImageGallery
+            ProductImageGallery::create([
+                'product_id' => $product->id,
+                'color_id'   => $color_id,
+                'image'      => $imagePathColor,
+            ]);
+        }
+    }
+}
+
         // ===============================
         // Product Customization Save
         // ===============================
@@ -173,7 +199,7 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::with('customization')->findOr($id);
+        $product = Product::with(['customization', 'productImageGalleries'])->findOr($id);
         $subCategories = SubCategory::where('category_id', $product->category_id)->get();
         $childCategories = ChildCategory::where('sub_category_id', $product->sub_category_id)->get();
         $categories = Category::where('status', 1)->get();
@@ -188,6 +214,7 @@ class ProductController extends Controller
      */
     public function update(ProductUpdateRequest $request, string $id)
     {
+        // dd($request->all());
         $product = Product::find($id);
 
         /** handle image update*/
@@ -238,10 +265,83 @@ class ProductController extends Controller
                 }
             }
         }
+        // dd($sizesToSync, $colorsToSync);
 
         // Sync: Merge old + new
         $product->sizes()->sync($sizesToSync);
         $product->colors()->sync($colorsToSync);
+
+        // Remove old galleries if needed or update
+    /** Handle Deleted Colors */
+    if ($request->has('deleted_color_ids') && !empty($request->deleted_color_ids)) {
+        $deletedIds = explode(',', $request->deleted_color_ids);
+        ProductImageGallery::where('product_id', $product->id)
+            ->whereIn('color_id', $deletedIds)
+            ->delete();
+    }
+
+    /** Handle Color + Color Images */
+    // if ($request->has('proColor')) {
+    //     foreach ($request->proColor as $index => $color_id) {
+    //         if (!$color_id) continue;
+
+    //         $existingGallery = $product->productImageGalleries[$index] ?? null;
+    //         $imagePathColor = null;
+
+    //         if ($request->hasFile('color_image') && isset($request->file('color_image')[$index])) {
+    //             $singleFileRequest = new \Illuminate\Http\Request();
+    //             $singleFileRequest->files->set('color_image', $request->file('color_image')[$index]);
+    //             $imagePathColor = $this->updateImage(
+    //                 $singleFileRequest,
+    //                 'color_image',
+    //                 'uploads/image-gallery',
+    //                 $existingGallery->image ?? null,
+    //                 400,
+    //                 500
+    //             );
+    //         } else {
+    //             $imagePathColor = $existingGallery->image ?? null;
+    //         }
+
+    //         ProductImageGallery::updateOrCreate(
+    //             ['product_id' => $product->id, 'color_id' => $color_id],
+    //             ['image' => $imagePathColor]
+    //         );
+    //     }
+    // }
+    /** Handle Color + Color Images */
+if ($request->has('proColor')) {
+    foreach ($request->proColor as $index => $color_id) {
+        if (!$color_id) continue;
+
+        // Existing gallery check
+        $existingGallery = $product->productImageGalleries()->where('color_id', $color_id)->first();
+        $imagePathColor = null;
+
+        // যদি file upload করা হয়
+        if ($request->hasFile('color_image') && isset($request->file('color_image')[$index])) {
+            $singleFileRequest = new \Illuminate\Http\Request();
+            $singleFileRequest->files->set('color_image', $request->file('color_image')[$index]);
+            $imagePathColor = $this->updateImage(
+                $singleFileRequest,
+                'color_image',
+                'uploads/image-gallery',
+                $existingGallery->image ?? null,
+                400,
+                500
+            );
+        }
+
+        // শুধুমাত্র তখনই gallery create/update হবে যদি image আছে বা gallery আগে থেকেই আছে
+        if ($imagePathColor || $existingGallery) {
+            ProductImageGallery::updateOrCreate(
+                ['product_id' => $product->id, 'color_id' => $color_id],
+                ['image' => $imagePathColor ?? $existingGallery->image]
+            );
+        }
+    }
+}
+
 
         /**============================
          * Handle Product Customization

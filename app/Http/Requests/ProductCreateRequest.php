@@ -22,7 +22,7 @@ class ProductCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => 'required|image|max:3000',
+            'image' => 'required|image|max:5048',
             'name' => 'required|max:200',
             'category' => 'required',
             // 'brand'=>'required',
@@ -42,6 +42,8 @@ class ProductCreateRequest extends FormRequest
             'front_price' => 'nullable|numeric|min:0',
             'back_price' => 'nullable|numeric|min:0',
             'both_price' => 'nullable|numeric|min:0',
+            //color_image
+            'color_image.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5048',
         ];
     }
 }

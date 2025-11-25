@@ -46,9 +46,17 @@ class FrontendProductController extends Controller
         }
 
 
+        // if ($request->filled('color_ids')) {
+        //     $query->whereHas('colors', fn($q) => $q->whereIn('colors.id', (array)$request->color_ids));
+        // }
         if ($request->filled('color_ids')) {
-            $query->whereHas('colors', fn($q) => $q->whereIn('colors.id', (array)$request->color_ids));
-        }
+    $colorIds = (array) $request->color_ids; // ensure array
+
+    $query->whereHas('productImageGalleries', function ($q) use ($colorIds) {
+        $q->whereIn('color_id', $colorIds)
+          ->whereNotNull('image'); // optional: শুধুমাত্র যাদের image আছে
+    });
+}
 
 
         if ($request->filled('size_ids')) {
@@ -116,10 +124,11 @@ class FrontendProductController extends Controller
         }
         $query = $this->applyFilters($query, $request);
 
-        $products = $query->with(['category', 'colors', 'customization', 'sizes'])
+        $products = $query->with(['category', 'colors', 'customization', 'sizes', 'productImageGalleries'])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->paginate(25);
+            // dd($products);
 
         return response()->json(['status' => true, 'products' => $products]);
     }
@@ -200,7 +209,7 @@ class FrontendProductController extends Controller
     {
         $product = Product::with([
             'category:id,name,slug,image,icon',
-            'productImageGalleries:id,image,product_id',
+            'productImageGalleries:id,image,product_id,color_id',
             'customization',
             'colors' => fn($q) => $q->select('colors.id as color_id', 'colors.color_name', 'colors.color_code', 'colors.price', 'colors.is_default')->withPivot('product_id', 'id'),
             'sizes' => fn($q) => $q->select('sizes.id as size_id', 'sizes.size_name', 'sizes.price', 'sizes.is_default')->withPivot('product_id', 'id'),

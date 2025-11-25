@@ -188,9 +188,9 @@
                                     </div>
                                     <!-- Size, Color, Price Combinations -->
                                     <div class="form-group col-md-12">
-                                        <label>Add Size, Color, and Price Combinations</label>
+                                        <label>Add Size and Price Combinations</label>
                                         <div class="row mb-3">
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
                                                 <select class="form-control" id="variantSize" name="proSize[]">
                                                     <option value="">Select Size (Optional)</option>
                                                     @foreach ($sizes as $size)
@@ -199,7 +199,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
+                                            {{-- <div class="col-md-4">
                                                 <select class="form-control" id="variantColor" name="proColor[]">
                                                     <option value="">Select Color (Optional)</option>
                                                     @foreach ($colors as $color)
@@ -207,8 +207,8 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                            </div>
-                                            <div class="col-md-3">
+                                            </div> --}}
+                                            <div class="col-md-5">
                                                 <input type="number" class="form-control" id="variantPrice"
                                                     placeholder="Price (Optional)" min="0" step="0.01"
                                                     name="variant_price">
@@ -264,6 +264,66 @@
 
 
                                 </div>
+                                {{-- <h5>Add Colors with Images</h5>
+                                <div id="colorImageWrapper">
+                                    <input type="hidden" name="deleted_color_ids" id="deleted_color_ids"
+                                        value="">
+                                    @foreach ($product->productImageGalleries as $index => $gallery)
+                                        <div class="row mb-3 color-image-row" data-index="{{ $index }}">
+                                            <div class="col-md-5">
+                                                <select class="form-control" name="proColor[]">
+                                                    <option value="">Select Color</option>
+                                                    @foreach ($colors as $color)
+                                                        <option value="{{ $color->id }}"
+                                                            {{ $color->id == $gallery->color_id ? 'selected' : '' }}>
+                                                            {{ $color->color_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input type="file" class="form-control" name="color_image[]">
+                                                <img src="{{ asset($gallery->image) }}" width="50px" height="50px"
+                                                    class="mt-2 rounded-circle">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button"
+                                                    class="btn btn-danger removeColorRow">Remove</button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="button" class="btn btn-primary" id="addColorRow">Add More Color</button> --}}
+
+                                <h5>Add Colors with Images</h5>
+<div id="colorImageWrapper">
+    <input type="hidden" name="deleted_color_ids" id="deleted_color_ids" value="">
+    @foreach ($product->productImageGalleries as $index => $gallery)
+    <div class="row mb-3 color-image-row" data-index="{{ $index }}">
+        <div class="col-md-5">
+            <select class="form-control" name="proColor[]" id="variantColor">
+                <option value="">Select Color</option>
+                @foreach ($colors as $color)
+                    <option value="{{ $color->id }}" {{ $color->id == $gallery->color_id ? 'selected' : '' }}>
+                        {{ $color->color_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-5">
+            <input type="file" class="form-control color-image-input" name="color_image[]">
+            <img src="{{ asset($gallery->image) }}" width="50px" height="50px"
+                class="mt-2 rounded-circle color-image-preview">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger removeColorRow">Remove</button>
+        </div>
+    </div>
+    @endforeach
+</div>
+<button type="button" class="btn btn-primary" id="addColorRow">Add More Color</button>
+
+
                                 <hr>
                                 <h5>🔧 Product Customization</h5>
 
@@ -491,7 +551,7 @@
                     let existingSize = $(this).find('input[name$="[size_id]"]').val();
                     let existingColor = $(this).find('input[name$="[color_id]"]').val();
                     if ((sizeId && sizeId == existingSize) || (colorId && colorId ==
-                        existingColor)) {
+                            existingColor)) {
                         duplicate = true;
                         return false;
                     }
@@ -612,4 +672,108 @@
             document.getElementById('is_customizable').addEventListener('change', toggleCustomizeSection);
         });
     </script>
+
+    {{-- <script>
+        $(document).ready(function() {
+            let colorIndex = {{ $product->productImageGalleries->count() }};
+
+            $('#addColorRow').click(function() {
+                let html = `
+        <div class="row mb-3 color-image-row" data-index="${colorIndex}">
+            <div class="col-md-5">
+                <select class="form-control" name="proColor[]">
+                    <option value="">Select Color</option>
+                    @foreach ($colors as $color)
+                        <option value="{{ $color->id }}">{{ $color->color_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input type="file" class="form-control" name="color_image[]">
+                <img src="" width="50px" height="50px" class="mt-2 rounded-circle" style="display:none;">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger removeColorRow">Remove</button>
+            </div>
+        </div>`;
+                $('#colorImageWrapper').append(html);
+                colorIndex++;
+            });
+
+            // $(document).on('click', '.removeColorRow', function() {
+            //     $(this).closest('.color-image-row').remove();
+            // });
+            let deletedColors = [];
+
+            $(document).on('click', '.removeColorRow', function() {
+                let row = $(this).closest('.color-image-row');
+                let colorId = row.find('select[name="proColor[]"]').val();
+
+                if (colorId) {
+                    deletedColors.push(colorId);
+                    $('#deleted_color_ids').val(deletedColors.join(',')); // hidden input update
+                }
+
+                row.remove();
+            });
+        });
+    </script> --}}
+    <script>
+$(document).ready(function() {
+    let colorIndex = {{ $product->productImageGalleries->count() }};
+    let deletedColors = [];
+
+    // Add new color row
+    $('#addColorRow').click(function() {
+        let html = `
+        <div class="row mb-3 color-image-row" data-index="${colorIndex}">
+            <div class="col-md-5">
+                <select class="form-control" name="proColor[]">
+                    <option value="">Select Color</option>
+                    @foreach ($colors as $color)
+                        <option value="{{ $color->id }}">{{ $color->color_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input type="file" class="form-control color-image-input" name="color_image[]">
+                <img src="" width="50px" height="50px" class="mt-2 rounded-circle color-image-preview" style="display:none;">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger removeColorRow">Remove</button>
+            </div>
+        </div>`;
+        $('#colorImageWrapper').append(html);
+        colorIndex++;
+    });
+
+    // Remove color row
+    $(document).on('click', '.removeColorRow', function() {
+        let row = $(this).closest('.color-image-row');
+        let colorId = row.find('select[name="proColor[]"]').val();
+
+        if (colorId) {
+            deletedColors.push(colorId);
+            $('#deleted_color_ids').val(deletedColors.join(','));
+        }
+
+        row.remove();
+    });
+
+    // Show preview when file selected
+    $(document).on('change', '.color-image-input', function(e) {
+        let input = this;
+        let preview = $(this).siblings('.color-image-preview');
+        if (input.files && input.files[0]) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                preview.attr('src', e.target.result);
+                preview.show();
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    });
+});
+</script>
+
 @endpush
