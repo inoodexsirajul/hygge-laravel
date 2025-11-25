@@ -84,7 +84,6 @@ class Product extends Model
                 'category',
                 'colors:id,color_name,color_code,price,is_default',
                 'sizes:id,size_name,price,is_default',
-                'productImageGalleries'
             ]);
     }
     /** customization relationship */

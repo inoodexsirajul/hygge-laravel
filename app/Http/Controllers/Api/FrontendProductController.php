@@ -50,13 +50,13 @@ class FrontendProductController extends Controller
         //     $query->whereHas('colors', fn($q) => $q->whereIn('colors.id', (array)$request->color_ids));
         // }
         if ($request->filled('color_ids')) {
-    $colorIds = (array) $request->color_ids; // ensure array
+            $colorIds = (array) $request->color_ids; // ensure array
 
-    $query->whereHas('productImageGalleries', function ($q) use ($colorIds) {
-        $q->whereIn('color_id', $colorIds)
-          ->whereNotNull('image'); // optional: শুধুমাত্র যাদের image আছে
-    });
-}
+            $query->whereHas('productImageGalleries', function ($q) use ($colorIds) {
+                $q->whereIn('color_id', $colorIds)
+                    ->whereNotNull('image');
+            });
+        }
 
 
         if ($request->filled('size_ids')) {
@@ -80,7 +80,7 @@ class FrontendProductController extends Controller
         }
 
 
-             // Sorting and special filters
+        // Sorting and special filters
         if ($request->has('sort_by')) {
             switch ($request->sort_by) {
                 case 'lowtohigh':
@@ -119,16 +119,23 @@ class FrontendProductController extends Controller
     public function allProducts(Request $request)
     {
         $query = Product::active();
-        if(!$request->has('sort_by')){
+        if (!$request->has('sort_by')) {
             $query->orderBy('id', 'desc');
         }
         $query = $this->applyFilters($query, $request);
 
-        $products = $query->with(['category', 'colors', 'customization', 'sizes', 'productImageGalleries'])
+        $products = $query->with([
+            'category',
+            'colors',
+            'customization',
+            'sizes',
+            'productImageGalleries:id,image,product_id,color_id',
+            'productImageGalleries.color:id,color_name,color_code'
+        ])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->paginate(25);
-            // dd($products);
+        // dd($products);
 
         return response()->json(['status' => true, 'products' => $products]);
     }
@@ -210,6 +217,7 @@ class FrontendProductController extends Controller
         $product = Product::with([
             'category:id,name,slug,image,icon',
             'productImageGalleries:id,image,product_id,color_id',
+            'productImageGalleries.color:id,color_name,color_code',
             'customization',
             'colors' => fn($q) => $q->select('colors.id as color_id', 'colors.color_name', 'colors.color_code', 'colors.price', 'colors.is_default')->withPivot('product_id', 'id'),
             'sizes' => fn($q) => $q->select('sizes.id as size_id', 'sizes.size_name', 'sizes.price', 'sizes.is_default')->withPivot('product_id', 'id'),
