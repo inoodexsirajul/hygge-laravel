@@ -108,14 +108,143 @@ class AuthController extends Controller
     }
 
 
-/**
- * Login API
- * This endpoint is used to login a user.
- * 
- * @param Request $request
- * @return \Illuminate\Http\Response
- * 
- */
+    /**
+     * Login API
+     * This endpoint is used to login a user.
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     * 
+     */
+    // public function login(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|email',
+    //         'password' => 'required|string',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Validation failed',
+    //             'errors' => $validator->errors(),
+    //         ], 422);
+    //     }
+
+    //     $customer = Customer::where('email', $request->email)->first();
+
+    //     if (!$customer || !Hash::check($request->password, $customer->password)) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Invalid credentials'
+    //         ], 401);
+    //     }
+    //     if (!$customer->hasVerifiedEmail()) {
+    //         return response()->json(['message' => 'Please verify your email first'], 403);
+    //     }
+
+    //     // check if user is active
+    //     if ($customer->status != 'active') {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Your account is inactive. Please contact support.'
+    //         ], 403); // 403 Forbidden
+    //     }
+
+    //     // Delete old tokens to enforce single session
+    //     $customer->tokens()->delete();
+
+    //     // Create new token
+    //     $token = $customer->createToken('API Token')->plainTextToken;
+
+    //     // ===== Merge guest cart & customization =====
+    //     $sessionId = $request->header('X-Session-Id');
+    //     if ($sessionId) {
+    //         $this->mergeGuestCartToUser($customer->id, $sessionId);
+    //         $this->mergeGuestCustomizationToUser($customer->id, $sessionId);
+    //     }
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Login successful',
+    //         'data' => [
+    //             'user' => $customer,
+    //             'access_token' => $token,
+    //             'token_type' => 'Bearer',
+    //         ]
+    //     ]);
+    // }
+
+    // private function mergeGuestCartToUser($userId, $sessionId)
+    // {
+    //     $guestCart = Cart::where('session_id', $sessionId)->get();
+
+    //     foreach ($guestCart as $item) {
+    //         $existing = Cart::where('user_id', $userId)
+    //             ->where('product_id', $item->product_id)
+    //             ->where('options', $item->options)
+    //             ->first();
+
+    //         if ($existing) {
+    //             // Increase quantity
+    //             $existing->increment('quantity', $item->quantity);
+    //             $item->delete();
+    //         } else {
+    //             // Assign guest item to user
+    //             $item->update([
+    //                 'user_id' => $userId,
+    //                 'session_id' => null,
+    //             ]);
+    //         }
+    //     }
+    // }
+
+    // private function mergeGuestCustomizationToUser($userId, $sessionId)
+    // {
+    //     $guestCustomizations = CustomerCustomization::where('session_id', $sessionId)->get();
+
+    //     foreach ($guestCustomizations as $custom) {
+    //         $existing = CustomerCustomization::where('user_id', $userId)
+    //             ->where('product_id', $custom->product_id)
+    //             ->first();
+
+    //         if ($existing) {
+    //             // Merge old + new data
+    //             $oldData = json_decode($existing->custom_data, true) ?? [];
+    //             $newData = json_decode($custom->custom_data, true) ?? [];
+    //             $mergedData = array_merge($oldData, $newData);
+
+    //             // Handle images: replace if guest sent new
+    //             $frontImage = $custom->front_image ?: $existing->front_image;
+    //             $backImage  = $custom->back_image ?: $existing->back_image;
+
+    //             // Delete old images if replaced
+    //             if ($custom->front_image && $existing->front_image && file_exists(public_path($existing->front_image))) {
+    //                 @unlink(public_path($existing->front_image));
+    //             }
+    //             if ($custom->back_image && $existing->back_image && file_exists(public_path($existing->back_image))) {
+    //                 @unlink(public_path($existing->back_image));
+    //             }
+
+    //             $existing->update([
+    //                 'custom_data' => json_encode($mergedData),
+    //                 'front_image' => $frontImage,
+    //                 'back_image' => $backImage,
+    //                 'price' => $custom->price ?: $existing->price,
+    //             ]);
+
+    //             // Delete guest customization
+    //             $custom->delete();
+    //         } else {
+    //             // Assign guest customization to user
+    //             $custom->update([
+    //                 'user_id' => $userId,
+    //                 'session_id' => null,
+    //             ]);
+    //         }
+    //     }
+    // }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -139,32 +268,33 @@ class AuthController extends Controller
                 'message' => 'Invalid credentials'
             ], 401);
         }
+
         if (!$customer->hasVerifiedEmail()) {
             return response()->json(['message' => 'Please verify your email first'], 403);
         }
 
-        // check if user is active
         if ($customer->status != 'active') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Your account is inactive. Please contact support.'
-            ], 403); // 403 Forbidden
+            ], 403);
         }
 
-        // Delete old tokens to enforce single session
+        // Delete old tokens for single session
         $customer->tokens()->delete();
 
         // Create new token
         $token = $customer->createToken('API Token')->plainTextToken;
 
         // ===== Merge guest cart & customization =====
-        $sessionId = $request->header('X-Session-Id');
+        $sessionId = $request->cookie('cart_session');
         if ($sessionId) {
             $this->mergeGuestCartToUser($customer->id, $sessionId);
             $this->mergeGuestCustomizationToUser($customer->id, $sessionId);
         }
 
-        return response()->json([
+        // ===== Prepare response =====
+        $response = response()->json([
             'status' => 'success',
             'message' => 'Login successful',
             'data' => [
@@ -173,7 +303,15 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
             ]
         ]);
+
+        // Clear guest cart session cookie after merging
+        if ($sessionId) {
+            $response->withCookie(cookie()->forget('cart_session'));
+        }
+
+        return $response;
     }
+
 
     private function mergeGuestCartToUser($userId, $sessionId)
     {
@@ -186,14 +324,12 @@ class AuthController extends Controller
                 ->first();
 
             if ($existing) {
-                // Increase quantity
                 $existing->increment('quantity', $item->quantity);
                 $item->delete();
             } else {
-                // Assign guest item to user
                 $item->update([
                     'user_id' => $userId,
-                    'session_id' => null,
+                    'session_id' => null, // clear session
                 ]);
             }
         }
@@ -209,16 +345,14 @@ class AuthController extends Controller
                 ->first();
 
             if ($existing) {
-                // Merge old + new data
                 $oldData = json_decode($existing->custom_data, true) ?? [];
                 $newData = json_decode($custom->custom_data, true) ?? [];
                 $mergedData = array_merge($oldData, $newData);
 
-                // Handle images: replace if guest sent new
                 $frontImage = $custom->front_image ?: $existing->front_image;
                 $backImage  = $custom->back_image ?: $existing->back_image;
 
-                // Delete old images if replaced
+                // Remove replaced images
                 if ($custom->front_image && $existing->front_image && file_exists(public_path($existing->front_image))) {
                     @unlink(public_path($existing->front_image));
                 }
@@ -233,10 +367,8 @@ class AuthController extends Controller
                     'price' => $custom->price ?: $existing->price,
                 ]);
 
-                // Delete guest customization
                 $custom->delete();
             } else {
-                // Assign guest customization to user
                 $custom->update([
                     'user_id' => $userId,
                     'session_id' => null,
@@ -269,20 +401,20 @@ class AuthController extends Controller
     {
         // $customer = $request->user(); // or Auth::user()
         $customer = Auth::user();
-        $customer->image= asset('uploads/default.jpg');
+        $customer->image = asset('uploads/default.jpg');
         return response()->json([
             'status' => 'success',
             'data' => $customer
         ]);
     }
-/**
- * Forgot password
- *
- * Sends a password reset link to the customer's email.
- *
- * @param \Illuminate\Http\Request $request
- * @return \Illuminate\Http\JsonResponse
- */
+    /**
+     * Forgot password
+     *
+     * Sends a password reset link to the customer's email.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email|exists:customers,email']);
