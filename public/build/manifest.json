@@ -20,12 +20,16 @@
     "src": "node_modules/slick-carousel/slick/fonts/slick.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-D9zGhkfC.css",
+    "file": "assets/app-DsotnIrq.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
+  "resources/fonts/GlamourAbsoluteCondensed.woff2": {
+    "file": "assets/GlamourAbsoluteCondensed-B3X2b-Xb.woff2",
+    "src": "resources/fonts/GlamourAbsoluteCondensed.woff2"
+  },
   "resources/js/app.jsx": {
-    "file": "assets/app-BheKttGk.js",
+    "file": "assets/app-BUs1vekU.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,

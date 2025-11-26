@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -22,179 +22,133 @@ import {
 } from "../redux/services/eCommerceApi";
 
 const ProductDetails = () => {
-    const [nav1, setNav1] = useState(null);
-    const [nav2, setNav2] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewComment, setReviewComment] = useState("");
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedSizeId, setSelectedSizeId] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
-    const sliderRef1 = useRef(null);
-    const sliderRef2 = useRef(null);
+
+    const [nav1, setNav1] = useState(null);
+    const [nav2, setNav2] = useState(null);
+    const slider1 = useRef(null);
+    const slider2 = useRef(null);
+
     const location = useLocation();
     const pathName = location.pathname.split("/")[1];
     const { slug } = useParams();
+    const navigate = useNavigate();
 
     const { data, isLoading, error } = useGetProductDetailsQuery(slug);
     const [addReview, { isLoading: isReviewSubmitting, error: reviewError }] =
         useAddReviewMutation();
     const [addToCart, { isLoading: isCartLoading, error: cartError }] =
         useAddToCartMutation();
-    // const { refetch } = useGetCartDetailsQuery(undefined, {
-    //     skip: !localStorage.getItem("authToken"),
-    // });
-
     const { data: cartData } = useGetCartDetailsQuery();
     const [removeFromCart] = useRemoveFromCartMutation();
-    const navigate = useNavigate();
 
-    // Out of Stock + Max Quantity চেক
-    const isOutOfStock = data?.product?.qty <= 0;
-    const maxAvailableQty = data?.product?.qty || 0;
+    const product = data?.product;
+    const galleries = product?.product_image_galleries || [];
+
+    const galleryColors = useMemo(() => {
+        const map = new Map();
+        galleries.forEach((item) => {
+            if (item.color?.id) {
+                map.set(item.color.id, item.color);
+            }
+        });
+        return Array.from(map.values());
+    }, [galleries]);
+
+    const isOutOfStock = product?.qty <= 0;
+    const maxAvailableQty = product?.qty || 0;
     const isMaxReached = quantity >= maxAvailableQty && !isOutOfStock;
 
-    // Calculate total price based on selected color and size
     useEffect(() => {
-        if (!data?.product) return;
+        setNav1(slider1.current);
+        setNav2(slider2.current);
+    }, [galleryColors]);
 
-        setNav1(sliderRef1.current);
-        setNav2(sliderRef2.current);
+    useEffect(() => {
+        if (!selectedColor || !slider1.current) return;
 
-        // Default color & size selection
-        if (data.product.colors?.length > 0 && !selectedColor) {
-            setSelectedColor(data.product.colors[0]);
+        const index = galleries.findIndex(
+            (img) => img.color?.id === selectedColor.id
+        );
+        if (index !== -1) {
+            slider1.current.slickGoTo(index);
         }
-        if (data.product.sizes?.length > 0 && !selectedSizeId) {
-            const validSize = data.product.sizes.find(
-                (s) => s.size_id && s.size_name
+    }, [selectedColor, galleries]);
+
+    useEffect(() => {
+        if (!product) return;
+
+        let sizeExtra = 0;
+        if (selectedSizeId && product.sizes?.length > 0) {
+            const selectedSize = product.sizes.find(
+                (s) => s.size_id === selectedSizeId
             );
-            if (validSize) setSelectedSizeId(validSize.size_id);
-        }
-
-        const regularPrice = Number(data.product.price) || 0;
-        const offerPrice =
-            data.product.offer_price != null &&
-            data.product.offer_price !== "" &&
-            !isNaN(Number(data.product.offer_price))
-                ? Number(data.product.offer_price)
-                : null;
-
-        const isOfferApplied = offerPrice !== null && offerPrice < regularPrice;
-        const basePrice = isOfferApplied ? offerPrice : regularPrice;
-
-        const colorExtra = selectedColor?.pivot?.color_price
-            ? Number(selectedColor.pivot.color_price)
-            : 0;
-
-        const selectedSizeObj = data.product.sizes?.find(
-            (s) => s.size_id === selectedSizeId
-        );
-        const sizeExtra = selectedSizeObj?.pivot?.size_price
-            ? Number(selectedSizeObj.pivot.size_price)
-            : 0;
-
-        const total = basePrice + colorExtra + sizeExtra;
-        setTotalPrice(total > 0 ? total : regularPrice);
-    }, [data?.product, selectedColor, selectedSizeId]);
-
-    const handleCustomizeClick = async () => {
-        if (!cartData?.data?.cart_items?.length) {
-            // কার্ট খালি → সরাসরি কাস্টমাইজ পেজে যাও
-            navigate(`/product/${slug}/customize`);
-            return;
-        }
-
-        // চেক করো এই প্রোডাক্টটা কার্টে আছে কিনা (নরমাল + কাস্টমাইজড দুটোই)
-        const existingItem = cartData.data.cart_items.find(
-            (item) => item.product_id === data?.product?.id
-        );
-
-        if (existingItem) {
-            // কার্টে আছে → রিমুভ করো
-            try {
-                await removeFromCart(existingItem.id).unwrap();
-            } catch (err) {
-                return; // রিমুভ না হলে এগোবো না
+            if (selectedSize?.pivot?.size_price) {
+                sizeExtra = Number(selectedSize.pivot.size_price);
             }
         }
 
-        // এখন কাস্টমাইজ পেজে নিয়ে যাও
-        navigate(`/product/${slug}/customize`);
-    };
+        const basePrice = Number(product.price) || 0;
+        const offerPrice =
+            product.offer_price && !isNaN(Number(product.offer_price))
+                ? Number(product.offer_price)
+                : null;
 
-    // Handle Add to Cart
+        if (offerPrice !== null) {
+            setTotalPrice(offerPrice + sizeExtra);
+        } else {
+            setTotalPrice(basePrice + sizeExtra);
+        }
+    }, [product, selectedSizeId]);
+
     const handleAddToCart = async () => {
-        if (isOutOfStock) {
-            toast.error("This product is currently out of stock!");
-            return;
-        }
-
-        if (quantity > maxAvailableQty) {
-            toast.error(`Only ${maxAvailableQty} item(s) available in stock!`);
-            return;
-        }
-
-        if (data?.product?.colors?.length > 0 && !selectedColor) {
-            toast.error("Please select a color");
-            return;
-        }
-        if (data?.product?.sizes?.length > 0 && !selectedSizeId) {
-            toast.error("Please select a size");
-            return;
-        }
-        if (quantity < 1) {
-            toast.error("Quantity must be at least 1");
-            return;
-        }
-        if (isNaN(totalPrice) || totalPrice <= 0) {
-            toast.error("Invalid product price");
-            return;
-        }
+        if (isOutOfStock)
+            return toast.error("This product is currently out of stock!");
+        if (quantity > maxAvailableQty)
+            return toast.error(
+                `Only ${maxAvailableQty} item(s) available in stock!`
+            );
+        if (galleryColors.length > 0 && !selectedColor)
+            return toast.error("Please select a color");
+        if (product?.sizes?.length > 0 && !selectedSizeId)
+            return toast.error("Please select a size");
 
         try {
             await addToCart({
-                product_id: data?.product?.id,
+                product_id: product.id,
                 qty: quantity,
                 size: selectedSizeId || null,
-                color: selectedColor?.color_id || null,
+                color: selectedColor?.id || null,
                 price: Number(totalPrice),
             }).unwrap();
-
             toast.success("Product added to cart!");
         } catch (err) {
             toast.error(err?.data?.message || "Failed to add to cart");
         }
     };
 
-    const mainSliderSettings = (hasGallery) => ({
-        dots: false,
-        infinite: hasGallery,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        arrows: false,
-        asNavFor: nav2,
-        fade: hasGallery,
-    });
+    const handleCustomizeClick = async () => {
+        if (cartData?.data?.cart_items?.length) {
+            const existingItem = cartData.data.cart_items.find(
+                (item) => item.product_id === product?.id
+            );
+            if (existingItem) {
+                try {
+                    await removeFromCart(existingItem.id).unwrap();
+                } catch {}
+            }
+        }
+        navigate(`/product/${slug}/customize`);
+    };
 
-    const thumbnailSliderSettings = (hasGallery) => ({
-        dots: false,
-        infinite: hasGallery,
-        slidesToShow: hasGallery ? 2 : 1,
-        slidesToScroll: 1,
-        arrows: false,
-        vertical: true,
-        verticalSwiping: hasGallery,
-        swipeToSlide: hasGallery,
-        focusOnSelect: hasGallery,
-        asNavFor: nav1,
-    });
-
-    // Updated: কোয়ান্টিটি স্টকের বেশি যাবে না
     const handleIncrement = () => {
-        if (isOutOfStock) return;
-        if (quantity >= maxAvailableQty) {
-            toast.warn(`Only ${maxAvailableQty} item(s) available in stock`);
+        if (isOutOfStock || quantity >= maxAvailableQty) {
+            toast.warn(`Only ${maxAvailableQty} item(s) available`);
             return;
         }
         setQuantity((prev) => prev + 1);
@@ -209,15 +163,12 @@ const ProductDetails = () => {
             toast.error("Please provide a rating and comment.");
             return;
         }
-
-        const payload = {
-            product_id: data?.product?.id,
-            review: reviewComment,
-            rating: reviewRating,
-        };
-
         try {
-            await addReview(payload).unwrap();
+            await addReview({
+                product_id: product.id,
+                review: reviewComment,
+                rating: reviewRating,
+            }).unwrap();
             setReviewRating(0);
             setReviewComment("");
             toast.success("Review submitted successfully!");
@@ -228,8 +179,7 @@ const ProductDetails = () => {
 
     const formatReviewDate = (dateString) => {
         try {
-            const date = new Date(dateString);
-            return format(date, "MM/dd/yyyy");
+            return format(new Date(dateString), "MM/dd/yyyy");
         } catch {
             return "Invalid date";
         }
@@ -237,7 +187,6 @@ const ProductDetails = () => {
 
     const renderSkeleton = () => (
         <div className="pt-[5px] grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-[50px] 2xl:gap-[156px]">
-            {/* তোমার আগের স্কেলিটন কোড (অপরিবর্তিত) */}
             <div className="grid grid-cols-3 gap-2.5 md:gap-5">
                 <div>
                     <Skeleton height={276} count={2} className="mb-2" />
@@ -266,83 +215,84 @@ const ProductDetails = () => {
                 </p>
             )}
 
-            {!isLoading && !error && data?.product && (
+            {!isLoading && !error && product && (
                 <div className="pt-[5px] grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-[50px] 2xl:gap-[156px]">
-                    {/* Left side: Image Sliders */}
+                    {/* Image Gallery */}
                     <div className="grid grid-cols-3 gap-2.5 md:gap-5">
-                        <div>
+                        {/* Thumbnails - এখন স্লাইড + ক্লিক + সিঙ্ক করবে */}
+                        <div className="overflow-hidden">
                             <Slider
-                                {...thumbnailSliderSettings(
-                                    data?.product?.product_image_galleries
-                                        ?.length > 0
-                                )}
-                                ref={sliderRef2}
+                                ref={slider2}
+                                asNavFor={nav1}
+                                slidesToShow={2}
+                                swipeToSlide={true}
+                                focusOnSelect={true}
+                                vertical={true}
+                                verticalSwiping={true}
+                                arrows={false}
+                                infinite={galleries.length > 2}
+                                className="thumbnail-slider"
                             >
-                                {data?.product?.product_image_galleries
-                                    ?.length > 0 ? (
-                                    data?.product?.product_image_galleries?.map(
-                                        (img, index) => (
-                                            <div
-                                                key={`thumb-${index}`}
-                                                className="xl:h-full"
-                                            >
-                                                <img
-                                                    src={`/${img?.image}`}
-                                                    alt={`thumbnail-${index}`}
-                                                    className="w-full xl:h-[276px] object-cover cursor-pointer rounded"
-                                                />
-                                            </div>
-                                        )
-                                    )
+                                {galleries.length > 0 ? (
+                                    galleries.map((img, i) => (
+                                        <div
+                                            key={`thumb-${i}`}
+                                            className="px-2 py-3 cursor-pointer outline-none"
+                                        >
+                                            <img
+                                                src={`/${img.image}`}
+                                                alt={`thumb ${i}`}
+                                                className={`w-full h-[140px] xl:h-[200px] object-cover rounded-lg border-2 transition-all duration-300
+                           `}
+                                            />
+                                        </div>
+                                    ))
                                 ) : (
-                                    <div
-                                        key="thumb-single"
-                                        className="xl:h-full"
-                                    >
+                                    <div className="px-2 py-3">
                                         <img
-                                            src={`/${data?.product?.thumb_image}`}
-                                            alt="thumbnail"
-                                            className="w-full xl:h-[276px] object-cover rounded"
+                                            src={`/${product.thumb_image}`}
+                                            alt="thumb"
+                                            className="w-full h-[200px] object-cover rounded-lg border-2 border-gray-700"
                                         />
                                     </div>
                                 )}
                             </Slider>
                         </div>
+
+                        {/* Main Slider */}
                         <div className="col-span-2 w-full">
                             <Slider
-                                {...mainSliderSettings(
-                                    data?.product?.product_image_galleries
-                                        ?.length > 0
-                                )}
-                                ref={sliderRef1}
+                                ref={slider1}
+                                asNavFor={nav2}
+                                arrows={false}
+                                fade={true}
+                                dots={false}
+                                infinite={galleries.length > 1}
                             >
-                                {data?.product?.product_image_galleries
-                                    ?.length > 0 ? (
-                                    data?.product?.product_image_galleries?.map(
-                                        (img, index) => (
-                                            <div
-                                                key={`main-${index}`}
-                                                className="w-full h-full"
-                                            >
-                                                <ImageZoom
-                                                    src={`/${img?.image}`}
-                                                    className="w-full h-full rounded-xl"
-                                                    alt="Product image"
-                                                    zoom="200"
-                                                />
-                                            </div>
-                                        )
-                                    )
+                                {galleries.length > 0 ? (
+                                    galleries.map((img, i) => (
+                                        <div
+                                            key={`main-${i}`}
+                                            className="w-full h-full"
+                                        >
+                                            <ImageZoom
+                                                src={`/${img.image}`}
+                                                zoom="200"
+                                                className="w-full h-[400px] xl:h-[600px] object-cover rounded-xl"
+                                                alt={`${product.name} - ${
+                                                    img.color?.color_name ||
+                                                    "Product"
+                                                }`}
+                                            />
+                                        </div>
+                                    ))
                                 ) : (
-                                    <div
-                                        key="main-single"
-                                        className="w-full h-full"
-                                    >
+                                    <div className="w-full h-full">
                                         <ImageZoom
-                                            src={`/${data?.product?.thumb_image}`}
-                                            className="w-full h-full rounded-xl"
-                                            alt="Product image"
+                                            src={`/${product.thumb_image}`}
                                             zoom="200"
+                                            className="w-full h-[400px] xl:h-[600px] object-cover rounded-xl"
+                                            alt={product.name}
                                         />
                                     </div>
                                 )}
@@ -350,14 +300,14 @@ const ProductDetails = () => {
                         </div>
                     </div>
 
-                    {/* Right side: Product Info */}
+                    {/* Product Info - ডিজাইন ১০০% অপরিবর্তিত */}
                     <div className="w-full">
                         <div className="pt-[15px] mb-4 3xl:mb-[38px]">
                             <ul className="flex items-center gap-3">
                                 <li>
                                     <Link
                                         to="/"
-                                        className="text-cream text-sm md:text-[18px] font-normal"
+                                        className="text-cream text-sm md:text-[18px] font-normal font-mont"
                                     >
                                         Home
                                     </Link>
@@ -365,19 +315,19 @@ const ProductDetails = () => {
                                 <li className="text-cream text-sm md:text-[18px] font-normal">
                                     /
                                 </li>
-                                <li className="text-cream text-[14px] md:text-[18px] font-normal capitalize">
+                                <li className="text-cream text-[14px] md:text-[18px] font-normal capitalize font-mont">
                                     {pathName}
                                 </li>
                             </ul>
                         </div>
-                        <h2 className="text-yellow text-[35px] xl:text-[46px] font-normal mb-3">
-                            {data?.product?.name || "Unknown Product"}
+
+                        <h2 className="text-yellow text-[35px] xl:text-[46px] font-normal mb-3 font-mont">
+                            {product.name}
                         </h2>
+
                         <div className="mb-4 3xl:mb-[30px]">
                             <Rating
-                                initialRating={
-                                    data?.product?.reviews_avg_rating || 0
-                                }
+                                initialRating={product.reviews_avg_rating || 0}
                                 emptySymbol={
                                     <MdOutlineStarBorder className="text-red text-[24px]" />
                                 }
@@ -387,45 +337,47 @@ const ProductDetails = () => {
                                 readonly
                             />
                         </div>
+
                         <div className="flex gap-[30px] xl:gap-[60px] items-center mb-4 3xl:mb-[30px]">
-                            <p className="text-[16px] xl:text-[24px] text-cream font-bold">
+                            {/* মেইন প্রাইস — সবসময় totalPrice */}
+                            <p className="text-[16px] xl:text-[24px] text-cream font-bold font-mont">
                                 ${totalPrice}
                             </p>
-                            {data?.product?.offer_price != null &&
-                                data?.product?.offer_price !== "" &&
-                                Number(data.product.offer_price) <
-                                    Number(data.product.price) && (
-                                    <p className="text-[16px] xl:text-[24px] text-gray-500 line-through">
-                                        ${Number(data.product.price)}
+
+                            {/* লাইন-থ্রু — শুধু offer_price থাকলে এবং product.price দেখাবে */}
+                            {product.offer_price &&
+                                !isNaN(Number(product.offer_price)) && (
+                                    <p className="text-[16px] xl:text-[24px] text-gray-500 line-through font-mont">
+                                        ${Number(product.price)}
                                     </p>
                                 )}
                         </div>
-                        <p className="text-[16px] 3xl:text-[18px] text-cream mb-4 3xl:mb-[50px]">
-                            {data?.product?.short_description ||
-                                "No description available"}
+
+                        <p className="text-[16px] 3xl:text-[18px] text-cream mb-4 3xl:mb-[50px] font-mont">
+                            {product.short_description}
                         </p>
 
                         <div className="flex flex-col md:flex-row gap-4 xl:gap-[46px] mb-[59px]">
                             <div className="flex gap-4 xl:gap-[33px] items-center">
-                                <span className="text-[18px] text-cream bg-dark1 p-1 rounded-[5px] font-bold">
+                                <span className="text-[18px] text-cream bg-dark1 p-1 rounded-[5px] font-bold font-mont">
                                     Collection
                                 </span>
-                                <span className="text-cream font-normal">
-                                    {data?.product?.category?.name || "Unknown"}
+                                <span className="text-cream font-normal font-mont">
+                                    {product.category?.name || "Unknown"}
                                 </span>
                             </div>
                             <div className="flex gap-4 xl:gap-[33px] items-center">
-                                <span className="text-[18px] text-cream bg-dark1 p-1 rounded-[5px] font-bold">
+                                <span className="text-[18px] text-cream bg-dark1 p-1 rounded-[5px] font-bold font-mont">
                                     Stock
                                 </span>
-                                <span className="text-cream font-normal">
+                                <span className="text-cream font-normal font-mont">
                                     {isOutOfStock ? (
-                                        <span className="text-red text-xl font-bold">
+                                        <span className="text-red text-xl font-bold font-mont">
                                             Out of Stock
                                         </span>
                                     ) : (
                                         <>
-                                            <span className="text-yellow">
+                                            <span className="text-yellow font-mont">
                                                 {maxAvailableQty}
                                             </span>{" "}
                                             In Stock
@@ -436,65 +388,70 @@ const ProductDetails = () => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-4 xl:gap-10 3xl:gap-20 mb-[60px]">
-                            {/* Colors */}
+                            {/* Colors - এখন গ্যালারি থেকে */}
                             <div className="w-full">
-                                <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0">
+                                <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0 font-mont">
                                     Colors
                                 </h5>
-                                {data?.product?.colors?.length > 0 ? (
+                                {galleryColors.length > 0 ? (
                                     <div className="flex flex-wrap gap-2 xl:gap-[18px]">
-                                        {data.product.colors.map((color) => (
+                                        {galleryColors.map((color) => (
                                             <div
-                                                key={color.color_id}
-                                                className="flex items-center gap-2 relative"
+                                                key={color.id}
+                                                className="relative"
                                             >
                                                 <button
                                                     type="button"
                                                     disabled={isOutOfStock}
-                                                    className={`w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] rounded-[10px] border cursor-pointer transition-all duration-200 ${
-                                                        selectedColor?.color_id ===
-                                                        color.color_id
-                                                            ? "border-4 border-yellow scale-110 shadow-md"
-                                                            : "border-2 border-gray-800 hover:border-gray-500"
-                                                    } ${
-                                                        isOutOfStock
-                                                            ? "opacity-60 cursor-not-allowed"
-                                                            : ""
-                                                    }`}
-                                                    style={{
-                                                        backgroundColor:
-                                                            color.color_code,
-                                                    }}
                                                     onClick={() =>
                                                         !isOutOfStock &&
                                                         setSelectedColor(color)
                                                     }
+                                                    className={`
+                                                        w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] 
+                                                        rounded-[10px] border transition-all duration-200 font-mont
+                                                        ${
+                                                            selectedColor?.id ===
+                                                            color.id
+                                                                ? "border-4 border-yellow scale-110 shadow-lg shadow-yellow/50"
+                                                                : "border-2 border-gray-800 hover:border-gray-500"
+                                                        }
+                                                        ${
+                                                            isOutOfStock
+                                                                ? "opacity-60 cursor-not-allowed"
+                                                                : "cursor-pointer"
+                                                        }
+                                                    `}
+                                                    style={{
+                                                        backgroundColor:
+                                                            color.color_code,
+                                                    }}
                                                 >
-                                                    {selectedColor?.color_id ===
-                                                        color.color_id && (
-                                                        <FaCheck className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-cream text-[12px] xl:text-[16px] drop-shadow" />
+                                                    {selectedColor?.id ===
+                                                        color.id && (
+                                                        <FaCheck className="absolute inset-0 m-auto text-cream text-[14px] drop-shadow-lg" />
                                                     )}
                                                 </button>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-gray text-[16px]">
+                                    <p className="text-gray text-[16px] font-mont">
                                         No colors available
                                     </p>
                                 )}
                             </div>
 
-                            {/* Quantity - এখানে লিমিট যোগ করা হয়েছে */}
+                            {/* Quantity */}
                             <div className="w-full">
-                                <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0">
+                                <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0 font-mont">
                                     Quantity
                                 </h5>
                                 <div className="flex gap-2 xl:gap-[18px]">
                                     <button
                                         type="button"
                                         disabled={isOutOfStock || quantity <= 1}
-                                        className={`cursor-pointer w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center transition-all ${
+                                        className={`cursor-pointer w-[30px] font-mont xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center transition-all ${
                                             isOutOfStock || quantity <= 1
                                                 ? "opacity-60 cursor-not-allowed"
                                                 : "hover:bg-gray-700"
@@ -503,11 +460,9 @@ const ProductDetails = () => {
                                     >
                                         <HiOutlineMinusSm />
                                     </button>
-
                                     <div className="w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] border border-gray rounded-[10px] text-cream flex justify-center items-center">
                                         {quantity}
                                     </div>
-
                                     <button
                                         type="button"
                                         disabled={isOutOfStock || isMaxReached}
@@ -521,9 +476,8 @@ const ProductDetails = () => {
                                         <HiOutlinePlusSm />
                                     </button>
                                 </div>
-
                                 {isMaxReached && (
-                                    <p className="text-yellow text-xs mt-2 font-medium">
+                                    <p className="text-yellow text-xs mt-2 font-medium font-mont">
                                         Maximum available quantity reached
                                     </p>
                                 )}
@@ -531,17 +485,23 @@ const ProductDetails = () => {
 
                             {/* Sizes */}
                             <div className="w-full">
-                                <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0">
+                                <h5 className="font-manrope text-[18px] text-cream font-bold mb-[21px] leading-0 font-mont">
                                     Sizes
                                 </h5>
-                                {data?.product?.sizes?.length > 0 ? (
+                                {product.sizes?.length > 0 ? (
                                     <div className="flex flex-wrap gap-[18px]">
-                                        {data.product?.sizes.map((size) => (
+                                        {product.sizes.map((size) => (
                                             <button
                                                 type="button"
                                                 key={size.size_id}
                                                 disabled={isOutOfStock}
-                                                className={`relative w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] rounded-[10px] flex justify-center items-center font-bold text-sm xl:text-[14px] transition-all duration-200 ${
+                                                onClick={() =>
+                                                    !isOutOfStock &&
+                                                    setSelectedSizeId(
+                                                        size.size_id
+                                                    )
+                                                }
+                                                className={`relative font-mont w-[30px] xl:w-[45px] h-[30px] xl:h-[45px] rounded-[10px] flex justify-center items-center font-bold text-sm xl:text-[14px] transition-all duration-200 ${
                                                     selectedSizeId ===
                                                     size.size_id
                                                         ? "bg-yellow text-dark2 border-2 border-yellow shadow-md scale-105"
@@ -551,19 +511,13 @@ const ProductDetails = () => {
                                                         ? "opacity-60 cursor-not-allowed"
                                                         : ""
                                                 }`}
-                                                onClick={() =>
-                                                    !isOutOfStock &&
-                                                    setSelectedSizeId(
-                                                        size.size_id
-                                                    )
-                                                }
                                             >
                                                 {size.size_name.toUpperCase()}
                                             </button>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-gray text-[16px]">
+                                    <p className="text-gray text-[16px] font-mont">
                                         No sizes available
                                     </p>
                                 )}
@@ -579,7 +533,7 @@ const ProductDetails = () => {
                                     isOutOfStock ||
                                     quantity > maxAvailableQty
                                 }
-                                className={`flex items-center gap-2.5 font-semibold text-[16px] xl:text-[18px] text-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer transition-all ${
+                                className={`flex items-center gap-2.5 font-semibold text-[16px] font-mont xl:text-[18px] text-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer transition-all ${
                                     isOutOfStock || quantity > maxAvailableQty
                                         ? "bg-gray-600 opacity-70 cursor-not-allowed"
                                         : isCartLoading
@@ -600,10 +554,10 @@ const ProductDetails = () => {
                                     )}
                             </button>
 
-                            {data?.product?.customization && !isOutOfStock && (
+                            {product.customization && !isOutOfStock && (
                                 <button
-                                    onClick={handleCustomizeClick} // ← এখানে Link এর বদলে button + onClick
-                                    className="flex items-center gap-2.5 font-semibold text-[18px] text-cream border border-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer hover:bg-cream hover:text-dark2 transition-all"
+                                    onClick={handleCustomizeClick}
+                                    className="flex items-center font-mont gap-2.5 font-semibold text-[18px] text-cream border border-cream rounded-[10px] py-2.5 xl:py-[30px] px-[30px] xl:px-[60px] cursor-pointer hover:bg-cream hover:text-dark2 transition-all"
                                 >
                                     Customize <GoArrowRight />
                                 </button>
@@ -621,17 +575,16 @@ const ProductDetails = () => {
                 </div>
             )}
 
-            {/* Product Tabs - অপরিবর্তিত */}
             {/* Product Tabs */}
             {!isLoading && !error && (
                 <div className="pt-[129px] pb-[60px]">
                     <Tabs>
                         <div className="text-center border-b border-b-gray/20">
                             <TabList className="flex flex-col md:flex-row justify-start md:justify-center md:gap-[100px] xl:gap-[178px]">
-                                <Tab className="ml-8 text-cream text-md text-left md:text-auto xl:text-[24px] font-normal pb-4 md:pb-10 cursor-pointer focus:border-0 transition-all duration-300">
+                                <Tab className="ml-8 font-mont text-cream text-md text-left md:text-auto xl:text-[24px] font-normal pb-4 md:pb-10 cursor-pointer focus:border-0 transition-all duration-300">
                                     PRODUCT REVIEW
                                 </Tab>
-                                <Tab className="ml-8 text-cream text-md text-left md:text-auto xl:text-[24px] font-normal pb-4 md:pb-10 cursor-pointer focus:border-0 transition-all duration-300">
+                                <Tab className="ml-8 font-mont text-cream text-md text-left md:text-auto xl:text-[24px] font-normal pb-4 md:pb-10 cursor-pointer focus:border-0 transition-all duration-300">
                                     FULL DESCRIPTION
                                 </Tab>
                             </TabList>
@@ -660,7 +613,7 @@ const ProductDetails = () => {
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex flex-col xl:flex-row justify-between flex-wrap xl:items-center mb-4 xl:mb-[37px]">
-                                                        <h4 className="text-[24px] font-bold text-cream">
+                                                        <h4 className="text-[24px] font-bold text-cream font-mont">
                                                             {review?.user
                                                                 ?.name ||
                                                                 "Anonymous"}
@@ -687,7 +640,7 @@ const ProductDetails = () => {
                                                         </div>
                                                     </div>
                                                     <div className="pr-0 xl:pr-[100px]">
-                                                        <p className="text-gray text-sm xl:text-[18px] font-normal">
+                                                        <p className="text-gray text-sm xl:text-[18px] font-normal font-mont">
                                                             {review?.comment ||
                                                                 "No comment provided"}
                                                         </p>
@@ -696,14 +649,14 @@ const ProductDetails = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-gray text-[18px]">
+                                        <p className="text-gray text-[18px] font-mont">
                                             No reviews yet
                                         </p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <h4 className="text-[24px] font-normal text-cream mb-[18px]">
+                                    <h4 className="text-[24px] font-normal text-cream mb-[18px] font-mont">
                                         Write a review
                                     </h4>
                                     <form>
@@ -737,7 +690,7 @@ const ProductDetails = () => {
                                                     "Failed to submit review"}
                                             </p>
                                         )}
-                                        <p className="text-gray text-[18px] mt-2">
+                                        <p className="text-gray text-[18px] mt-2 font-mont">
                                             How we use your data: We'll only
                                             contact you about the review you
                                             left, and only if necessary. By
@@ -770,13 +723,13 @@ const ProductDetails = () => {
                                     />
                                 </div>
                                 <div className="pt-20">
-                                    <h4 className="text-[24px] font-bold text-cream mb-8">
+                                    <h4 className="text-[24px] font-bold text-cream mb-8 font-mont">
                                         {data?.product?.name ||
                                             "Unknown Product"}
                                     </h4>
                                     <div className="max-w-md">
                                         <p
-                                            className="text-sm xl:text-[18px] text-gray font-normal mb-4"
+                                            className="text-sm xl:text-[18px] text-gray font-normal mb-4 font-mont"
                                             dangerouslySetInnerHTML={{
                                                 __html:
                                                     data?.product
@@ -786,60 +739,60 @@ const ProductDetails = () => {
                                         />
                                     </div>
                                     {/* <table className="mt-[72px]">
-                                        <tbody>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Material
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.material ||
-                                                        "100% Cotton"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Brand
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.brand ||
-                                                        "Hygee"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Color
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {selectedColor?.color_name ||
-                                                        "Not selected"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Size
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.sizes
-                                                        ?.find(
-                                                            (size) =>
-                                                                size.size_id ===
-                                                                selectedSizeId
-                                                        )
-                                                        ?.size_name?.toUpperCase() ||
-                                                        "Not selected"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th className="text-left py-2 text-cream">
-                                                    Origin
-                                                </th>
-                                                <td className="p-2 text-cream">
-                                                    {data?.product?.origin ||
-                                                        "Denmark"}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table> */}
+                                                 <tbody>
+                                                     <tr>
+                                                         <th className="text-left py-2 text-cream">
+                                                             Material
+                                                         </th>
+                                                         <td className="p-2 text-cream">
+                                                             {data?.product?.material ||
+                                                                 "100% Cotton"}
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <th className="text-left py-2 text-cream">
+                                                             Brand
+                                                         </th>
+                                                         <td className="p-2 text-cream">
+                                                             {data?.product?.brand ||
+                                                                 "Hygee"}
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <th className="text-left py-2 text-cream">
+                                                             Color
+                                                         </th>
+                                                         <td className="p-2 text-cream">
+                                                             {selectedColor?.color_name ||
+                                                                 "Not selected"}
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <th className="text-left py-2 text-cream">
+                                                             Size
+                                                         </th>
+                                                         <td className="p-2 text-cream">
+                                                             {data?.product?.sizes
+                                                                 ?.find(
+                                                                     (size) =>
+                                                                         size.size_id ===
+                                                                         selectedSizeId
+                                                                 )
+                                                                 ?.size_name?.toUpperCase() ||
+                                                                 "Not selected"}
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <th className="text-left py-2 text-cream">
+                                                             Origin
+                                                         </th>
+                                                         <td className="p-2 text-cream">
+                                                             {data?.product?.origin ||
+                                                                 "Denmark"}
+                                                         </td>
+                                                     </tr>
+                                                 </tbody>
+                                             </table> */}
                                 </div>
                             </div>
                         </TabPanel>

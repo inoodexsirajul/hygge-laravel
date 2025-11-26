@@ -219,7 +219,7 @@ class FrontendProductController extends Controller
             'productImageGalleries:id,image,product_id,color_id',
             'productImageGalleries.color:id,color_name,color_code',
             'customization',
-            'colors' => fn($q) => $q->select('colors.id as color_id', 'colors.color_name', 'colors.color_code', 'colors.price', 'colors.is_default')->withPivot('product_id', 'id'),
+            // 'colors' => fn($q) => $q->select('colors.id as color_id', 'colors.color_name', 'colors.color_code', 'colors.price', 'colors.is_default')->withPivot('product_id', 'id'),
             'sizes' => fn($q) => $q->select('sizes.id as size_id', 'sizes.size_name', 'sizes.price', 'sizes.is_default')->withPivot('product_id', 'id'),
             'brand:id,name,slug,logo'
         ])->where('slug', $slug)->active()->first();

@@ -188,10 +188,10 @@ const ContactPage = () => {
             <div className="">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl font-bold text-cream mb-4">
+                    <h1 className="text-4xl font-bold text-cream mb-4 font-mont">
                         Get in touch
                     </h1>
-                    <p className="text-sm text-gray max-w-sm mx-auto">
+                    <p className="text-sm text-gray max-w-sm mx-auto font-mont">
                         Proin volutpat consequat porttitor cras nullam gravida
                         at. Orci molestie a eu arcu. Sed ut tincidunt integerum
                         id sem. Arcu sed malesuada et magna.
@@ -206,10 +206,10 @@ const ContactPage = () => {
                             key={branch?.id}
                         >
                             <div className="p-4">
-                                <h4 className="text-cream font-bold text-[24px]">
+                                <h4 className="text-cream font-bold text-[24px] font-mont">
                                     {branch?.name}
                                 </h4>
-                                <p className="text-gray text-sm my-4">
+                                <p className="text-gray text-sm my-4 font-mont">
                                     {branch?.description}
                                 </p>
                             </div>
@@ -233,7 +233,7 @@ const ContactPage = () => {
                     {/* Contact Info */}
                     <div className="lg:w-2/5">
                         <div className="bg-dark2 rounded-2xl p-8 shadow-lg">
-                            <h2 className="text-2xl font-semibold text-cream mb-6">
+                            <h2 className="text-2xl font-semibold text-cream mb-6 font-mont">
                                 Contact Information
                             </h2>
 
@@ -244,7 +244,7 @@ const ContactPage = () => {
                                             <IoLocationSharp />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-cream">
+                                            <h3 className="font-medium text-cream font-mont">
                                                 Address
                                             </h3>
                                             <p className="text-gray">
@@ -262,7 +262,7 @@ const ContactPage = () => {
                                             <MdOutlineLocalPhone />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-cream">
+                                            <h3 className="font-medium text-cream font-mont">
                                                 Phone
                                             </h3>
                                             <p className="text-gray">
@@ -280,7 +280,7 @@ const ContactPage = () => {
                                             <MdEmail />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-cream">
+                                            <h3 className="font-medium text-cream font-mont">
                                                 Email
                                             </h3>
                                             <p className="text-gray">
@@ -299,7 +299,7 @@ const ContactPage = () => {
                     {/* Contact Form */}
                     <div className="lg:w-3/5">
                         <div className="bg-dark2 rounded-2xl p-8 shadow-lg">
-                            <h2 className="text-2xl font-semibold text-cream mb-6">
+                            <h2 className="text-2xl font-semibold text-cream mb-6 font-mont">
                                 Send us a message
                             </h2>
 
@@ -307,7 +307,7 @@ const ContactPage = () => {
                                 {/* Name Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-cream mb-2">
+                                        <label className="block text-sm font-medium text-cream mb-2 font-mont">
                                             First name
                                         </label>
                                         <input
@@ -320,7 +320,7 @@ const ContactPage = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-cream mb-2">
+                                        <label className="block text-sm font-medium text-cream mb-2 font-mont">
                                             Last name
                                         </label>
                                         <input
@@ -335,7 +335,7 @@ const ContactPage = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label className="block text-sm font-medium text-cream mb-2 font-mont">
                                         Email
                                     </label>
                                     <input
@@ -349,7 +349,7 @@ const ContactPage = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label className="block text-sm font-medium text-cream mb-2 font-mont">
                                         Phone number
                                     </label>
                                     <input
@@ -362,7 +362,7 @@ const ContactPage = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label className="block text-sm font-medium text-cream mb-2 font-mont">
                                         Subject
                                     </label>
                                     <input
@@ -376,7 +376,7 @@ const ContactPage = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-cream mb-2">
+                                    <label className="block text-sm font-medium text-cream mb-2 font-mont">
                                         Message
                                     </label>
                                     <textarea
@@ -407,7 +407,7 @@ const ContactPage = () => {
                                     </button>
 
                                     {submitStatus === "success" && (
-                                        <p className="mt-3 text-green-400 text-center">
+                                        <p className="mt-3 text-green-400 text-center font-mont">
                                             Thank you! Your message has been
                                             sent.
                                         </p>

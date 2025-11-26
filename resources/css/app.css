@@ -3,6 +3,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&family=Michroma&family=Vidaloka&family=Story+Script&display=swap");
 
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anton&display=swap");
+/* abril  */
+@import url("https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Yeseva+One&display=swap");
+
+/* quick sand  */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+
+/* league sparton  */
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap");
+@font-face {
+    font-family: "glamour";
+    src: url("../fonts/GlamourAbsoluteCondensed.woff2") format("woff2");
+}
+
+/* Yeseva One  */
 
 @import "tailwindcss";
 
@@ -30,12 +46,23 @@
     --container-2xl: 1750px;
     /* --container-3xl: 1750px; */
 
+    --font-glamour: "glamour", sans-serif;
+    --font-abrial: "Abril Fatface", serif;
+    --font-anton: "anton", sans-serif;
+    --font-chewy: "chewy", sans-serif;
+    --font-etna: "etna", sans-serif;
+    --font-sparton: "League Spartan", sans-serif;
+
+    --font-yeseva: "Yeseva One", serif;
+    --font-quicksand: "Quicksand", sans-serif;
     /* Adding custom font families */
     --font-manrope: "Manrope", sans-serif;
     --font-vidaloka: "Vidaloka", serif;
     --font-story: "Story Script", sans-serif;
     --font-curs: "Monsieur La Doulaise", cursive;
     --font-michroma: "Michroma", sans-serif;
+
+    --font-mont: "Montserrat", sans-serif;
 
     /* Adding custom colors */
     --color-red: #e65237;
@@ -64,7 +91,7 @@ body {
     outline: none;
     box-sizing: border-box;
     /* font-family: "Manrope", sans-serif; */
-    font-family: "Montserrat", sans-serif;
+    /* font-family: "Montserrat", sans-serif; */
     font-size: 18px;
 }
 /* 
@@ -75,24 +102,22 @@ body {
 
 */
 
-h1,
+/* h1,
 h2,
 h4,
 h5,
 h3,
 h6 {
     font-family: "Montserrat", sans-serif;
-}
+} */
 
 ul {
     padding: 0;
     margin: 0;
     list-style: none;
-    font-family: "Montserrat", sans-serif;
 }
 a {
     text-decoration: none;
-    font-family: "Montserrat", sans-serif;
 }
 .bg-nav-gradient {
     background: linear-gradient(

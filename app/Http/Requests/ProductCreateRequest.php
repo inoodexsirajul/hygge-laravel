@@ -43,6 +43,7 @@ class ProductCreateRequest extends FormRequest
             'back_price' => 'nullable|numeric|min:0',
             'both_price' => 'nullable|numeric|min:0',
             //color_image
+            'proColor.*'=>'nullable|integer|exists:colors,id',
             'color_image.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5048',
         ];
     }

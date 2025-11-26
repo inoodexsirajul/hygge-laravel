@@ -59,11 +59,11 @@ const FooterSkeleton = () => (
 const FooterFallback = () => (
     <footer className="bg-dark1 text-white py-10 text-center">
         <div className="container mx-auto px-6">
-            <p className="text-3xl font-bold mb-2">Hygge Cotton</p>
-            <p className="text-gray-400 mb-4">Copenhagen, Denmark</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-3xl font-bold mb-2 font-mont">Hygge Cotton</p>
+            <p className="text-gray-400 mb-4 font-mont">Copenhagen, Denmark</p>
+            <p className="text-sm text-gray-500 font-mont">
                 © 2025 Hygge Cotton. Made with{" "}
-                <FaHeart className="inline text-red-500" /> in Denmark
+                <FaHeart className="inline text-red-500 font-mont" /> in Denmark
             </p>
         </div>
     </footer>
@@ -106,7 +106,9 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
                     {/* Company Info */}
                     <div className="col-span-2">
-                        <h2 className="text-3xl mb-3 text-red">Hygge Cotton</h2>
+                        <h2 className="text-3xl mb-3 text-red font-mont">
+                            Hygge Cotton
+                        </h2>
                         {footer_info.logo && (
                             <img
                                 src={footer_info.logo}
@@ -114,16 +116,16 @@ const Footer = () => {
                                 className="mb-6 max-w-xs h-16 object-contain"
                             />
                         )}
-                        <p className="text-cream leading-relaxed">
+                        <p className="text-cream leading-relaxed font-mont">
                             {footer_info.address}
                         </p>
-                        <p className="mt-2 text-cream ">
+                        <p className="mt-2 text-cream font-mont">
                             Phone:{" "}
                             <a href={`tel:${footer_info.phone}`} className=" ">
                                 {footer_info.phone}
                             </a>
                         </p>
-                        <p className="text-cream">
+                        <p className="text-cream font-mont">
                             Email:{" "}
                             <a
                                 href={`mailto:${footer_info.email}`}
@@ -136,17 +138,23 @@ const Footer = () => {
 
                     {/* About */}
                     <div>
-                        <h3 className="text-xl font-bold mb-5 text-cream">
+                        <h3 className="text-xl font-bold mb-5 text-cream font-mont">
                             About
                         </h3>
                         <ul className="space-y-3">
                             <li>
-                                <Link to="/about" className="  transition">
+                                <Link
+                                    to="/about"
+                                    className=" font-mont transition"
+                                >
                                     About Us
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/career" className="transition">
+                                <Link
+                                    to="/career"
+                                    className="transition font-mont"
+                                >
                                     Career
                                 </Link>
                             </li>
@@ -155,25 +163,31 @@ const Footer = () => {
 
                     {/* Help & Support */}
                     <div>
-                        <h3 className="text-xl font-bold mb-5 ">
+                        <h3 className="text-xl font-bold mb-5 font-mont">
                             Help & Support
                         </h3>
                         <ul className="space-y-3">
                             <li>
-                                <Link to="/support" className="  transition">
+                                <Link
+                                    to="/support"
+                                    className="  transition font-mont"
+                                >
                                     Help & Support
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/how-to-order"
-                                    className="  transition"
+                                    className="  transition font-mont"
                                 >
                                     How to Order
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/shipping" className="  transition">
+                                <Link
+                                    to="/shipping"
+                                    className=" font-mont transition"
+                                >
                                     Shipping
                                 </Link>
                             </li>
@@ -182,12 +196,14 @@ const Footer = () => {
 
                     {/* Legal */}
                     <div>
-                        <h3 className="text-xl font-bold mb-5  ">Legal</h3>
+                        <h3 className="text-xl font-bold mb-5 font-mont ">
+                            Legal
+                        </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     to="/return-policy"
-                                    className="  transition"
+                                    className="  transition font-mont"
                                 >
                                     Return Policy
                                 </Link>
@@ -195,7 +211,7 @@ const Footer = () => {
                             <li>
                                 <Link
                                     to="/privacy-policy"
-                                    className="  transition"
+                                    className="  transition font-mont"
                                 >
                                     Privacy Policy
                                 </Link>
@@ -203,7 +219,7 @@ const Footer = () => {
                             <li>
                                 <Link
                                     to="/legal-notice"
-                                    className=" transition"
+                                    className=" transition font-mont"
                                 >
                                     Legal Notice
                                 </Link>
@@ -213,7 +229,9 @@ const Footer = () => {
 
                     {/* Social */}
                     <div>
-                        <h3 className="text-xl font-bold mb-5  ">Follow Us</h3>
+                        <h3 className="text-xl font-bold mb-5 font-mont ">
+                            Follow Us
+                        </h3>
                         <div className="flex space-x-5 text-2xl">
                             {[...footer_social]
                                 .sort((a, b) => a.serial_no - b.serial_no)
@@ -238,6 +256,14 @@ const Footer = () => {
                     <p className="text-cream">
                         {footer_info.copyright}
                         <FaHeart className="inline text-red-500 mx-1 animate-pulse" />
+                        Developed By
+                        <Link
+                            to="https://inoodex.com"
+                            target="_blank"
+                            className="text-red ml-2"
+                        >
+                            Inoodex
+                        </Link>
                     </p>
                 </div>
             </div>

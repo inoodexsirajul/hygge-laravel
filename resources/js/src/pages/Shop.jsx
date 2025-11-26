@@ -263,12 +263,17 @@ const Shop = () => {
                 <div className="px-4 py-4 lg:py-[47px]">
                     <ul className="flex justify-end gap-4">
                         <li>
-                            <Link to="/" className="text-cream text-[18px]">
+                            <Link
+                                to="/"
+                                className="text-cream text-[18px] font-mont"
+                            >
                                 Home
                             </Link>
                         </li>
                         <li className="text-cream text-[18px]">/</li>
-                        <li className="text-cream text-[18px]">Shop</li>
+                        <li className="text-cream text-[18px] font-mont">
+                            Shop
+                        </li>
                     </ul>
                 </div>
 
@@ -290,7 +295,7 @@ const Shop = () => {
                         <div className="p-4 h-full overflow-y-auto">
                             <div className="flex justify-between">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="font-bold text-xl text-cream">
+                                    <h3 className="font-bold text-xl text-cream font-mont">
                                         Filters
                                     </h3>
                                     <button
@@ -303,7 +308,7 @@ const Shop = () => {
                                 {hasActiveFilters && (
                                     <button
                                         onClick={clearAllFilters}
-                                        className="text-red-400 text-sm mb-6 block cursor-pointer"
+                                        className="text-red-400 text-sm mb-6 block cursor-pointer font-mont"
                                     >
                                         Clear Filters
                                     </button>
@@ -312,7 +317,7 @@ const Shop = () => {
 
                             {/* Categories */}
                             <div className="mb-8">
-                                <h4 className="font-semibold text-cream mb-3">
+                                <h4 className="font-semibold text-cream mb-3 font-mont">
                                     Categories
                                 </h4>
                                 <button
@@ -320,7 +325,7 @@ const Shop = () => {
                                         setSelectedCategories([]);
                                         updateURL({ categories: [], page: 1 });
                                     }}
-                                    className={`flex items-center gap-3 w-full text-left ${
+                                    className={`flex items-center gap-3 w-full text-left font-mont ${
                                         selectedCategories.length === 0
                                             ? "text-cream font-bold"
                                             : "text-gray"
@@ -332,7 +337,7 @@ const Shop = () => {
                                             selectedCategories.length === 0
                                         }
                                         readOnly
-                                        className="accent-cream"
+                                        className="accent-cream font-mont"
                                     />
                                     All Categories ({totalProducts})
                                 </button>
@@ -350,7 +355,7 @@ const Shop = () => {
                                             type="checkbox"
                                             checked={isChecked(cat.id)}
                                             readOnly
-                                            className="accent-cream"
+                                            className="accent-cream font-mont"
                                         />
                                         {cat.name}
                                     </button>
@@ -359,7 +364,7 @@ const Shop = () => {
 
                             {/* Brands */}
                             <div className="mb-8">
-                                <h4 className="font-semibold text-cream mb-3">
+                                <h4 className="font-semibold text-cream mb-3 font-mont">
                                     Brands
                                 </h4>
                                 {brands.map((brand) => (

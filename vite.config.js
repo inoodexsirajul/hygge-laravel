@@ -30,6 +30,7 @@ export default defineConfig({
         sourcemap: false,
     },
     base: "/", // cPanel root
+    assetsInclude: ["**/*.woff", "**/*.woff2", "**/*.ttf", "**/*.otf"],
     resolve: {
         alias: {
             "@": "/resources/js",

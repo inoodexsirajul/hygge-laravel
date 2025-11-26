@@ -27,7 +27,7 @@ const CategorySectionSkeleton = () => (
                 {[...Array(8)].map((_, i) => (
                     <div key={i} className="group">
                         <div className="aspect-square bg-gray-300 rounded-2xl overflow-hidden shadow-lg animate-pulse">
-                            <div className="w-full h-full bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400"></div>
+                            <div className="w-full h-full bg-linear-to-br from-gray-200 via-gray-300 to-gray-400"></div>
                         </div>
                         <div className="mt-4 space-y-3">
                             <div className="h-5 bg-gray-300 rounded-full w-32 mx-auto animate-pulse"></div>

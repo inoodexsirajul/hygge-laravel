@@ -31,7 +31,7 @@ class AdminReviewDataTable extends DataTable
                 return $query->product->name;
             })
             ->addColumn('user', function ($query) {
-                return $query->user->name;
+                return $query->user->name ?? 'N/A';
             })
             ->addColumn('status', function ($query) {
                 if ($query->status == 1) {

@@ -140,7 +140,7 @@ const Navbar = () => {
                             <li className="relative group">
                                 <Link
                                     to="/shop"
-                                    className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] cursor-pointer flex items-center text-md uppercase"
+                                    className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] font-mont cursor-pointer flex items-center text-md uppercase"
                                 >
                                     Our Products
                                     <FaChevronDown className="ml-2 text-xs transition-transform group-hover:rotate-180" />
@@ -151,7 +151,7 @@ const Navbar = () => {
                                         {categories.map((cat) => (
                                             <li
                                                 key={cat.id}
-                                                className="relative group/sub"
+                                                className="relative group/sub font-mont"
                                                 onMouseEnter={() =>
                                                     setHoveredCat(cat.id)
                                                 }
@@ -168,7 +168,7 @@ const Navbar = () => {
                                                         )
                                                     } // ID দিয়ে
                                                 >
-                                                    <span className="text-dark2 text-sm">
+                                                    <span className="text-dark2 text-sm font-mont">
                                                         {cat.name}
                                                     </span>
                                                     {cat.sub_categories
@@ -211,7 +211,7 @@ const Navbar = () => {
                                                                                     )
                                                                                 } // ID দিয়ে
                                                                             >
-                                                                                <span className="text-dark2 text-sm">
+                                                                                <span className="text-dark2 text-sm font-mont">
                                                                                     {
                                                                                         sub.name
                                                                                     }
@@ -275,7 +275,7 @@ const Navbar = () => {
                                 <li key={title}>
                                     <Link
                                         to={`/${title.toLowerCase()}`}
-                                        className="px-4 py-2 text-cream hover:bg-nav-gradient rounded-[10px] text-md"
+                                        className="px-4 py-2 text-cream hover:bg-nav-gradient font-mont rounded-[10px] text-md"
                                     >
                                         {title}
                                     </Link>
@@ -304,7 +304,7 @@ const Navbar = () => {
                                     alt="Profile"
                                     className="w-8 h-8 rounded-full object-cover border border-cream"
                                 />
-                                <span className="text-cream text-sm hidden sm:block">
+                                <span className="text-cream text-sm hidden sm:block font-mont">
                                     {user.data.name}
                                 </span>
                             </div>
@@ -313,7 +313,7 @@ const Navbar = () => {
                                     <li>
                                         <Link
                                             to="/profile"
-                                            className="block px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 hover:text-cream rounded"
+                                            className="block px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 font-mont hover:text-cream rounded"
                                             onClick={() =>
                                                 setIsProfileDropdownOpen(false)
                                             }
@@ -324,7 +324,7 @@ const Navbar = () => {
                                     <li>
                                         <button
                                             onClick={handleLogout}
-                                            className="block w-full text-left px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 hover:text-cream rounded"
+                                            className="block w-full text-left px-2 py-2 text-dark2 font-mont text-sm hover:bg-linear-to-r from-dark1 to-dark2 hover:text-cream rounded"
                                         >
                                             Logout
                                         </button>
@@ -333,7 +333,7 @@ const Navbar = () => {
                             )}
                         </li>
                     ) : (
-                        <li className="text-cream text-sm hidden lg:block">
+                        <li className="text-cream text-sm hidden lg:block font-mont">
                             <Link to="/signin">SIGN IN</Link>
                         </li>
                     )}
@@ -343,7 +343,7 @@ const Navbar = () => {
                             <GrBasket size={40} />
                             {/* <MdOutlineShoppingBag size={40} /> */}
                             {totalQuantity > 0 && (
-                                <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red text-cream flex justify-center items-center text-xs">
+                                <div className="absolute -top-2 font-mont -right-2 w-5 h-5 rounded-full bg-red text-cream flex justify-center items-center text-xs">
                                     {totalQuantity}
                                 </div>
                             )}
@@ -362,7 +362,7 @@ const Navbar = () => {
                     <ul className="px-4 py-4 space-y-2">
                         <li>
                             <div
-                                className="flex items-center justify-between text-cream py-3 px-4 rounded-lg hover:bg-nav-gradient cursor-pointer"
+                                className="flex items-center font-mont justify-between text-cream py-3 px-4 rounded-lg hover:bg-nav-gradient cursor-pointer"
                                 onClick={() =>
                                     setMobileShopOpen(!mobileShopOpen)
                                 }
@@ -392,7 +392,7 @@ const Navbar = () => {
                                                         (sub) => (
                                                             <li key={sub.id}>
                                                                 <div
-                                                                    className="text-cream py-2 px-4 hover:bg-cream/20 cursor-pointer text-sm"
+                                                                    className="text-cream  font-mont py-2 px-4 hover:bg-cream/20 cursor-pointer text-sm"
                                                                     onClick={() =>
                                                                         goToShopWithSubcategory(
                                                                             sub.id
@@ -416,7 +416,7 @@ const Navbar = () => {
                             <li key={title}>
                                 <Link
                                     to={`/${title.toLowerCase()}`}
-                                    className="block text-cream py-3 px-4 rounded-lg hover:bg-nav-gradient"
+                                    className="block text-cream font-mont py-3 px-4 rounded-lg hover:bg-nav-gradient"
                                     onClick={toggleMobileMenu}
                                 >
                                     {title}
@@ -428,7 +428,7 @@ const Navbar = () => {
                             <li>
                                 <Link
                                     to="/signin"
-                                    className="block text-cream py-3 px-4 rounded-lg hover:bg-nav-gradient"
+                                    className="block text-cream py-3 px-4 font-mont rounded-lg hover:bg-nav-gradient"
                                     onClick={toggleMobileMenu}
                                 >
                                     SIGN IN
@@ -447,7 +447,9 @@ const Navbar = () => {
                 }`}
             >
                 <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-cream text-lg">Search Our Product</h4>
+                    <h4 className="text-cream text-lg font-mont">
+                        Search Our Product
+                    </h4>
                     <button
                         onClick={toggleSearch}
                         className="text-cream text-2xl"

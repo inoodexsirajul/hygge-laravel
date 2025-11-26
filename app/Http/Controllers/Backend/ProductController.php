@@ -53,10 +53,22 @@ class ProductController extends Controller
     public function store(ProductCreateRequest $request)
     {
         // dd($request->all());
+
+        /** extra validtion for color and image */
+        // $proColors = $request->proColor ?? [];
+        // $colorImages = $request->file('color_image') ?? [];
+
+        // foreach ($proColors as $index => $color_id) {
+        //     if ($color_id && empty($colorImages[$index])) {
+        //         Toastr::error("Color image is required when a color is selected!", "Error");
+        //         return back()->withInput();
+        //     }
+        // }
+        
         $lastId = Product::max('id') + 1;
         $productCode = 'P' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
 
-        $imagePath = $this->uploadImage($request, 'image', 'uploads/products');
+        $imagePath = $this->upload_image($request, 'image', 'uploads/products');
         $product = new Product();
         $product->thumb_image = $imagePath;
         $product->name = $request->name;
@@ -122,27 +134,47 @@ class ProductController extends Controller
 
         // dd($sizeData, $colorData);
 
-        // Multiple Color + Image Upload
-        if ($request->has('proColor') && $request->hasFile('color_image')) {
+//         // Multiple Color + Image Upload
+//         if ($request->has('proColor') && $request->hasFile('color_image')) {
 
-    foreach ($request->proColor as $index => $color_id) {
+//     foreach ($request->proColor as $index => $color_id) {
 
-        if (!$color_id) continue; // skip empty
+//         if (!$color_id) continue; // skip empty
 
-        // file check
-        $imageFile = $request->file('color_image')[$index];
+//         // file check
+//         $imageFile = $request->file('color_image')[$index];
 
-        if ($imageFile) {
-            // image upload function (custom) – adjust path
-            $imagePathColor = $this->uploadImage($request, 'image', 'uploads/image-gallery');
+//         if ($imageFile) {
+//             // image upload function (custom) – adjust path
+//             $imagePathColor = $this->uploadImage($request, 'image', 'uploads/image-gallery');
 
-            // save to ProductImageGallery
-            ProductImageGallery::create([
-                'product_id' => $product->id,
-                'color_id'   => $color_id,
-                'image'      => $imagePathColor,
-            ]);
-        }
+//             // save to ProductImageGallery
+//             ProductImageGallery::create([
+//                 'product_id' => $product->id,
+//                 'color_id'   => $color_id,
+//                 'image'      => $imagePathColor,
+//             ]);
+//         }
+//     }
+// }
+// Multiple Color + Image Upload
+        foreach ($request->proColor as $index => $color_id) {
+    if (!$color_id) continue;
+
+    $imageFile = $request->file('color_image')[$index] ?? null;
+
+    if ($imageFile) {
+        // correct upload function
+        $ext = $imageFile->getClientOriginalExtension();
+        $imageName = 'media_' . uniqid() . '.' . $ext;
+        $imageFile->move(public_path('uploads/image-gallery'), $imageName);
+        $imagePathColor = 'uploads/image-gallery/' . $imageName;
+
+        ProductImageGallery::create([
+            'product_id' => $product->id,
+            'color_id'   => $color_id,
+            'image'      => $imagePathColor,
+        ]);
     }
 }
 
@@ -218,7 +250,7 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         /** handle image update*/
-        $imagePath = $this->updateImage($request, 'image', 'uploads/products', $product->thumb_image);
+        $imagePath = $this->update_image($request, 'image', 'uploads/products', $product->thumb_image);
         $product->thumb_image = empty(!$imagePath) ? $imagePath : $product->thumb_image;
 
         $product->name = $request->name;
@@ -309,6 +341,24 @@ class ProductController extends Controller
     //         );
     //     }
     // }
+    /** extra validtion for color and image */
+        $proColors = $request->proColor ?? [];
+        $colorImages = $request->file('color_image') ?? [];
+
+        // Fetch old galleries for existing colors
+        $oldGalleries = $product->productImageGalleries()->get()->keyBy('color_id');
+
+        foreach ($proColors as $index => $color_id) {
+            if (!$color_id) continue;
+
+            $hasOldImage = isset($oldGalleries[$color_id]);
+            $hasNewImage = !empty($colorImages[$index]);
+
+            if (!$hasOldImage && !$hasNewImage) {
+                Toastr::error("Color image is required when a new color is selected!", "Error");
+                return back()->withInput();
+            }
+        }
     /** Handle Color + Color Images */
 if ($request->has('proColor')) {
     foreach ($request->proColor as $index => $color_id) {

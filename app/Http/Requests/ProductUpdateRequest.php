@@ -35,7 +35,10 @@ class ProductUpdateRequest extends FormRequest
             'seo_description'=>'nullable|max:250',
 
             //color image
-            // 'color_image.*.color_id' => 'nullable|exists:colors,id',
+            'proColor'=>'array',
+            'color_image'=>'array',
+            'proColor.*'=>'nullable|integer|exists:colors,id',
+            'color_image.*'=>'nullable|image|mimes:jpeg,png,jpg,webp|max:5048'
         ];
     }
 }

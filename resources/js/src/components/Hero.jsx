@@ -56,16 +56,16 @@ const Hero = () => {
                                 />
                             </div>
                             <div className="w-full order-1 lg:order-2 text-center lg:text-left px-4 sm:px-6 lg:px-0">
-                                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl 3xl:text-[100px] text-yellow font-vidaloka leading-tight sm:leading-snug lg:leading-[1.2] mb-6 sm:mb-8">
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl 3xl:text-[100px] text-yellow font-mont  leading-tight sm:leading-snug lg:leading-[1.2] mb-6 sm:mb-8">
                                     {slide.type}
                                 </h2>
-                                <p className="text-cream text-sm sm:text-base lg:text-lg font-light mb-6 sm:mb-8 max-w-[90%] sm:max-w-[470px] mx-auto lg:mx-0">
+                                <p className="text-cream text-sm sm:text-base lg:text-lg font-light mb-6  sm:mb-8 max-w-[90%] sm:max-w-[470px] mx-auto lg:mx-0 font-mont">
                                     {slide.title ||
                                         "Handcrafted with precision and timeless detail."}
                                 </p>
                                 <Button
                                     href={slide.btn_url}
-                                    className="inline-flex items-center gap-2 text-sm sm:text-base lg:text-lg px-6 sm:px-8 py-3 rounded-[10px] text-cream"
+                                    className="inline-flex items-center gap-2 text-sm sm:text-base  font-mont lg:text-lg px-6 sm:px-8 py-3 rounded-[10px] text-cream"
                                     variant="border"
                                     color="cream"
                                     size="md"
