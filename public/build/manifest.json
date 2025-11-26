@@ -20,16 +20,20 @@
     "src": "node_modules/slick-carousel/slick/fonts/slick.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DsotnIrq.css",
+    "file": "assets/app-BTBCqDUP.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
-  "resources/fonts/GlamourAbsoluteCondensed.woff2": {
-    "file": "assets/GlamourAbsoluteCondensed-B3X2b-Xb.woff2",
-    "src": "resources/fonts/GlamourAbsoluteCondensed.woff2"
+  "resources/fonts/AbrilFatface-Regular.ttf": {
+    "file": "assets/AbrilFatface-Regular-CF4J23BR.ttf",
+    "src": "resources/fonts/AbrilFatface-Regular.ttf"
+  },
+  "resources/fonts/Anton-Regular.ttf": {
+    "file": "assets/Anton-Regular-DcVcLnRJ.ttf",
+    "src": "resources/fonts/Anton-Regular.ttf"
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-BUs1vekU.js",
+    "file": "assets/app-B2Q9N8ZG.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,

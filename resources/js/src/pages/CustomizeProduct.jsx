@@ -144,17 +144,13 @@ const CustomizeProduct = () => {
     };
 
     const fontOptions = [
-        {
-            id: "glamour",
-            name: "Glamour Absolute Condensed",
-            value: "glamour",
-        },
-        { id: "abril", name: "Abril Fatface", value: "abrial" },
+        { id: "story", name: "Story Script", value: "Story Script" },
+        { id: "monsieur", name: "Monsieur", value: "Monsieur La Doulaise" },
+        { id: "michroma", name: "Michroma", value: "Michroma" },
+        { id: "vidaloka", name: "Vidaloka", value: "Vidaloka" },
+        { id: "manrope", name: "Manrope", value: "Manrope" },
         { id: "anton", name: "Anton", value: "anton" },
-        { id: "sparton", name: "League Spartan", value: "sparton" },
-        { id: "copperplate", name: "Copperplate", value: "copperplate" },
-        { id: "yeseva", name: "Yeseva One", value: "yeseva" },
-        { id: "quicksand", name: "Quicksand", value: "quicksand" },
+        { id: "abril", name: "abril", value: "abril" },
     ];
 
     const colorOptions = [
@@ -1151,14 +1147,15 @@ const CustomizeProduct = () => {
                                     {currentDesign.texts.map(
                                         (textItem) =>
                                             textItem.title && (
+                                                // font-${textItem.fontFamily}
                                                 <p
                                                     key={textItem.id}
-                                                    className={`absolute font-bold text-center pointer-events-none select-none font-${textItem.fontFamily}`}
+                                                    className={`absolute font-bold text-center pointer-events-none select-none `}
                                                     style={{
                                                         fontSize: `${textItem.textSize}px`,
                                                         color: textItem.titleColor,
-                                                        // fontFamily:
-                                                        //     textItem.fontFamily,
+                                                        fontFamily:
+                                                            textItem.fontFamily,
                                                         left: `${textItem.xAxis}%`,
                                                         top: `${textItem.yAxis}%`,
                                                         transform:
@@ -1243,12 +1240,12 @@ const CustomizeProduct = () => {
                                             textItem.title && (
                                                 <p
                                                     key={textItem.id}
-                                                    className="absolute wrap-word font-bold text-center w-full"
+                                                    className={`absolute wrap-word font-bold text-center w-full font-${textItem.fontFamily}`}
                                                     style={{
                                                         fontSize: `${textItem.textSize}px`,
                                                         color: textItem.titleColor,
-                                                        fontFamily:
-                                                            textItem.fontFamily,
+                                                        // fontFamily:
+                                                        //     textItem.fontFamily,
                                                         left: `${textItem.xAxis}%`,
                                                         top: `${textItem.yAxis}%`,
                                                         transform:
