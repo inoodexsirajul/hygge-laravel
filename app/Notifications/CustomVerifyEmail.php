@@ -46,10 +46,11 @@ class CustomVerifyEmail extends Notification
 
         return (new MailMessage)
             ->subject('Verify Your Email')
-            ->line('Thank you for registering. Please verify your email by clicking the button below.')
+            ->view('mail.custom_verify', ['url' => $frontendUrl]);
+            // ->line('Thank you for registering. Please verify your email by clicking the button below.')
             // ->action('Verify Email', '/signin?verifyUrl=' . urlencode($verificationUrl))
-            ->action('Verify Email',  $frontendUrl)
-            ->line('If you did not create an account, no further action is required.');
+            // ->action('Verify Email',  $frontendUrl)
+            // ->line('If you did not create an account, no further action is required.');
     }
 
     /**

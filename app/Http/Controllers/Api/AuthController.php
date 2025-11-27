@@ -27,20 +27,79 @@ class AuthController extends Controller
     /**
      * Register new customer
      */
+    // public function register(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|email|unique:customers,email',
+    //         'password' => 'required|string|min:6|confirmed',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Validation failed',
+    //             'errors' => $validator->errors(),
+    //         ], 422);
+    //     }
+
+    //     $customer = Customer::create([
+    //         'name' => $request->name,
+    //         'email' => $request->email,
+    //         'password' => Hash::make($request->password),
+    //     ]);
+
+    //     // Create token
+    //     $token = $customer->createToken('API Token')->plainTextToken;
+
+    //     // $customer->sendEmailVerificationNotification();
+    //     $customer->notify(new CustomVerifyEmail());
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Registration successful',
+    //         'data' => [
+    //             'user' => $customer,
+    //             'access_token' => $token,
+    //             'token_type' => 'Bearer',
+    //         ]
+    //     ], 201);
+    // }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:customers,email',
+            'email' => 'required|email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         if ($validator->fails()) {
+            $allErrors = implode(' ', $validator->errors()->all());
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
+                'message' => $allErrors, 
             ], 422);
+        }
+
+        // Check if email already exists
+        $existing = Customer::where('email', $request->email)->first();
+
+        if ($existing) {
+            if (!$existing->hasVerifiedEmail()) {
+                $existing->notify(new CustomVerifyEmail());
+
+                return response()->json([
+                    'status' => 'warning',
+                    'message' => 'This email is already registered but not verified. A new verification email has been sent.',
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email already taken.',
+            ], 409);
         }
 
         $customer = Customer::create([
@@ -49,15 +108,13 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // Create token
         $token = $customer->createToken('API Token')->plainTextToken;
 
-        // $customer->sendEmailVerificationNotification();
         $customer->notify(new CustomVerifyEmail());
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Registration successful',
+            'message' => 'Registration successful. Please verify your email.',
             'data' => [
                 'user' => $customer,
                 'access_token' => $token,
