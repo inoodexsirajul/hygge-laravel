@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('admin/login', [AuthenticatedSessionController::class, 'create'])
     ->middleware('redirect.logged.in')->name('admin.login');
 
+Route::get('login', function () {
+    return redirect('/admin/login');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register')->middleware('auth');

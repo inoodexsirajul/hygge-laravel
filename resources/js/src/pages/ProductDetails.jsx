@@ -237,7 +237,7 @@ const ProductDetails = () => {
                                     galleries.map((img, i) => (
                                         <div
                                             key={`thumb-${i}`}
-                                            className="px-2 py-3 cursor-pointer outline-none"
+                                            className="px-2 py-2 cursor-pointer outline-none"
                                         >
                                             <img
                                                 src={`/${img.image}`}
