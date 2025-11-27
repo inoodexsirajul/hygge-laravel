@@ -144,13 +144,17 @@ const CustomizeProduct = () => {
     };
 
     const fontOptions = [
-        { id: "story", name: "Story Script", value: "Story Script" },
-        { id: "monsieur", name: "Monsieur", value: "Monsieur La Doulaise" },
-        { id: "michroma", name: "Michroma", value: "Michroma" },
-        { id: "vidaloka", name: "Vidaloka", value: "Vidaloka" },
-        { id: "manrope", name: "Manrope", value: "Manrope" },
         { id: "anton", name: "Anton", value: "anton" },
         { id: "abril", name: "abril", value: "abril" },
+        { id: "leagueSparton", name: "league Sparton", value: "leagueSparton" },
+        { id: "yesevaOne", name: "Yeseva One", value: "yesevaOne" },
+        { id: "chewy", name: "Chewy", value: "chewy" },
+        { id: "quicksand", name: "Quicksand", value: "quicksand" },
+        { id: "telegraph", name: "Telegraph", value: "telegraph" },
+        { id: "futura", name: "Futura", value: "futura" },
+        { id: "london", name: "London", value: "london" },
+        { id: "lovelo", name: "Lovelo", value: "lovelo" },
+        { id: "copper", name: "Copper", value: "copper" },
     ];
 
     const colorOptions = [
@@ -475,6 +479,24 @@ const CustomizeProduct = () => {
 
     return (
         <div className="min-h-screen bg-dark1 py-8 px-1 lg:px-4">
+            <p className="text-4xl text-cream font-lovelo">Regular</p>
+            <p className="text-4xl text-cream font-telegraph">Regular</p>
+            <p className="text-4xl text-cream font-abril">
+                Whereas disregard and contempt for human rights have resulted{" "}
+            </p>
+            <p className="text-4xl text-cream font-anton">
+                Whereas disregard and contempt for human rights have resulted{" "}
+            </p>
+            <p className="text-4xl text-cream font-leagueSparton">
+                leagueSparton Whereas recognition of the inherent dignity
+            </p>
+            <p className="text-4xl text-cream font-yesevaOne">
+                yeseva one Whereas recognition of the inherent dignity
+            </p>
+            <p className="text-4xl text-cream font-chewy">
+                chewy Whereas recognition of the inherent dignity
+            </p>
+            <p className="text-4xl text-cream">another font</p>
             <div className="w-full 2xl:max-w-4/5 mx-auto bg-dark2 rounded-xl overflow-hidden">
                 {/* মূল গ্রিড */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 lg:p-6 min-h-screen md:items-start">
@@ -1147,15 +1169,15 @@ const CustomizeProduct = () => {
                                     {currentDesign.texts.map(
                                         (textItem) =>
                                             textItem.title && (
-                                                // font-${textItem.fontFamily}
+                                                //
                                                 <p
                                                     key={textItem.id}
-                                                    className={`absolute font-bold text-center pointer-events-none select-none `}
+                                                    className={`absolute font-bold text-center pointer-events-none select-none font-${textItem.fontFamily}`}
                                                     style={{
                                                         fontSize: `${textItem.textSize}px`,
                                                         color: textItem.titleColor,
-                                                        fontFamily:
-                                                            textItem.fontFamily,
+                                                        // fontFamily:
+                                                        //     textItem.fontFamily,
                                                         left: `${textItem.xAxis}%`,
                                                         top: `${textItem.yAxis}%`,
                                                         transform:

@@ -1,25 +1,46 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Vidaloka&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Michroma&family=Monsieur+La+Doulaise&family=Story+Script&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&family=Michroma&family=Vidaloka&family=Story+Script&display=swap");
+/* league sparton  */
+@import url("https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap");
 
 @import url("https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anton&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chewy&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Yeseva+One&display=swap");
 
 /* Yeseva One  */
 
+/* telegraph font  */
+
 @font-face {
-    font-family: "anton";
-    src: url("../fonts/Anton-Regular.ttf") format("ttf");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
+    font-family: telegraph;
+    src: url(../fonts/telegraph.otf);
 }
 @font-face {
-    font-family: "abril";
-    src: url("../fonts/AbrilFatface-Regular.ttf") format("ttf");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
+    font-family: futura;
+    src: url(../fonts/UTM_Futuraf.ttf);
+}
+@font-face {
+    font-family: london;
+    src: url(../fonts/Loudon-yla5.ttf);
+}
+@font-face {
+    font-family: lovelo;
+    src: url(../fonts/LoveloBlack.otf);
+}
+@font-face {
+    font-family: glamour;
+    src: url(../fonts/GlamourAbsoluteCondensed.woff2);
+}
+@font-face {
+    font-family: etna;
+    src: url(../fonts/etna-free-font.otf);
+}
+@font-face {
+    font-family: copper;
+    src: url(../fonts/Copperplate-Gothic-Std-31-AB.ttf);
 }
 
 @import "tailwindcss";
@@ -49,15 +70,21 @@
     /* --container-3xl: 1750px; */
 
     /* Adding custom font families */
-    --font-manrope: "Manrope", sans-serif;
-    --font-vidaloka: "Vidaloka", serif;
-    --font-story: "Story Script", sans-serif;
-    --font-curs: "Monsieur La Doulaise", cursive;
-    --font-michroma: "Michroma", sans-serif;
     --font-anton: "anton", sans-serif;
     --font-abril: "Abril Fatface", serif;
-
+    --font-leagueSparton: "League Spartan", sans-serif;
+    --font-yesevaOne: "Yeseva One", serif;
+    --font-chewy: "Chewy", system-ui;
+    --font-quicksand: "Quicksand", sans-serif;
     --font-mont: "Montserrat", sans-serif;
+    --font-telegraph: telegraph, sans-serif;
+    --font-futura: futura, sans-serif;
+    --font-london: london, sans-serif;
+    --font-lovelo: lovelo, sans-serif;
+    --font-lovelo: lovelo, sans-serif;
+    --font-glamour: glamour, sans-serif;
+    --font-etna: etna, sans-serif;
+    --font-copper: copper, sans-serif;
 
     /* Adding custom colors */
     --color-red: #e65237;
@@ -85,7 +112,7 @@ body {
     margin: 0;
     outline: none;
     box-sizing: border-box;
-    font-family: "Manrope", sans-serif;
+
     font-family: "Montserrat", sans-serif;
     /* font-size: 18px; */
 }

@@ -20,20 +20,40 @@
     "src": "node_modules/slick-carousel/slick/fonts/slick.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-ADr6LWtU.css",
+    "file": "assets/app-C_RUkVrh.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
-  "resources/fonts/AbrilFatface-Regular.ttf": {
-    "file": "assets/AbrilFatface-Regular-CF4J23BR.ttf",
-    "src": "resources/fonts/AbrilFatface-Regular.ttf"
+  "resources/fonts/Copperplate-Gothic-Std-31-AB.ttf": {
+    "file": "assets/Copperplate-Gothic-Std-31-AB-JI1BZJs1.ttf",
+    "src": "resources/fonts/Copperplate-Gothic-Std-31-AB.ttf"
   },
-  "resources/fonts/Anton-Regular.ttf": {
-    "file": "assets/Anton-Regular-DcVcLnRJ.ttf",
-    "src": "resources/fonts/Anton-Regular.ttf"
+  "resources/fonts/GlamourAbsoluteCondensed.woff2": {
+    "file": "assets/GlamourAbsoluteCondensed-B3X2b-Xb.woff2",
+    "src": "resources/fonts/GlamourAbsoluteCondensed.woff2"
+  },
+  "resources/fonts/Loudon-yla5.ttf": {
+    "file": "assets/Loudon-yla5--7CT-OqN.ttf",
+    "src": "resources/fonts/Loudon-yla5.ttf"
+  },
+  "resources/fonts/LoveloBlack.otf": {
+    "file": "assets/LoveloBlack-CYJkyHCU.otf",
+    "src": "resources/fonts/LoveloBlack.otf"
+  },
+  "resources/fonts/UTM_Futuraf.ttf": {
+    "file": "assets/UTM_Futuraf-Ca0fsa2B.ttf",
+    "src": "resources/fonts/UTM_Futuraf.ttf"
+  },
+  "resources/fonts/etna-free-font.otf": {
+    "file": "assets/etna-free-font-hMvY35ZH.otf",
+    "src": "resources/fonts/etna-free-font.otf"
+  },
+  "resources/fonts/telegraph.otf": {
+    "file": "assets/telegraph-O581Tn_k.otf",
+    "src": "resources/fonts/telegraph.otf"
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-D4MUW-X9.js",
+    "file": "assets/app-Gge-0USh.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
