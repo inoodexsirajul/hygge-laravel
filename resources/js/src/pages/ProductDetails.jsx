@@ -291,7 +291,7 @@ const ProductDetails = () => {
                                         <ImageZoom
                                             src={`/${product.thumb_image}`}
                                             zoom="200"
-                                            className="w-full h-[400px] xl:h-[600px] object-cover rounded-xl"
+                                            className="w-full h-auto object-cover rounded-xl"
                                             alt={product.name}
                                         />
                                     </div>
