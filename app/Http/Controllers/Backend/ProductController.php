@@ -50,172 +50,119 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductCreateRequest $request)
-    {
-        // dd($request->all());
 
-        /** extra validtion for color and image */
-        // $proColors = $request->proColor ?? [];
-        // $colorImages = $request->file('color_image') ?? [];
+public function store(ProductCreateRequest $request)
+{
+    /** ensure array exists */
+    $proColors = $request->proColor ?? [];
+    $colorImages = $request->file('color_image') ?? [];
 
-        // foreach ($proColors as $index => $color_id) {
-        //     if ($color_id && empty($colorImages[$index])) {
-        //         Toastr::error("Color image is required when a color is selected!", "Error");
-        //         return back()->withInput();
-        //     }
-        // }
-        
-        $lastId = Product::max('id') + 1;
-        $productCode = 'P' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
+    /** COLOR + IMAGE VALIDATION */
+    foreach ($proColors as $index => $color_id) {
 
-        $imagePath = $this->upload_image($request, 'image', 'uploads/products');
-        $product = new Product();
-        $product->thumb_image = $imagePath;
-        $product->name = $request->name;
-        $product->slug = Str::slug($request->name);
-        $product->category_id = $request->category;
-        $product->sub_category_id = $request->sub_category;
-        $product->child_category_id = $request->child_category;
-        $product->brand_id = $request->brand;
-        $product->qty = $request->qty;
-        $product->short_description = $request->short_description;
-        $product->long_description = $request->long_description;
-        $product->video_link = $request->video_link;
-        $product->sku = $request->sku;
-        $product->purchase_price = $request->purchase_price ?? null;
-        $product->price = $request->price;
-        $product->offer_price = $request->offer_price;
-        $product->offer_start_date = $request->offer_start_date;
-        $product->offer_end_date = $request->offer_end_date;
-        $product->product_type = $request->product_type;
-        $product->status = $request->status;
-        $product->meta_title = $request->meta_title;
-        $product->meta_description = $request->meta_description;
-        $product->created_by = auth()->id();
-        $product->product_code = $productCode;
+        $imageFile = $colorImages[$index] ?? null;
 
-        if (auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Admin')) {
-            $product->is_approved = 1;
-        } else {
-            $product->is_approved = 0;
+        // color selected but no image
+        if ($color_id && !$imageFile) {
+            Toastr::error("Color image is required when a color is selected!", "Error");
+            return back()->withInput();
         }
 
-        $product->save();
-
-        // ===============================
-        // Size + Price Sync
-        // ===============================
-        $sizeData = [];
-        if ($request->has('variants')) {
-            foreach ($request->variants as $variant) {
-                if (!empty($variant['size_id'])) {
-                    $sizeData[$variant['size_id']] = [
-                        'size_price' => $variant['price'] ?? 0
-                    ];
-                }
-            }
+        // image uploaded but no color
+        if (!$color_id && $imageFile) {
+            Toastr::error("Please select a color for the uploaded image!", "Error");
+            return back()->withInput();
         }
-        $product->sizes()->sync($sizeData);
+    }
 
-        // ===============================
-        // Color + Price Sync
-        // ===============================
-        $colorData = [];
-        if ($request->has('variants')) {
-            foreach ($request->variants as $variant) {
-                if (!empty($variant['color_id'])) {
-                    $colorData[$variant['color_id']] = [
-                        'color_price' => $variant['price'] ?? 0
-                    ];
-                }
-            }
+    /** PRODUCT CREATE */
+    $lastId = (Product::max('id') ?? 0) + 1;
+    $productCode = 'P' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
+
+    $imagePath = $this->upload_image($request, 'image', 'uploads/products');
+
+    $product = new Product();
+    $product->thumb_image = $imagePath;
+    $product->name = $request->name;
+    $product->slug = Str::slug($request->name);
+    $product->category_id = $request->category;
+    $product->sub_category_id = $request->sub_category;
+    $product->child_category_id = $request->child_category;
+    $product->brand_id = $request->brand;
+    $product->qty = $request->qty;
+    $product->short_description = $request->short_description;
+    $product->long_description = $request->long_description;
+    $product->video_link = $request->video_link;
+    $product->sku = $request->sku;
+    $product->purchase_price = $request->purchase_price ?? null;
+    $product->price = $request->price;
+    $product->offer_price = $request->offer_price;
+    $product->offer_start_date = $request->offer_start_date;
+    $product->offer_end_date = $request->offer_end_date;
+    $product->product_type = $request->product_type;
+    $product->status = $request->status;
+    $product->meta_title = $request->meta_title;
+    $product->meta_description = $request->meta_description;
+    $product->created_by = auth()->id();
+    $product->product_code = $productCode;
+    $product->is_approved = auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Admin') ? 1 : 0;
+    $product->save();
+
+
+    /** COLOR IMAGE UPLOAD (SAFE FIXED VERSION) */
+    foreach ($proColors as $index => $color_id) {
+
+        if (!$color_id) continue;
+
+        $imageFile = $colorImages[$index] ?? null;
+        if (!$imageFile) continue;
+
+        // ensure folder exists
+        $path = public_path('uploads/image-gallery');
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
         }
-        $product->colors()->sync($colorData);
 
-        // dd($sizeData, $colorData);
-
-//         // Multiple Color + Image Upload
-//         if ($request->has('proColor') && $request->hasFile('color_image')) {
-
-//     foreach ($request->proColor as $index => $color_id) {
-
-//         if (!$color_id) continue; // skip empty
-
-//         // file check
-//         $imageFile = $request->file('color_image')[$index];
-
-//         if ($imageFile) {
-//             // image upload function (custom) – adjust path
-//             $imagePathColor = $this->uploadImage($request, 'image', 'uploads/image-gallery');
-
-//             // save to ProductImageGallery
-//             ProductImageGallery::create([
-//                 'product_id' => $product->id,
-//                 'color_id'   => $color_id,
-//                 'image'      => $imagePathColor,
-//             ]);
-//         }
-//     }
-// }
-// Multiple Color + Image Upload
-        foreach ($request->proColor as $index => $color_id) {
-    if (!$color_id) continue;
-
-    $imageFile = $request->file('color_image')[$index] ?? null;
-
-    if ($imageFile) {
-        // correct upload function
         $ext = $imageFile->getClientOriginalExtension();
         $imageName = 'media_' . uniqid() . '.' . $ext;
-        $imageFile->move(public_path('uploads/image-gallery'), $imageName);
-        $imagePathColor = 'uploads/image-gallery/' . $imageName;
+        $imageFile->move($path, $imageName);
 
         ProductImageGallery::create([
             'product_id' => $product->id,
             'color_id'   => $color_id,
-            'image'      => $imagePathColor,
+            'image'      => 'uploads/image-gallery/' . $imageName,
         ]);
     }
-}
-
-        // ===============================
-        // Product Customization Save
-        // ===============================
-        $isCustomizable = $request->input('is_customizable', 0);
-
-        if ($isCustomizable) {
-            $frontPath = $request->hasFile('front_image')
-                ? $this->uploadImage($request, 'front_image', 'uploads/customize', 700, 600)
-                : null;
-
-            $backPath = $request->hasFile('back_image')
-                ? $this->uploadImage($request, 'back_image', 'uploads/customize', 700, 600)
-                : null;
-
-            $product->customization()->updateOrCreate(
-                ['product_id' => $product->id],
-                [
-                    'is_customizable' => 1,
-                    'front_image' => $frontPath,
-                    'back_image' => $backPath,
-                    'front_price' => $request->input('front_price', 0),
-                    'back_price' => $request->input('back_price', 0),
-                    'both_price' => $request->input('both_price', 0),
-                ]
-            );
-        }
 
 
-        // // now generate product code safely
-        // $product->product_code = 'P' . str_pad($product->id, 4, '0', STR_PAD_LEFT);
-        // $product->save();
-        // $product->update([
-        //     'product_code' => 'P' . str_pad($product->id, 4, '0', STR_PAD_LEFT)
-        // ]);
+    /** CUSTOMIZATION */
+    $isCustomizable = $request->input('is_customizable', 0);
 
-        Toastr::success('Created Product Successfully!', 'success');
-        return redirect()->route('admin.products.index');
+    if ($isCustomizable) {
+        $frontPath = $request->hasFile('front_image')
+            ? $this->upload_image($request, 'front_image', 'uploads/customize')
+            : null;
+
+        $backPath = $request->hasFile('back_image')
+            ? $this->upload_image($request, 'back_image', 'uploads/customize')
+            : null;
+
+        $product->customization()->updateOrCreate(
+            ['product_id' => $product->id],
+            [
+                'is_customizable' => 1,
+                'front_image'     => $frontPath,
+                'back_image'      => $backPath,
+                'front_price'     => $request->input('front_price', 0)  ?: 0,
+                'back_price'      => $request->input('back_price', 0) ?: 0,
+                'both_price'      => $request->input('both_price', 0)  ?: 0,
+            ]
+        );
     }
+
+    Toastr::success('Created Product Successfully!', 'success');
+    return redirect()->route('admin.products.index');
+}
 
 
     /**
@@ -327,7 +274,7 @@ class ProductController extends Controller
     //                 $singleFileRequest,
     //                 'color_image',
     //                 'uploads/image-gallery',
-    //                 $existingGallery->image ?? null,
+    //                 $existingGallery->image ?? null,u
     //                 400,
     //                 500
     //             );
@@ -349,13 +296,29 @@ class ProductController extends Controller
         $oldGalleries = $product->productImageGalleries()->get()->keyBy('color_id');
 
         foreach ($proColors as $index => $color_id) {
-            if (!$color_id) continue;
+            // if (!$color_id) continue;
+
+            // $hasOldImage = isset($oldGalleries[$color_id]);
+            // $hasNewImage = !empty($colorImages[$index]);
+
+            // if (!$hasOldImage && !$hasNewImage) {
+            //     Toastr::error("Color image is required when a new color is selected!", "Error");
+            //     return back()->withInput();
+            // }
+            $hasColor = !empty($color_id);
+    $hasImage = isset($colorImages[$index]) && !empty($colorImages[$index]);
 
             $hasOldImage = isset($oldGalleries[$color_id]);
-            $hasNewImage = !empty($colorImages[$index]);
-
-            if (!$hasOldImage && !$hasNewImage) {
-                Toastr::error("Color image is required when a new color is selected!", "Error");
+        
+            /** CASE 1: Color selected but no image provided */
+            if ($hasColor && !$hasImage && !$hasOldImage) {
+                Toastr::error("You selected a color but did not upload an image!", "Error");
+                return back()->withInput();
+            }
+        
+            /** CASE 2: Image provided but no color selected */
+            if (!$hasColor && $hasImage) {
+                Toastr::error("You uploaded an image but did not select a color!", "Error");
                 return back()->withInput();
             }
         }
@@ -368,21 +331,25 @@ if ($request->has('proColor')) {
         $existingGallery = $product->productImageGalleries()->where('color_id', $color_id)->first();
         $imagePathColor = null;
 
-        // যদি file upload করা হয়
         if ($request->hasFile('color_image') && isset($request->file('color_image')[$index])) {
             $singleFileRequest = new \Illuminate\Http\Request();
             $singleFileRequest->files->set('color_image', $request->file('color_image')[$index]);
-            $imagePathColor = $this->updateImage(
+            // $imagePathColor = $this->updateImage(
+            //     $singleFileRequest,
+            //     'color_image',
+            //     'uploads/image-gallery',
+            //     $existingGallery->image ?? null,
+            //     400,
+            //     500
+            // );
+             $imagePathColor = $this->update_image(
                 $singleFileRequest,
                 'color_image',
                 'uploads/image-gallery',
-                $existingGallery->image ?? null,
-                400,
-                500
+                $existingGallery->image ?? null
             );
         }
 
-        // শুধুমাত্র তখনই gallery create/update হবে যদি image আছে বা gallery আগে থেকেই আছে
         if ($imagePathColor || $existingGallery) {
             ProductImageGallery::updateOrCreate(
                 ['product_id' => $product->id, 'color_id' => $color_id],
@@ -402,8 +369,8 @@ if ($request->has('proColor')) {
             $customization->is_customizable = 1;
 
             // Use updateImage method for front/back image
-            $customization->front_image = $this->updateImage($request, 'front_image', 'uploads/customize', $customization->front_image ?? null, 700, 600) ?? $customization->front_image;
-            $customization->back_image = $this->updateImage($request, 'back_image', 'uploads/customize', $customization->back_image ?? null, 700, 600) ?? $customization->back_image;
+            $customization->front_image = $this->update_image($request, 'front_image', 'uploads/customize', $customization->front_image ?? null ) ?? $customization->front_image;
+            $customization->back_image = $this->update_image($request, 'back_image', 'uploads/customize', $customization->back_image ?? null ) ?? $customization->back_image;
 
             $customization->front_price = $request->front_price ?? 0;
             $customization->back_price = $request->back_price ?? 0;

@@ -180,6 +180,27 @@ trait ImageUploadTrait
             return $path . '/' . $imageName;
         }
     }
+//     public function upload_image(Request $request, $inputName, $path)
+// {
+// if ($request->hasFile($inputName) && $request->file($inputName)->isValid()) {
+// $image = $request->file($inputName);
+
+//     // ensure folder exists
+//     $fullPath = public_path($path);
+//     if (!file_exists($fullPath)) {
+//         mkdir($fullPath, 0777, true);
+//     }
+
+//     $ext = $image->getClientOriginalExtension();
+//     $imageName = 'media_' . uniqid() . '.' . $ext;
+//     $image->move($fullPath, $imageName);
+
+//     return $path . '/' . $imageName;
+// }
+
+// return null; // return null if no valid file
+
+// }
 
     /** handle multi image file */
     public function upload_multiImage(Request $request, $inputName, $path)

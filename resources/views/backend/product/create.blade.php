@@ -103,7 +103,7 @@
               <div class="form-group">
                 <label>Long Description <code>*</code></label>
                 <textarea name="long_description" class="form-control summernote"
-                  required>{{ old('long_description') }}</textarea>
+                  >{{ old('long_description') }}</textarea>
               </div>
               <div class="row">
                 <div class="form-group col-md-6">
