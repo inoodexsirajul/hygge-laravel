@@ -568,11 +568,49 @@ const CustomizeProduct = () => {
                     {/* মোবাইলে প্রিভিউ উপরে */}
                     <div className="md:hidden order-1">
                         <div className="bg-dark1/50 p-6 rounded-xl shadow-2xl">
-                            <h3 className="text-2xl font-bold text-cream text-center mb-4">
-                                {currentSide.charAt(0).toUpperCase() +
-                                    currentSide.slice(1)}{" "}
-                                Preview
-                            </h3>
+                            <div className=" z-20    ">
+                                <div className="flex justify-between items-center gap-4">
+                                    {/* Front / Back Switch */}
+                                    <div className="flex   rounded-xl p-1 border border-white/20 mb-2">
+                                        {["front", "back"].map((side) => (
+                                            <button
+                                                key={side}
+                                                onClick={() => toggleSide(side)}
+                                                className={`px-2 py-1 rounded-lg font-bold text-sm transition-all duration-300 cursor-pointer ${
+                                                    currentSide === side
+                                                        ? "bg-linear-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50"
+                                                        : "text-gray-300 hover:text-white hover:bg-white/10"
+                                                }`}
+                                            >
+                                                {side.charAt(0).toUpperCase() +
+                                                    side.slice(1)}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Preview & Download Icons */}
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={openPreview}
+                                            className="py-1 px-5 bg-white/10 cursor-pointer hover:bg-white/20 backdrop-blur-md rounded-xl transition-all hover:scale-110"
+                                            title="Full Preview"
+                                        >
+                                            <FaEye
+                                                className="w-6 h-6 text-white"
+                                                cursor-pointer
+                                            />
+                                        </button>
+                                        <button
+                                            onClick={handleDownload}
+                                            className="py-1 px-5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl transition-all hover:scale-110"
+                                            title="Download PNG"
+                                        >
+                                            <MdOutlineFileDownload className="w-6 h-6 text-white" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <figure
                                 ref={previewRef}
                                 className="relative w-full max-w-lg mx-auto"
