@@ -476,93 +476,92 @@ const CustomizeProduct = () => {
             </h2>
         );
     }
-if (isLoading) {
-    return (
-        <div className="min-h-screen bg-dark1 py-8 px-1 lg:px-4">
-            <div className="w-full 2xl:max-w-4/5 mx-auto bg-dark2 rounded-xl overflow-hidden animate-pulse">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 lg:p-6">
-                    {/* Mobile Preview Skeleton */}
-                    <div className="md:hidden">
-                        <div className="bg-dark1/50 p-6 rounded-xl">
-                            <div className="h-8 bg-gray-700 rounded w-48 mx-auto mb-6"></div>
-                            <div className="bg-gray-800 rounded-lg h-96 w-full mx-auto"></div>
-                        </div>
-                    </div>
-
-                    {/* Left Panel - Form Skeleton */}
-                    <div className="bg-dark1 p-6 rounded-lg space-y-6">
-                        {/* Tabs */}
-                        <div className="flex gap-2 rounded-xl overflow-hidden">
-                            {[...Array(3)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="flex-1 h-12 bg-gray-700 rounded-lg"
-                                ></div>
-                            ))}
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-dark1 py-8 px-1 lg:px-4">
+                <div className="w-full 2xl:max-w-4/5 mx-auto bg-dark2 rounded-xl overflow-hidden animate-pulse">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 lg:p-6">
+                        {/* Mobile Preview Skeleton */}
+                        <div className="md:hidden">
+                            <div className="bg-dark1/50 p-6 rounded-xl">
+                                <div className="h-8 bg-gray-700 rounded w-48 mx-auto mb-6"></div>
+                                <div className="bg-gray-800 rounded-lg h-96 w-full mx-auto"></div>
+                            </div>
                         </div>
 
-                        {/* Text Layers Skeleton */}
-                        <div className="space-y-4">
-                            {[...Array(2)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="bg-gray-800/60 border border-gray-700 rounded-xl p-4"
-                                >
-                                    <div className="flex justify-between items-center mb-3">
-                                        <div className="h-6 bg-gray-700 rounded w-32"></div>
-                                        <div className="h-6 bg-gray-700 rounded w-20"></div>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div className="h-12 bg-gray-700 rounded"></div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="h-10 bg-gray-700 rounded"></div>
-                                            <div className="h-10 bg-gray-700 rounded"></div>
-                                        </div>
-                                        <div className="h-10 bg-gray-700 rounded"></div>
-                                        <div className="flex gap-3">
-                                            {[...Array(5)].map((_, j) => (
-                                                <div
-                                                    key={j}
-                                                    className="w-12 h-12 bg-gray-700 rounded-full"
-                                                ></div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            <div className="h-12 bg-gray-700 rounded-xl"></div>
-                        </div>
-
-                        {/* Add to Cart Button */}
-                        <div className="h-14 bg-gray-700 rounded-2xl"></div>
-                    </div>
-
-                    {/* Desktop Preview Skeleton */}
-                    <div className="hidden md:block sticky top-4">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex gap-2">
-                                {[...Array(2)].map((_, i) => (
+                        {/* Left Panel - Form Skeleton */}
+                        <div className="bg-dark1 p-6 rounded-lg space-y-6">
+                            {/* Tabs */}
+                            <div className="flex gap-2 rounded-xl overflow-hidden">
+                                {[...Array(3)].map((_, i) => (
                                     <div
                                         key={i}
-                                        className="h-10 w-24 bg-gray-700 rounded-lg"
+                                        className="flex-1 h-12 bg-gray-700 rounded-lg"
                                     ></div>
                                 ))}
                             </div>
-                            <div className="flex gap-3">
-                                <div className="w-12 h-12 bg-gray-700 rounded-xl"></div>
-                                <div className="w-12 h-12 bg-gray-700 rounded-xl"></div>
+
+                            {/* Text Layers Skeleton */}
+                            <div className="space-y-4">
+                                {[...Array(2)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-gray-800/60 border border-gray-700 rounded-xl p-4"
+                                    >
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div className="h-6 bg-gray-700 rounded w-32"></div>
+                                            <div className="h-6 bg-gray-700 rounded w-20"></div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="h-12 bg-gray-700 rounded"></div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="h-10 bg-gray-700 rounded"></div>
+                                                <div className="h-10 bg-gray-700 rounded"></div>
+                                            </div>
+                                            <div className="h-10 bg-gray-700 rounded"></div>
+                                            <div className="flex gap-3">
+                                                {[...Array(5)].map((_, j) => (
+                                                    <div
+                                                        key={j}
+                                                        className="w-12 h-12 bg-gray-700 rounded-full"
+                                                    ></div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="h-12 bg-gray-700 rounded-xl"></div>
                             </div>
+
+                            {/* Add to Cart Button */}
+                            <div className="h-14 bg-gray-700 rounded-2xl"></div>
                         </div>
-                        <div className="bg-gray-800 rounded-lg h-96 w-full mx-auto"></div>
+
+                        {/* Desktop Preview Skeleton */}
+                        <div className="hidden md:block sticky top-4">
+                            <div className="flex justify-between items-center mb-6">
+                                <div className="flex gap-2">
+                                    {[...Array(2)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="h-10 w-24 bg-gray-700 rounded-lg"
+                                        ></div>
+                                    ))}
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="w-12 h-12 bg-gray-700 rounded-xl"></div>
+                                    <div className="w-12 h-12 bg-gray-700 rounded-xl"></div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-800 rounded-lg h-96 w-full mx-auto"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
     return (
         <div className="min-h-screen bg-dark1 py-8 px-1 lg:px-4">
-       
             <div className="w-full 2xl:max-w-4/5 mx-auto bg-dark2 rounded-xl overflow-hidden">
                 {/* মূল গ্রিড */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 lg:p-6 min-h-screen md:items-start">
@@ -1235,15 +1234,15 @@ if (isLoading) {
                                     {currentDesign.texts.map(
                                         (textItem) =>
                                             textItem.title && (
-                                                //
+                                                //font-${textItem?.fontFamily}
                                                 <p
                                                     key={textItem.id}
-                                                    className={`absolute font-bold text-center pointer-events-none select-none font-${textItem.fontFamily}`}
+                                                    className={`absolute font-bold text-center pointer-events-none select-none `}
                                                     style={{
                                                         fontSize: `${textItem.textSize}px`,
                                                         color: textItem.titleColor,
-                                                        // fontFamily:
-                                                        //     textItem.fontFamily,
+                                                        fontFamily:
+                                                            textItem.fontFamily,
                                                         left: `${textItem.xAxis}%`,
                                                         top: `${textItem.yAxis}%`,
                                                         transform:
