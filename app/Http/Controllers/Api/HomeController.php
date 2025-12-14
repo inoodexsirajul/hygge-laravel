@@ -7,6 +7,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Color;
 use App\Models\Size;
+use App\Models\GeneralSetting;
 use App\Models\Product;
 use App\Models\Slider;
 use App\Models\LogoSetting;
@@ -29,79 +30,216 @@ class HomeController extends Controller
 
     public function brands()
     {
-        $brands = Brand::active()
-            ->featured()
-            ->select('id', 'name', 'logo')
-            ->get();
+        // $brands = Brand::active()
+        //     ->featured()
+        //     ->select('id', 'name', 'logo')
+        //     ->get();
+
+        // return response()->json(['brands' => $brands]);
+
+        //new version with cache
+        $brands = Cache::remember(
+            'brands',
+            3600,
+            fn() =>
+            Brand::active()->featured()
+                ->select('id', 'name', 'logo')
+                ->get()
+        );
 
         return response()->json(['brands' => $brands]);
     }
     public function colors()
     {
-        $colors = Color::select('id', 'color_name', 'color_code')->where('status', '1')->get();
+        // $colors = Color::select('id', 'color_name', 'color_code')->where('status', '1')->get();
 
-        return response()->json([
-            'data' => $colors
-        ]);
+        // return response()->json([
+        //     'data' => $colors
+        // ]);
+
+        $colors = Cache::remember(
+            'colors',
+            3600,
+            fn() =>
+            Color::select('id', 'color_name', 'color_code')
+                ->where('status', 1)
+                ->get()
+        );
+
+        return response()->json(['data' => $colors]);
     }
 
     public function sizes()
     {
-        $sizes = Size::select('id', 'size_name')->where('status', '1')->get();
+        // $sizes = Size::select('id', 'size_name')->where('status', '1')->get();
 
-        return response()->json([
-            'data' => $sizes]);
-        }
+        // return response()->json([
+        //     'data' => $sizes
+        // ]);
+        $sizes = Cache::remember(
+            'sizes',
+            3600,
+            fn() =>
+            Size::select('id', 'size_name', 'price')
+                ->where('status', 1)
+                ->get()
+        );
+
+        return response()->json(['data' => $sizes]);
+    }
     public function categories()
     {
-        $categories = Category::active()
-            ->select('id', 'name', 'image', 'slug')
-            ->with([
-                'subCategories' => function ($subQuery) {
-                    $subQuery->active();
-                    $subQuery->select('id', 'category_id', 'name', 'slug')->with([
-                        'childCategories' => function ($childQuery) {
-                            $childQuery->active();
-                            $childQuery->select('id', 'sub_category_id', 'name', 'slug');
-                        }
-                    ]);
-                }
-            ])
-            ->get();
+        // $categories = Category::active()
+        //     ->select('id', 'name', 'image', 'slug')
+        //     ->with([
+        //         'subCategories' => function ($subQuery) {
+        //             $subQuery->active();
+        //             $subQuery->select('id', 'category_id', 'name', 'slug')->with([
+        //                 'childCategories' => function ($childQuery) {
+        //                     $childQuery->active();
+        //                     $childQuery->select('id', 'sub_category_id', 'name', 'slug');
+        //                 }
+        //             ]);
+        //         }
+        //     ])
+        //     ->get();
+
+        // return response()->json(['categories' => $categories]);
+        $categories = Cache::remember(
+            'categories',
+            1800,
+            fn() =>
+            Category::active()
+                ->select('id', 'name', 'image', 'slug')
+                ->with([
+                    'subCategories:id,category_id,name,slug',
+                    'subCategories.childCategories:id,sub_category_id,name,slug'
+                ])
+                ->get()
+        );
 
         return response()->json(['categories' => $categories]);
     }
 
-    public function homeProducts()
+    // public function homeProducts()
+    // {
+    //     $homeProducts = Category::where(['front_show' => 1, 'status' => 1])
+    //         ->select('id', 'name', 'slug', 'icon', 'image')
+    //         ->orderBy('id', 'asc')
+    //         ->with(['products' => function ($q) {
+    //             $q->active()
+    //                 ->select('id', 'name', 'slug', 'category_id', 'price', 'offer_price', 'img_alt_text', 'qty', 'thumb_image')
+    //                 ->with(['productImageGalleries.color', 'colors:id,color_name,color_code,price,is_default', 'sizes:id,size_name,price,is_default'])
+    //                 ->withreview()
+    //                 ->orderBy('id', 'desc')
+    //                 ->take(8); 
+    //         }])
+    //         ->get();
+
+    //     return response()->json(['homeProducts' => $homeProducts]);
+    // }
+
+    // public function getTypeBaseProduct()
+    // {
+    //     $typeBaseProducts = [];
+    //     $typeBaseProducts['new_arrival'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'new_arrival', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
+    //     $typeBaseProducts['featured_product'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'featured_product', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
+    //     $typeBaseProducts['top_product'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'top_product', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
+    //     $typeBaseProducts['best_product'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'best_product', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
+    //     return $typeBaseProducts;
+    // }
+
+    //  HomeProducts (optimized + cache)
+    public function homeProducts(Request $request)
     {
-        $homeProducts = Category::where(['front_show' => 1, 'status' => 1])
-            ->select('id', 'name', 'slug', 'icon', 'image')
-            ->orderBy('id', 'asc')
-            ->with(['products' => function ($q) {
-                $q->active()
-                    ->select('id', 'name', 'slug', 'category_id', 'price', 'offer_price', 'img_alt_text', 'qty', 'thumb_image')
-                    ->with(['productImageGalleries.color', 'colors:id,color_name,color_code,price,is_default', 'sizes:id,size_name,price,is_default'])
-                    ->withreview()
-                    ->orderBy('id', 'desc')
-                    ->take(8); 
-            }])
-            ->get();
+        $homeProducts = Cache::remember('home_products', 1800, function () {
+            return Category::where(['front_show' => 1, 'status' => 1])
+                ->select('id', 'name', 'slug', 'icon', 'image')
+                ->orderBy('id', 'asc')
+                ->with(['products' => function ($q) {
+                    $q->active()
+                        ->select('id', 'name', 'slug', 'category_id', 'price', 'offer_price', 'img_alt_text', 'qty', 'thumb_image')
+                        ->with([
+                            'productImageGalleries:id,product_id,image',
+                            'colors:id,color_name,color_code,price,is_default',
+                            'sizes:id,size_name,price,is_default'
+                        ])
+                        ->withCount('reviews')
+                        ->withAvg('reviews', 'rating')
+                        ->orderBy('id', 'desc')
+                        ->take(12);
+                }])
+                ->get();
+        });
 
         return response()->json(['homeProducts' => $homeProducts]);
     }
 
+    //  Type-based Products (new, featured, top, best)
     public function getTypeBaseProduct()
     {
-        $typeBaseProducts = [];
-        $typeBaseProducts['new_arrival'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'new_arrival', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
-        $typeBaseProducts['featured_product'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'featured_product', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
-        $typeBaseProducts['top_product'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'top_product', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
-        $typeBaseProducts['best_product'] = Product::withreview()->with(['category', 'colors', 'sizes', 'productImageGalleries'])->where(['product_type' => 'best_product', 'status' => 1, 'is_approved' => 1])->orderBy('id', 'desc')->get();
-        return $typeBaseProducts;
-    }
-    public function logos(){
-        $logo=LogoSetting::select('id','logo', 'favicon', )->get();
-        return response()->json(['logo'=>$logo]);
+        $typeBaseProducts = Cache::remember('type_base_products', 1800, function () {
+            $types = ['new_arrival', 'featured_product', 'top_product', 'best_product'];
+            $result = [];
+            foreach ($types as $type) {
+                $result[$type] = Product::active()
+                    ->where('product_type', $type)
+                    ->where('is_approved', 1)
+                    ->select('id', 'name', 'slug', 'category_id', 'price', 'offer_price', 'img_alt_text', 'qty', 'thumb_image')
+                    ->with([
+                        'category:id,name,slug',
+                        'colors:id,color_name,color_code,price,is_default',
+                        'sizes:id,size_name,price,is_default',
+                        'productImageGalleries:id,product_id,image'
+                    ])
+                    ->withCount('reviews')
+                    ->withAvg('reviews', 'rating')
+                    ->orderBy('id', 'desc')
+                    ->take(12)
+                    ->get();
+            }
+            return $result;
+        });
+
+        return response()->json($typeBaseProducts);
     }
 
+    public function logos()
+    {
+        // $logo = LogoSetting::select('id', 'logo', 'favicon',)->get();
+        // return response()->json(['logo' => $logo]);
+        $logo = Cache::remember(
+            'logo',
+            3600,
+            fn() =>
+            LogoSetting::select('id', 'logo', 'favicon')->get()
+        );
+
+        return response()->json(['logo' => $logo]);
+    }
+
+
+    public function settings()
+    {
+        // $settings = GeneralSetting::select('id', 'site_name', 'contact_email', 'contact_phone', 'contact_address', 'currency_name', 'currency_icon', 'time_zone', 'map')->first();
+        // return response()->json(['settings' => $settings]);
+        $settings = Cache::remember(
+            'settings',
+            3600,
+            fn() =>
+            GeneralSetting::select(
+                'id',
+                'site_name',
+                'contact_email',
+                'contact_phone',
+                'contact_address',
+                'currency_name',
+                'currency_icon',
+                'time_zone',
+                'map'
+            )->first()
+        );
+
+        return response()->json(['settings' => $settings]);
+    }
 }

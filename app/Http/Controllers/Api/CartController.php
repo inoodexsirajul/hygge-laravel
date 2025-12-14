@@ -432,42 +432,493 @@ use Illuminate\Support\Str;
 //     }
 // }
 
+// class CartController extends Controller
+// {
+//     /**
+//      * Add Product to Cart
+//      */
+//     public function addToCart(Request $request)
+//     {
+//         $request->validate([
+//             'product_id' => 'required|integer|exists:products,id',
+//             'qty' => 'required|integer|min:1',
+//             'size_id' => 'nullable|integer|exists:sizes,id',
+//             'color_id' => 'nullable|integer|exists:colors,id',
+//             'customization_id' => 'nullable|integer|exists:customer_customizations,id',
+//         ]);
+
+//         $product = Product::with(['sizes', 'colors'])->findOrFail($request->product_id);
+
+//         if ($product->qty < $request->qty) {
+//             return apiResponse('error', 'Requested quantity not available!');
+//         }
+
+//         // Variant calculation
+//         [$sizePrice, $sizeName] = [0, null];
+//         [$colorPrice, $colorName] = [0, null];
+
+//         if ($request->size_id) {
+//             $size = $product->sizes()->where('sizes.id', $request->size_id)->first();
+//             if ($size) {
+//                 $sizePrice = $size->pivot->size_price ?? 0;
+//                 $sizeName = $size->size_name;
+//             }
+//         }
+
+//         if ($request->color_id) {
+//             $color = $product->colors()->where('colors.id', $request->color_id)->first();
+//             if ($color) {
+//                 $colorPrice = $color->pivot->color_price ?? 0;
+//                 $colorName = $color->color_name;
+//             }
+//         }
+
+//         $variantTotal = $sizePrice + $colorPrice;
+//         $basePrice = $product->offer_price ?? $product->price;
+
+//         // User or session
+//         $user_id = auth('sanctum')->id();
+//         $session_id = $request->cookie('cart_session');
+
+//         // Merge guest cart if login
+//         $cookie = null;
+//         if ($user_id && $session_id) {
+//             Cart::where('session_id', $session_id)
+//                 ->whereNull('user_id')
+//                 ->update(['user_id' => $user_id, 'session_id' => null]);
+
+//             $cookie = cookie()->forget('cart_session');
+//             $session_id = null;
+//         }
+
+//         if (!$user_id && !$session_id) {
+//             $session_id = 'cart_' . Str::random(32);
+//             $cookie = cookie('cart_session', $session_id, 60 * 24 * 30, '/', null, false, false, false, 'lax');
+//         }
+
+//         // Customization
+//         $extraPrice = 0;
+//         $font_image = $back_image = null;
+//         if ($request->customization_id) {
+//             $cust = customerCustomization::find($request->customization_id);
+//             if ($cust) {
+//                 $extraPrice = $cust->price ?? 0;
+//                 $font_image = $cust->front_image;
+//                 $back_image = $cust->back_image;
+//             }
+//         }
+
+//         // Same variant check
+//         $existingItem = Cart::where(function ($q) use ($user_id, $session_id) {
+//             $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
+//                 ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id));
+//         })
+//             ->where('product_id', $product->id)
+//             ->whereJsonContains('options->size_id', $request->size_id ?? null)
+//             ->whereJsonContains('options->color_id', $request->color_id ?? null)
+//             ->first();
+
+//         if ($existingItem) {
+//             $existingItem->increment('quantity', $request->qty);
+//             $cartItem = $existingItem;
+//         } else {
+//             $cartItem = Cart::create([
+//                 'user_id' => $user_id,
+//                 'session_id' => $session_id,
+//                 'product_id' => $product->id,
+//                 'quantity' => $request->qty,
+//                 'price' => $basePrice,
+//                 'options' => json_encode([
+//                     'image' => $product->thumb_image ?? null,
+//                     'size_id' => $request->size_id,
+//                     'size_name' => $sizeName,
+//                     'size_price' => $sizePrice,
+//                     'color_id' => $request->color_id,
+//                     'color_name' => $colorName,
+//                     'color_price' => $colorPrice,
+//                     'variant_total' => $variantTotal,
+//                     'extra_price' => $extraPrice,
+//                     'font_image' => $font_image,
+//                     'back_image' => $back_image,
+//                     'is_free_product' => false
+//                 ]),
+//             ]);
+//         }
+
+//         $cartItems = $this->getCurrentUserCart($user_id, $session_id);
+//         $cartTotal = $this->calculateCartTotal($cartItems);
+//         $promotions = $this->applyPromotions($cartItems);
+
+//         $response = apiResponse('success', 'Product added to cart successfully!', [
+//             'cart_count' => $cartItems->count(),
+//             'cart_total' => number_format($cartTotal, 2),
+//             'cart_item' => $cartItem,
+//             'promotions' => $promotions,
+//         ]);
+
+//         return $cookie ? $response->withCookie($cookie) : $response;
+//     }
+
+//     /**
+//      * Get Cart items
+//      */
+//     public function getCart(Request $request)
+//     {
+//         $user_id = auth('sanctum')->id();
+//         $session_id = $request->cookie('cart_session') // cookie check
+//             ?? $request->header('X-Session-Id') // header check
+//             ?? $request->input('session_id');
+
+//         if (!$session_id) {
+//             $session_id = bin2hex(random_bytes(16)); // 32 char random id
+//             cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
+//         }
+
+//         $cartItems = $this->getCurrentUserCart($user_id, $session_id)->map(function ($item) {
+//             $opt = json_decode($item->options, true);
+
+//             $item->variant_total = $opt['variant_total'] ?? 0;
+//             $item->extra_price = $opt['extra_price'] ?? 0;
+//             $item->size = [
+//                 'id' => $opt['size_id'] ?? null,
+//                 'name' => $opt['size_name'] ?? null,
+//                 'price' => $opt['size_price'] ?? 0
+//             ];
+//             $item->color = [
+//                 'id' => $opt['color_id'] ?? null,
+//                 'name' => $opt['color_name'] ?? null,
+//                 'price' => $opt['color_price'] ?? 0
+//             ];
+//             $item->customization = (!empty($opt['font_image']) || !empty($opt['back_image']))
+//                 ? ['front_image' => $opt['font_image'] ?? null, 'back_image' => $opt['back_image'] ?? null]
+//                 : null;
+//             $item->image = $opt['image'] ?? ($item->product->thumb_image ?? null);
+//             $item->total = ($item->price + $item->variant_total + $item->extra_price) * $item->quantity;
+
+//             return $item;
+//         });
+
+//         $cartTotal = $cartItems->sum('total');
+//         $promotions = $this->getPromotions($cartItems);
+
+//         return apiResponse('success', 'Cart fetched successfully!', [
+//             'cart_items' => $cartItems->values(),
+//             'cart_count' => $cartItems->count(),
+//             'cart_total' => number_format($cartTotal, 2),
+//             'promotions' => $promotions,
+//             'currency_icon' => getCurrencyIcon(),
+//         ]);
+//     }
+
+//     /**
+//      * Cart summary with coupon
+//      */
+//     public function cartSummary(Request $request)
+//     {
+//         $request->validate(['coupon_code' => 'nullable|string']);
+
+//         $user_id = auth('sanctum')->id();
+
+//         // Browser-specific session cookie
+//         // $session_id = $request->cookie('cart_session');
+//         $session_id = $request->cookie('cart_session') // cookie check
+//             ?? $request->header('X-Session-Id') // header check
+//             ?? $request->input('session_id'); // body input check
+//         if (!$session_id) {
+//             $session_id = bin2hex(random_bytes(16)); // 32 char random id
+//             cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
+//         }
+
+//         // Fetch cart items
+//         $cartItems = Cart::with('product')
+//             ->when($user_id, fn($q) => $q->where('user_id', $user_id))
+//             ->when(!$user_id && $session_id, fn($q) => $q->where('session_id', $session_id))
+//             ->get();
+
+//         if ($cartItems->isEmpty()) {
+//             return apiResponse('error', 'Your cart is empty!');
+//         }
+
+//         // Calculate subtotal
+//         $subTotal = $cartItems->sum(function ($item) {
+//             $options = json_decode($item->options, true) ?? [];
+//             return ($item->price + ($options['variant_total'] ?? 0) + ($options['extra_price'] ?? 0)) * $item->quantity;
+//         });
+
+//         // Coupon handling
+//         $discount = 0;
+//         $couponData = null;
+//         if ($request->coupon_code) {
+//             $coupon = Coupon::active()->where('code', $request->coupon_code)->first();
+//             if ($coupon) {
+//                 $discount = $coupon->discount_type === 'amount'
+//                     ? $coupon->discount
+//                     : $subTotal * $coupon->discount / 100;
+
+//                 $couponData = [
+//                     'code' => $coupon->code,
+//                     'discount_type' => $coupon->discount_type,
+//                     'discount' => $coupon->discount,
+//                 ];
+//             }
+//         }
+
+//         $finalTotal = max(0, $subTotal - $discount);
+//         $promotions = $this->applyPromotions($cartItems, $coupon ?? null);
+
+//         // Add front/back images, extra_price, size/color info, total per item
+//         $cartItems = $cartItems->map(function ($item) {
+//             $options = json_decode($item->options, true) ?? [];
+
+//             $item->front_image = $options['font_image'] ?? null;
+//             $item->back_image = $options['back_image'] ?? null;
+//             $item->extra_price = $options['extra_price'] ?? 0;
+
+//             $item->size = [
+//                 'id' => $options['size_id'] ?? null,
+//                 'name' => $options['size_name'] ?? null,
+//                 'price' => $options['size_price'] ?? 0
+//             ];
+//             $item->color = [
+//                 'id' => $options['color_id'] ?? null,
+//                 'name' => $options['color_name'] ?? null,
+//                 'price' => $options['color_price'] ?? 0
+//             ];
+
+//             $item->total = ($item->price + ($options['variant_total'] ?? 0) + ($options['extra_price'] ?? 0)) * $item->quantity;
+
+//             unset($item->options);
+
+//             return $item;
+//         });
+
+//         return apiResponse('success', 'Cart summary fetched!', [
+//             'cart_items' => $cartItems->values(),
+//             'cart_count' => $cartItems->count(),
+//             'sub_total' => number_format($subTotal, 2),
+//             'discount' => number_format($discount, 2),
+//             'final_total' => number_format($finalTotal, 2),
+//             'coupon' => $couponData,
+//             'promotions' => $promotions,
+//             'currency_icon' => getCurrencyIcon(),
+//         ]);
+//     }
+
+//     /**
+//      * Update cart quantity
+//      */
+//     public function updateCart(Request $request)
+//     {
+//         $request->validate(['cart_id' => 'required|integer', 'quantity' => 'required|integer|min:1']);
+
+//         $cartItem = Cart::findOrFail($request->cart_id);
+//         $product = Product::findOrFail($cartItem->product_id);
+
+//         if ($product->qty < $request->quantity) {
+//             return apiResponse('error', 'Not enough stock!');
+//         }
+
+//         $cartItem->update(['quantity' => $request->quantity]);
+
+//         $opt = json_decode($cartItem->options, true);
+//         $total = ($cartItem->price + ($opt['variant_total'] ?? 0) + ($opt['extra_price'] ?? 0)) * $cartItem->quantity;
+
+//         return apiResponse('success', 'Cart updated successfully!', [
+//             'product_total' => number_format($total, 2),
+//             'cart_item' => $cartItem,
+//         ]);
+//     }
+
+//     /**
+//      * Remove cart item
+//      */
+//     public function removeCart($id)
+//     {
+//         $user_id = auth('sanctum')->id();
+//         // $session_id = request()->cookie('cart_session');
+//         $session_id =  // cookie check
+//             request()->header('X-Session-Id') // header check
+//             ?? request()->cookie('cart_session')
+//             ?? request()->input('session_id'); // body input check
+//         if (!$session_id) {
+//             $session_id = bin2hex(random_bytes(16)); // 32 char random id
+//             cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
+//         }
+
+//         $cart = Cart::where('id', $id)
+//             ->where(function ($q) use ($user_id, $session_id) {
+//                 $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
+//                     ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id));
+//             })
+//             ->firstOrFail();
+
+//         if ($cart->user_id) {
+//             customerCustomization::where('user_id', $cart->user_id)
+//                 ->where('product_id', $cart->product_id)
+//                 ->delete();
+//         } else {
+//             customerCustomization::where('session_id', $cart->session_id)
+//                 ->where('product_id', $cart->product_id)
+//                 ->delete();
+//         }
+
+//         $cart->delete();
+
+//         return apiResponse('success', 'Cart item removed successfully!');
+//     }
+
+//     /**
+//      * Clear cart
+//      */
+//     public function clearCart(Request $request)
+//     {
+//         $user_id = auth('sanctum')->id();
+//         $session_id = $request->cookie('cart_session');
+
+//         Cart::where(fn($q) => $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
+//             ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id)))
+//             ->delete();
+
+//         return apiResponse('success', 'Cart cleared successfully!');
+//     }
+
+//     /** Helper: current user cart */
+//     private function getCurrentUserCart($user_id, $session_id)
+//     {
+//         return Cart::with('product:id,name,thumb_image,price,offer_price,qty,slug')
+//             ->where(fn($q) => $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
+//                 ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id)))
+//             ->get();
+//     }
+
+//     /** Helper: calculate cart total */
+//     private function calculateCartTotal($cartItems)
+//     {
+//         return $cartItems->sum(
+//             fn($i) => ($i->price + (json_decode($i->options, true)['variant_total'] ?? 0) + (json_decode($i->options, true)['extra_price'] ?? 0)) * $i->quantity
+//         );
+//     }
+
+//     /** Apply promotions & free products */
+//     private function applyPromotions($cartItems, $appliedCoupon = null)
+//     {
+//         $user_id = auth('sanctum')->id();
+//         $session_id = request()->cookie('cart_session');
+//         $promotions = Promotion::where('status', 1)->get();
+//         $applied = [];
+
+//         foreach ($promotions as $promo) {
+//             if ($appliedCoupon && !$promo->allow_coupon_stack) continue;
+
+//             $qty = $promo->product_id
+//                 ? $cartItems->where('product_id', $promo->product_id)->sum('quantity')
+//                 : ($promo->category_id
+//                     ? $cartItems->filter(fn($i) => $i->product->category_id == $promo->category_id)->sum('quantity')
+//                     : $cartItems->sum('quantity'));
+
+//             if ($qty >= $promo->buy_quantity) {
+//                 if ($promo->type === 'free_product' && $promo->product_id) {
+//                     $existing = $cartItems->where('product_id', $promo->product_id)
+//                         ->where(fn($i) => (json_decode($i->options, true)['is_free_product'] ?? false))
+//                         ->first();
+
+//                     if (!$existing) {
+//                         $freeProduct = Product::find($promo->product_id);
+//                         if ($freeProduct) {
+//                             Cart::create([
+//                                 'user_id' => $user_id,
+//                                 'session_id' => $user_id ? null : $session_id,
+//                                 'product_id' => $freeProduct->id,
+//                                 'quantity' => $promo->get_quantity ?? 1,
+//                                 'price' => 0,
+//                                 'options' => json_encode([
+//                                     'image' => $freeProduct->thumb_image,
+//                                     'variant_total' => 0,
+//                                     'extra_price' => 0,
+//                                     'is_free_product' => true,
+//                                 ]),
+//                             ]);
+//                         }
+//                     }
+//                 }
+
+//                 $applied[] = [
+//                     'promotion_id' => $promo->id,
+//                     'type' => $promo->type,
+//                     'message' => $promo->type === 'free_shipping' ? 'Free Shipping!' : 'Free Product Unlocked!',
+//                     'free_product_id' => $promo->type === 'free_product' ? $promo->product_id : null,
+//                     'free_quantity' => $promo->get_quantity ?? 1,
+//                 ];
+//             }
+//         }
+
+//         return $applied;
+//     }
+
+//     /** Get promotions metadata only */
+//     private function getPromotions($cartItems, $appliedCoupon = null)
+//     {
+//         $promotions = Promotion::where('status', 1)->get();
+//         $applied = [];
+
+//         foreach ($promotions as $promo) {
+//             if ($appliedCoupon && !$promo->allow_coupon_stack) continue;
+
+//             $qty = $promo->product_id
+//                 ? $cartItems->where('product_id', $promo->product_id)->sum('quantity')
+//                 : ($promo->category_id
+//                     ? $cartItems->filter(fn($i) => $i->product->category_id == $promo->category_id)->sum('quantity')
+//                     : $cartItems->sum('quantity'));
+
+//             if ($qty >= $promo->buy_quantity) {
+//                 $applied[] = [
+//                     'promotion_id' => $promo->id,
+//                     'type' => $promo->type,
+//                     'message' => $promo->type === 'free_shipping' ? 'Free Shipping!' : 'Free Product Unlocked!',
+//                     'free_product_id' => $promo->type === 'free_product' ? $promo->product_id : null,
+//                     'free_quantity' => $promo->get_quantity ?? 1,
+//                 ];
+//             }
+//         }
+
+//         return $applied;
+//     }
+// }
 class CartController extends Controller
 {
-    /**
-     * Add Product to Cart
-     */
+    /** Add product to cart */
     public function addToCart(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|integer|exists:products,id',
-            'qty' => 'required|integer|min:1',
-            'size_id' => 'nullable|integer|exists:sizes,id',
-            'color_id' => 'nullable|integer|exists:colors,id',
-            'customization_id' => 'nullable|integer|exists:customer_customizations,id',
+            'product_id'=>'required|integer|exists:products,id',
+            'qty'=>'required|integer|min:1',
+            'size_id'=>'nullable|integer|exists:sizes,id',
+            'color_id'=>'nullable|integer|exists:colors,id',
+            'customization_id'=>'nullable|integer|exists:customer_customizations,id'
         ]);
 
-        $product = Product::with(['sizes', 'colors'])->findOrFail($request->product_id);
+        $product = Product::select('id','name','thumb_image','price','offer_price','qty','slug')
+            ->with(['sizes:id,size_name','colors:id,color_name'])
+            ->findOrFail($request->product_id);
 
-        if ($product->qty < $request->qty) {
-            return apiResponse('error', 'Requested quantity not available!');
-        }
+        if($product->qty < $request->qty) 
+            return apiResponse('error','Requested quantity not available!');
 
         // Variant calculation
-        [$sizePrice, $sizeName] = [0, null];
-        [$colorPrice, $colorName] = [0, null];
+        [$sizePrice,$sizeName] = [0,null];
+        [$colorPrice,$colorName] = [0,null];
 
-        if ($request->size_id) {
-            $size = $product->sizes()->where('sizes.id', $request->size_id)->first();
-            if ($size) {
+        if($request->size_id){
+            $size = $product->sizes->firstWhere('id',$request->size_id);
+            if($size){
                 $sizePrice = $size->pivot->size_price ?? 0;
                 $sizeName = $size->size_name;
             }
         }
 
-        if ($request->color_id) {
-            $color = $product->colors()->where('colors.id', $request->color_id)->first();
-            if ($color) {
+        if($request->color_id){
+            $color = $product->colors->firstWhere('id',$request->color_id);
+            if($color){
                 $colorPrice = $color->pivot->color_price ?? 0;
                 $colorName = $color->color_name;
             }
@@ -476,411 +927,261 @@ class CartController extends Controller
         $variantTotal = $sizePrice + $colorPrice;
         $basePrice = $product->offer_price ?? $product->price;
 
-        // User or session
         $user_id = auth('sanctum')->id();
         $session_id = $request->cookie('cart_session');
-
-        // Merge guest cart if login
         $cookie = null;
-        if ($user_id && $session_id) {
-            Cart::where('session_id', $session_id)
-                ->whereNull('user_id')
-                ->update(['user_id' => $user_id, 'session_id' => null]);
 
+        if($user_id && $session_id){
+            Cart::where('session_id',$session_id)->whereNull('user_id')->update(['user_id'=>$user_id,'session_id'=>null]);
             $cookie = cookie()->forget('cart_session');
             $session_id = null;
         }
 
-        if (!$user_id && !$session_id) {
-            $session_id = 'cart_' . Str::random(32);
-            $cookie = cookie('cart_session', $session_id, 60 * 24 * 30, '/', null, false, false, false, 'lax');
+        if(!$user_id && !$session_id){
+            $session_id = 'cart_'.Str::random(32);
+            $cookie = cookie('cart_session',$session_id,60*24*30,'/',null,false,false,false,'lax');
         }
 
         // Customization
-        $extraPrice = 0;
-        $font_image = $back_image = null;
-        if ($request->customization_id) {
-            $cust = customerCustomization::find($request->customization_id);
-            if ($cust) {
+        $extraPrice = 0; $font_image = $back_image = null;
+        if($request->customization_id){
+            $cust = CustomerCustomization::find($request->customization_id);
+            if($cust){
                 $extraPrice = $cust->price ?? 0;
                 $font_image = $cust->front_image;
                 $back_image = $cust->back_image;
             }
         }
 
-        // Same variant check
-        $existingItem = Cart::where(function ($q) use ($user_id, $session_id) {
-            $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
-                ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id));
+        // Check same variant
+        $existingItem = Cart::where(function($q) use($user_id,$session_id){
+            $q->when($user_id, fn($qq)=>$qq->where('user_id',$user_id))
+              ->when(!$user_id && $session_id, fn($qq)=>$qq->where('session_id',$session_id));
         })
-            ->where('product_id', $product->id)
-            ->whereJsonContains('options->size_id', $request->size_id ?? null)
-            ->whereJsonContains('options->color_id', $request->color_id ?? null)
-            ->first();
+        ->where('product_id',$product->id)
+        ->whereJsonContains('options->size_id',$request->size_id ?? null)
+        ->whereJsonContains('options->color_id',$request->color_id ?? null)
+        ->first();
 
-        if ($existingItem) {
-            $existingItem->increment('quantity', $request->qty);
+        if($existingItem){
+            $existingItem->increment('quantity',$request->qty);
             $cartItem = $existingItem;
         } else {
             $cartItem = Cart::create([
-                'user_id' => $user_id,
-                'session_id' => $session_id,
-                'product_id' => $product->id,
-                'quantity' => $request->qty,
-                'price' => $basePrice,
-                'options' => json_encode([
-                    'image' => $product->thumb_image ?? null,
-                    'size_id' => $request->size_id,
-                    'size_name' => $sizeName,
-                    'size_price' => $sizePrice,
-                    'color_id' => $request->color_id,
-                    'color_name' => $colorName,
-                    'color_price' => $colorPrice,
-                    'variant_total' => $variantTotal,
-                    'extra_price' => $extraPrice,
-                    'font_image' => $font_image,
-                    'back_image' => $back_image,
-                    'is_free_product' => false
-                ]),
+                'user_id'=>$user_id,
+                'session_id'=>$session_id,
+                'product_id'=>$product->id,
+                'quantity'=>$request->qty,
+                'price'=>$basePrice,
+                'options'=>json_encode([
+                    'image'=>$product->thumb_image,
+                    'size_id'=>$request->size_id,
+                    'size_name'=>$sizeName,
+                    'size_price'=>$sizePrice,
+                    'color_id'=>$request->color_id,
+                    'color_name'=>$colorName,
+                    'color_price'=>$colorPrice,
+                    'variant_total'=>$variantTotal,
+                    'extra_price'=>$extraPrice,
+                    'font_image'=>$font_image,
+                    'back_image'=>$back_image,
+                    'is_free_product'=>false
+                ])
             ]);
         }
 
-        $cartItems = $this->getCurrentUserCart($user_id, $session_id);
+        $cartItems = $this->getCurrentUserCart($user_id,$session_id);
         $cartTotal = $this->calculateCartTotal($cartItems);
         $promotions = $this->applyPromotions($cartItems);
 
-        $response = apiResponse('success', 'Product added to cart successfully!', [
-            'cart_count' => $cartItems->count(),
-            'cart_total' => number_format($cartTotal, 2),
-            'cart_item' => $cartItem,
-            'promotions' => $promotions,
+        $response = apiResponse('success','Product added to cart successfully!',[
+            'cart_count'=>$cartItems->count(),
+            'cart_total'=>number_format($cartTotal,2),
+            'cart_item'=>$cartItem,
+            'promotions'=>$promotions
         ]);
 
         return $cookie ? $response->withCookie($cookie) : $response;
     }
 
-    /**
-     * Get Cart items
-     */
+    /** Get cart items */
     public function getCart(Request $request)
     {
         $user_id = auth('sanctum')->id();
-        $session_id = $request->cookie('cart_session') // cookie check
-            ?? $request->header('X-Session-Id') // header check
-            ?? $request->input('session_id');
+        $session_id = $request->cookie('cart_session') ?? $request->header('X-Session-Id') ?? $request->input('session_id');
 
-        if (!$session_id) {
-            $session_id = bin2hex(random_bytes(16)); // 32 char random id
-            cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
+        if(!$session_id){
+            $session_id = bin2hex(random_bytes(16));
+            cookie()->queue('cart_session',$session_id,60*24*30);
         }
 
-        $cartItems = $this->getCurrentUserCart($user_id, $session_id)->map(function ($item) {
-            $opt = json_decode($item->options, true);
-
+        $cartItems = $this->getCurrentUserCart($user_id,$session_id)->map(function($item){
+            $opt = json_decode($item->options,true);
             $item->variant_total = $opt['variant_total'] ?? 0;
             $item->extra_price = $opt['extra_price'] ?? 0;
-            $item->size = [
-                'id' => $opt['size_id'] ?? null,
-                'name' => $opt['size_name'] ?? null,
-                'price' => $opt['size_price'] ?? 0
-            ];
-            $item->color = [
-                'id' => $opt['color_id'] ?? null,
-                'name' => $opt['color_name'] ?? null,
-                'price' => $opt['color_price'] ?? 0
-            ];
+            $item->size = ['id'=>$opt['size_id']??null,'name'=>$opt['size_name']??null,'price'=>$opt['size_price']??0];
+            $item->color = ['id'=>$opt['color_id']??null,'name'=>$opt['color_name']??null,'price'=>$opt['color_price']??0];
             $item->customization = (!empty($opt['font_image']) || !empty($opt['back_image']))
-                ? ['front_image' => $opt['font_image'] ?? null, 'back_image' => $opt['back_image'] ?? null]
-                : null;
-            $item->image = $opt['image'] ?? ($item->product->thumb_image ?? null);
+                ? ['front_image'=>$opt['font_image'] ?? null,'back_image'=>$opt['back_image'] ?? null] : null;
             $item->total = ($item->price + $item->variant_total + $item->extra_price) * $item->quantity;
-
+            $item->image = $opt['image'] ?? ($item->product->thumb_image ?? null);
             return $item;
         });
 
         $cartTotal = $cartItems->sum('total');
         $promotions = $this->getPromotions($cartItems);
 
-        return apiResponse('success', 'Cart fetched successfully!', [
-            'cart_items' => $cartItems->values(),
-            'cart_count' => $cartItems->count(),
-            'cart_total' => number_format($cartTotal, 2),
-            'promotions' => $promotions,
-            'currency_icon' => getCurrencyIcon(),
+        return apiResponse('success','Cart fetched successfully!',[
+            'cart_items'=>$cartItems->values(),
+            'cart_count'=>$cartItems->count(),
+            'cart_total'=>number_format($cartTotal,2),
+            'promotions'=>$promotions,
+            'currency_icon'=>getCurrencyIcon()
         ]);
     }
 
-    /**
-     * Cart summary with coupon
-     */
-    public function cartSummary(Request $request)
-    {
-        $request->validate(['coupon_code' => 'nullable|string']);
-
-        $user_id = auth('sanctum')->id();
-
-        // Browser-specific session cookie
-        // $session_id = $request->cookie('cart_session');
-        $session_id = $request->cookie('cart_session') // cookie check
-            ?? $request->header('X-Session-Id') // header check
-            ?? $request->input('session_id'); // body input check
-        if (!$session_id) {
-            $session_id = bin2hex(random_bytes(16)); // 32 char random id
-            cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
-        }
-
-        // Fetch cart items
-        $cartItems = Cart::with('product')
-            ->when($user_id, fn($q) => $q->where('user_id', $user_id))
-            ->when(!$user_id && $session_id, fn($q) => $q->where('session_id', $session_id))
-            ->get();
-
-        if ($cartItems->isEmpty()) {
-            return apiResponse('error', 'Your cart is empty!');
-        }
-
-        // Calculate subtotal
-        $subTotal = $cartItems->sum(function ($item) {
-            $options = json_decode($item->options, true) ?? [];
-            return ($item->price + ($options['variant_total'] ?? 0) + ($options['extra_price'] ?? 0)) * $item->quantity;
-        });
-
-        // Coupon handling
-        $discount = 0;
-        $couponData = null;
-        if ($request->coupon_code) {
-            $coupon = Coupon::active()->where('code', $request->coupon_code)->first();
-            if ($coupon) {
-                $discount = $coupon->discount_type === 'amount'
-                    ? $coupon->discount
-                    : $subTotal * $coupon->discount / 100;
-
-                $couponData = [
-                    'code' => $coupon->code,
-                    'discount_type' => $coupon->discount_type,
-                    'discount' => $coupon->discount,
-                ];
-            }
-        }
-
-        $finalTotal = max(0, $subTotal - $discount);
-        $promotions = $this->applyPromotions($cartItems, $coupon ?? null);
-
-        // Add front/back images, extra_price, size/color info, total per item
-        $cartItems = $cartItems->map(function ($item) {
-            $options = json_decode($item->options, true) ?? [];
-
-            $item->front_image = $options['font_image'] ?? null;
-            $item->back_image = $options['back_image'] ?? null;
-            $item->extra_price = $options['extra_price'] ?? 0;
-
-            $item->size = [
-                'id' => $options['size_id'] ?? null,
-                'name' => $options['size_name'] ?? null,
-                'price' => $options['size_price'] ?? 0
-            ];
-            $item->color = [
-                'id' => $options['color_id'] ?? null,
-                'name' => $options['color_name'] ?? null,
-                'price' => $options['color_price'] ?? 0
-            ];
-
-            $item->total = ($item->price + ($options['variant_total'] ?? 0) + ($options['extra_price'] ?? 0)) * $item->quantity;
-
-            unset($item->options);
-
-            return $item;
-        });
-
-        return apiResponse('success', 'Cart summary fetched!', [
-            'cart_items' => $cartItems->values(),
-            'cart_count' => $cartItems->count(),
-            'sub_total' => number_format($subTotal, 2),
-            'discount' => number_format($discount, 2),
-            'final_total' => number_format($finalTotal, 2),
-            'coupon' => $couponData,
-            'promotions' => $promotions,
-            'currency_icon' => getCurrencyIcon(),
-        ]);
-    }
-
-    /**
-     * Update cart quantity
-     */
+    /** Update cart quantity */
     public function updateCart(Request $request)
     {
-        $request->validate(['cart_id' => 'required|integer', 'quantity' => 'required|integer|min:1']);
-
+        $request->validate(['cart_id'=>'required|integer','quantity'=>'required|integer|min:1']);
         $cartItem = Cart::findOrFail($request->cart_id);
         $product = Product::findOrFail($cartItem->product_id);
 
-        if ($product->qty < $request->quantity) {
-            return apiResponse('error', 'Not enough stock!');
-        }
+        if($product->qty < $request->quantity) 
+            return apiResponse('error','Not enough stock!');
 
-        $cartItem->update(['quantity' => $request->quantity]);
+        $cartItem->update(['quantity'=>$request->quantity]);
+        $opt = json_decode($cartItem->options,true);
+        $total = ($cartItem->price + ($opt['variant_total']??0) + ($opt['extra_price']??0)) * $cartItem->quantity;
 
-        $opt = json_decode($cartItem->options, true);
-        $total = ($cartItem->price + ($opt['variant_total'] ?? 0) + ($opt['extra_price'] ?? 0)) * $cartItem->quantity;
-
-        return apiResponse('success', 'Cart updated successfully!', [
-            'product_total' => number_format($total, 2),
-            'cart_item' => $cartItem,
+        return apiResponse('success','Cart updated successfully!',[
+            'product_total'=>number_format($total,2),
+            'cart_item'=>$cartItem
         ]);
     }
 
-    /**
-     * Remove cart item
-     */
+    /** Remove cart item */
     public function removeCart($id)
     {
         $user_id = auth('sanctum')->id();
-        // $session_id = request()->cookie('cart_session');
-        $session_id =  // cookie check
-            request()->header('X-Session-Id') // header check
-            ?? request()->cookie('cart_session')
-            ?? request()->input('session_id'); // body input check
-        if (!$session_id) {
-            $session_id = bin2hex(random_bytes(16)); // 32 char random id
-            cookie()->queue('cart_session', $session_id, 60 * 24 * 30); // 30 days
-        }
+        $session_id = request()->header('X-Session-Id') ?? request()->cookie('cart_session') ?? request()->input('session_id');
+        if(!$session_id) $session_id = bin2hex(random_bytes(16));
 
-        $cart = Cart::where('id', $id)
-            ->where(function ($q) use ($user_id, $session_id) {
-                $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
-                    ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id));
-            })
-            ->firstOrFail();
-
-        if ($cart->user_id) {
-            customerCustomization::where('user_id', $cart->user_id)
-                ->where('product_id', $cart->product_id)
-                ->delete();
-        } else {
-            customerCustomization::where('session_id', $cart->session_id)
-                ->where('product_id', $cart->product_id)
-                ->delete();
-        }
+        $cart = Cart::where('id',$id)
+            ->where(function($q) use($user_id,$session_id){
+                $q->when($user_id,fn($qq)=>$qq->where('user_id',$user_id))
+                  ->when(!$user_id && $session_id,fn($qq)=>$qq->where('session_id',$session_id));
+            })->firstOrFail();
 
         $cart->delete();
-
-        return apiResponse('success', 'Cart item removed successfully!');
+        return apiResponse('success','Cart item removed successfully!');
     }
 
-    /**
-     * Clear cart
-     */
+    /** Clear entire cart */
     public function clearCart(Request $request)
     {
         $user_id = auth('sanctum')->id();
         $session_id = $request->cookie('cart_session');
+        Cart::where(function($q) use($user_id,$session_id){
+            $q->when($user_id,fn($qq)=>$qq->where('user_id',$user_id))
+              ->when(!$user_id && $session_id,fn($qq)=>$qq->where('session_id',$session_id));
+        })->delete();
 
-        Cart::where(fn($q) => $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
-            ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id)))
-            ->delete();
-
-        return apiResponse('success', 'Cart cleared successfully!');
+        return apiResponse('success','Cart cleared successfully!');
     }
 
-    /** Helper: current user cart */
-    private function getCurrentUserCart($user_id, $session_id)
+    /** Cart summary with coupon */
+    public function cartSummary(Request $request)
     {
-        return Cart::with('product:id,name,thumb_image,price,offer_price,qty,slug')
-            ->where(fn($q) => $q->when($user_id, fn($qq) => $qq->where('user_id', $user_id))
-                ->when(!$user_id && $session_id, fn($qq) => $qq->where('session_id', $session_id)))
-            ->get();
+        $request->validate(['coupon_code'=>'nullable|string']);
+        $user_id = auth('sanctum')->id();
+        $session_id = $request->cookie('cart_session') ?? $request->header('X-Session-Id') ?? $request->input('session_id');
+
+        if(!$session_id){
+            $session_id = bin2hex(random_bytes(16));
+            cookie()->queue('cart_session',$session_id,60*24*30);
+        }
+
+        $cartItems = $this->getCurrentUserCart($user_id,$session_id);
+        if($cartItems->isEmpty()) return apiResponse('error','Your cart is empty!');
+
+        // $subTotal = $cartItems->sum(fn($item)=>{
+        //     $opt = json_decode($item->options,true) ?? [];
+        //     return ($item->price + ($opt['variant_total']??0) + ($opt['extra_price']??0)) * $item->quantity;
+        // });
+        $subTotal = $cartItems->sum(function($item){
+    $opt = json_decode($item->options,true) ?? [];
+    return ($item->price + ($opt['variant_total']??0) + ($opt['extra_price']??0)) * $item->quantity;
+});
+
+        $discount = 0; $couponData = null;
+        if($request->coupon_code){
+            $coupon = Coupon::active()->where('code',$request->coupon_code)->first();
+            if($coupon){
+                $discount = $coupon->discount_type==='amount' ? $coupon->discount : $subTotal * $coupon->discount/100;
+                $couponData = ['code'=>$coupon->code,'discount_type'=>$coupon->discount_type,'discount'=>$coupon->discount];
+            }
+        }
+
+        $finalTotal = max(0,$subTotal-$discount);
+        $promotions = $this->applyPromotions($cartItems,$coupon ?? null);
+
+        return apiResponse('success','Cart summary fetched!',[
+            'cart_items'=>$cartItems->values(),
+            'cart_count'=>$cartItems->count(),
+            'sub_total'=>number_format($subTotal,2),
+            'discount'=>number_format($discount,2),
+            'final_total'=>number_format($finalTotal,2),
+            'coupon'=>$couponData,
+            'promotions'=>$promotions,
+            'currency_icon'=>getCurrencyIcon()
+        ]);
     }
 
-    /** Helper: calculate cart total */
+    /** Helpers */
+    private function getCurrentUserCart($user_id,$session_id)
+    {
+        return Cart::with('product:id,name,thumb_image,price,offer_price,slug,qty,category_id')
+            ->where(function($q) use($user_id,$session_id){
+                $q->when($user_id,fn($qq)=>$qq->where('user_id',$user_id))
+                  ->when(!$user_id && $session_id,fn($qq)=>$qq->where('session_id',$session_id));
+            })->get();
+    }
+
     private function calculateCartTotal($cartItems)
     {
-        return $cartItems->sum(
-            fn($i) => ($i->price + (json_decode($i->options, true)['variant_total'] ?? 0) + (json_decode($i->options, true)['extra_price'] ?? 0)) * $i->quantity
-        );
+        return $cartItems->sum(fn($i)=>($i->price + (json_decode($i->options,true)['variant_total']??0) + (json_decode($i->options,true)['extra_price']??0)) * $i->quantity);
     }
 
-    /** Apply promotions & free products */
-    private function applyPromotions($cartItems, $appliedCoupon = null)
+    private function applyPromotions($cartItems,$appliedCoupon=null)
     {
-        $user_id = auth('sanctum')->id();
-        $session_id = request()->cookie('cart_session');
-        $promotions = Promotion::where('status', 1)->get();
+        $promotions = Promotion::where('status',1)->get();
         $applied = [];
 
-        foreach ($promotions as $promo) {
-            if ($appliedCoupon && !$promo->allow_coupon_stack) continue;
+        foreach($promotions as $promo){
+            if($appliedCoupon && !$promo->allow_coupon_stack) continue;
 
             $qty = $promo->product_id
-                ? $cartItems->where('product_id', $promo->product_id)->sum('quantity')
+                ? $cartItems->where('product_id',$promo->product_id)->sum('quantity')
                 : ($promo->category_id
-                    ? $cartItems->filter(fn($i) => $i->product->category_id == $promo->category_id)->sum('quantity')
+                    ? $cartItems->filter(fn($i)=>$i->product->category_id==$promo->category_id)->sum('quantity')
                     : $cartItems->sum('quantity'));
 
-            if ($qty >= $promo->buy_quantity) {
-                if ($promo->type === 'free_product' && $promo->product_id) {
-                    $existing = $cartItems->where('product_id', $promo->product_id)
-                        ->where(fn($i) => (json_decode($i->options, true)['is_free_product'] ?? false))
-                        ->first();
-
-                    if (!$existing) {
-                        $freeProduct = Product::find($promo->product_id);
-                        if ($freeProduct) {
-                            Cart::create([
-                                'user_id' => $user_id,
-                                'session_id' => $user_id ? null : $session_id,
-                                'product_id' => $freeProduct->id,
-                                'quantity' => $promo->get_quantity ?? 1,
-                                'price' => 0,
-                                'options' => json_encode([
-                                    'image' => $freeProduct->thumb_image,
-                                    'variant_total' => 0,
-                                    'extra_price' => 0,
-                                    'is_free_product' => true,
-                                ]),
-                            ]);
-                        }
-                    }
-                }
-
+            if($qty >= $promo->buy_quantity){
                 $applied[] = [
-                    'promotion_id' => $promo->id,
-                    'type' => $promo->type,
-                    'message' => $promo->type === 'free_shipping' ? 'Free Shipping!' : 'Free Product Unlocked!',
-                    'free_product_id' => $promo->type === 'free_product' ? $promo->product_id : null,
-                    'free_quantity' => $promo->get_quantity ?? 1,
+                    'promotion_id'=>$promo->id,
+                    'type'=>$promo->type,
+                    'message'=>$promo->type==='free_shipping'?'Free Shipping!':'Free Product Unlocked!',
+                    'free_product_id'=>$promo->type==='free_product'? $promo->product_id:null,
+                    'free_quantity'=>$promo->get_quantity ?? 1
                 ];
             }
         }
-
         return $applied;
     }
 
-    /** Get promotions metadata only */
-    private function getPromotions($cartItems, $appliedCoupon = null)
+    private function getPromotions($cartItems,$appliedCoupon=null)
     {
-        $promotions = Promotion::where('status', 1)->get();
-        $applied = [];
-
-        foreach ($promotions as $promo) {
-            if ($appliedCoupon && !$promo->allow_coupon_stack) continue;
-
-            $qty = $promo->product_id
-                ? $cartItems->where('product_id', $promo->product_id)->sum('quantity')
-                : ($promo->category_id
-                    ? $cartItems->filter(fn($i) => $i->product->category_id == $promo->category_id)->sum('quantity')
-                    : $cartItems->sum('quantity'));
-
-            if ($qty >= $promo->buy_quantity) {
-                $applied[] = [
-                    'promotion_id' => $promo->id,
-                    'type' => $promo->type,
-                    'message' => $promo->type === 'free_shipping' ? 'Free Shipping!' : 'Free Product Unlocked!',
-                    'free_product_id' => $promo->type === 'free_product' ? $promo->product_id : null,
-                    'free_quantity' => $promo->get_quantity ?? 1,
-                ];
-            }
-        }
-
-        return $applied;
+        return $this->applyPromotions($cartItems,$appliedCoupon);
     }
 }
